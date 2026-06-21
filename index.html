@@ -697,7 +697,7 @@
 
   .action-buttons{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr;
     gap:8px;
     margin-bottom:8px;
   }
@@ -809,7 +809,7 @@
   }
 
   .label-logo svg{
-    height:calc(5.4mm * var(--lscale, 1));
+    height:calc(7.2mm * var(--lscale, 1));
     width:auto;
     display:block;
   }
@@ -908,6 +908,38 @@
 
   .label-footer{
     font-size:calc(2.2mm * var(--lscale, 1));
+    color:#000000;
+  }
+
+  .label-cta-row{
+    display:flex;
+    align-items:center;
+    gap:calc(2.6mm * var(--lscale, 1));
+  }
+  .label-cta-qr{
+    width:calc(10mm * var(--lscale, 1));
+    height:calc(10mm * var(--lscale, 1));
+    flex-shrink:0;
+  }
+  .label-cta-qr svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .label-cta-text{
+    display:flex;
+    flex-direction:column;
+    gap:calc(0.3mm * var(--lscale, 1));
+  }
+  .label-cta-headline{
+    font-size:calc(2.5mm * var(--lscale, 1));
+    font-weight:700;
+    text-transform:uppercase;
+    color:#000000;
+  }
+  .label-cta-url{
+    font-size:calc(2.8mm * var(--lscale, 1));
+    font-weight:600;
     color:#000000;
   }
 
@@ -1237,6 +1269,9 @@
     .label-logo svg{
       shape-rendering:crispEdges;
     }
+    .label-cta-qr svg{
+      shape-rendering:crispEdges;
+    }
   }
 
   @media (max-width:980px){
@@ -1505,10 +1540,6 @@
         </button>
 
         <div class="action-buttons" style="margin-top:10px;">
-          <button class="btn btn-secondary" id="download-pdf-btn" type="button">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span class="btn-label">Descargar PDF</span>
-          </button>
           <button class="btn btn-primary" id="print-btn" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span class="btn-label">Imprimir</span>
@@ -1652,6 +1683,10 @@
     '<path fill="#59a29e" d="M410.85,119.97'
   );
   document.getElementById('form-logo-mount').innerHTML = SIERRA_LOGO_SVG_COLOR;
+
+  // QR code pointing to the SIERRA website, printed as a CTA at the
+  // bottom of every label.
+  const SIERRA_QR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><rect width="33" height="33" fill="#ffffff"/><path d="M 1.999957 2.499985 L 9.000044 2.499985 M 12.000058 2.499985 L 14.000015 2.499985 M 17.00003 2.499985 L 23.000059 2.499985 M 23.999957 2.499985 L 31.000045 2.499985 M 1.999957 3.500043 L 3.000014 3.500043 M 7.999986 3.500043 L 9.000044 3.500043 M 20.000044 3.500043 L 20.999943 3.500043 M 23.999957 3.500043 L 25.000015 3.500043 M 29.999987 3.500043 L 31.000045 3.500043 M 1.999957 4.499942 L 3.000014 4.499942 M 4.000072 4.499942 L 6.999928 4.499942 M 7.999986 4.499942 L 9.000044 4.499942 M 9.999942 4.499942 L 11 4.499942 M 12.000058 4.499942 L 12.999957 4.499942 M 14.000015 4.499942 L 15.000073 4.499942 M 15.999972 4.499942 L 17.00003 4.499942 M 17.999928 4.499942 L 18.999986 4.499942 M 22.000001 4.499942 L 23.000059 4.499942 M 23.999957 4.499942 L 25.000015 4.499942 M 26.000073 4.499942 L 28.999929 4.499942 M 29.999987 4.499942 L 31.000045 4.499942 M 1.999957 5.499999 L 3.000014 5.499999 M 4.000072 5.499999 L 6.999928 5.499999 M 7.999986 5.499999 L 9.000044 5.499999 M 9.999942 5.499999 L 12.000058 5.499999 M 14.000015 5.499999 L 15.000073 5.499999 M 17.999928 5.499999 L 20.000044 5.499999 M 22.000001 5.499999 L 23.000059 5.499999 M 23.999957 5.499999 L 25.000015 5.499999 M 26.000073 5.499999 L 28.999929 5.499999 M 29.999987 5.499999 L 31.000045 5.499999 M 1.999957 6.500057 L 3.000014 6.500057 M 4.000072 6.500057 L 6.999928 6.500057 M 7.999986 6.500057 L 9.000044 6.500057 M 9.999942 6.500057 L 11 6.500057 M 12.000058 6.500057 L 12.999957 6.500057 M 14.000015 6.500057 L 17.999928 6.500057 M 18.999986 6.500057 L 23.000059 6.500057 M 23.999957 6.500057 L 25.000015 6.500057 M 26.000073 6.500057 L 28.999929 6.500057 M 29.999987 6.500057 L 31.000045 6.500057 M 1.999957 7.499956 L 3.000014 7.499956 M 7.999986 7.499956 L 9.000044 7.499956 M 9.999942 7.499956 L 11 7.499956 M 12.000058 7.499956 L 18.999986 7.499956 M 23.999957 7.499956 L 25.000015 7.499956 M 29.999987 7.499956 L 31.000045 7.499956 M 1.999957 8.500014 L 9.000044 8.500014 M 9.999942 8.500014 L 11 8.500014 M 12.000058 8.500014 L 12.999957 8.500014 M 14.000015 8.500014 L 15.000073 8.500014 M 15.999972 8.500014 L 17.00003 8.500014 M 17.999928 8.500014 L 18.999986 8.500014 M 20.000044 8.500014 L 20.999943 8.500014 M 22.000001 8.500014 L 23.000059 8.500014 M 23.999957 8.500014 L 31.000045 8.500014 M 9.999942 9.500072 L 12.000058 9.500072 M 12.999957 9.500072 L 15.999972 9.500072 M 17.00003 9.500072 L 17.999928 9.500072 M 20.000044 9.500072 L 20.999943 9.500072 M 1.999957 10.499971 L 3.000014 10.499971 M 4.000072 10.499971 L 9.000044 10.499971 M 11 10.499971 L 12.000058 10.499971 M 12.999957 10.499971 L 14.000015 10.499971 M 15.999972 10.499971 L 17.999928 10.499971 M 18.999986 10.499971 L 20.000044 10.499971 M 20.999943 10.499971 L 23.000059 10.499971 M 23.999957 10.499971 L 28.999929 10.499971 M 1.999957 11.500029 L 3.000014 11.500029 M 6.000029 11.500029 L 6.999928 11.500029 M 9.000044 11.500029 L 11 11.500029 M 12.999957 11.500029 L 14.000015 11.500029 M 17.00003 11.500029 L 18.999986 11.500029 M 20.000044 11.500029 L 23.000059 11.500029 M 23.999957 11.500029 L 26.999972 11.500029 M 29.999987 11.500029 L 31.000045 11.500029 M 1.999957 12.499927 L 3.000014 12.499927 M 6.000029 12.499927 L 6.999928 12.499927 M 7.999986 12.499927 L 12.999957 12.499927 M 22.000001 12.499927 L 23.999957 12.499927 M 3.000014 13.499985 L 4.999971 13.499985 M 6.000029 13.499985 L 6.999928 13.499985 M 9.000044 13.499985 L 9.999942 13.499985 M 11 13.499985 L 12.999957 13.499985 M 15.999972 13.499985 L 17.00003 13.499985 M 17.999928 13.499985 L 18.999986 13.499985 M 22.000001 13.499985 L 23.000059 13.499985 M 23.999957 13.499985 L 26.000073 13.499985 M 26.999972 13.499985 L 28.00003 13.499985 M 28.999929 13.499985 L 29.999987 13.499985 M 3.000014 14.500043 L 6.000029 14.500043 M 6.999928 14.500043 L 9.999942 14.500043 M 17.999928 14.500043 L 20.000044 14.500043 M 26.999972 14.500043 L 28.999929 14.500043 M 3.000014 15.499942 L 4.000072 15.499942 M 4.999971 15.499942 L 6.000029 15.499942 M 6.999928 15.499942 L 7.999986 15.499942 M 9.000044 15.499942 L 11 15.499942 M 12.999957 15.499942 L 14.000015 15.499942 M 15.000073 15.499942 L 17.999928 15.499942 M 20.999943 15.499942 L 25.000015 15.499942 M 26.000073 15.499942 L 26.999972 15.499942 M 29.999987 15.499942 L 31.000045 15.499942 M 4.000072 16.5 L 4.999971 16.5 M 6.999928 16.5 L 9.999942 16.5 M 12.000058 16.5 L 14.000015 16.5 M 15.000073 16.5 L 20.999943 16.5 M 23.000059 16.5 L 26.000073 16.5 M 26.999972 16.5 L 28.999929 16.5 M 3.000014 17.500058 L 4.000072 17.500058 M 6.000029 17.500058 L 7.999986 17.500058 M 12.000058 17.500058 L 15.999972 17.500058 M 17.00003 17.500058 L 17.999928 17.500058 M 22.000001 17.500058 L 23.000059 17.500058 M 25.000015 17.500058 L 26.999972 17.500058 M 28.999929 17.500058 L 29.999987 17.500058 M 3.000014 18.499957 L 4.000072 18.499957 M 4.999971 18.499957 L 9.000044 18.499957 M 12.999957 18.499957 L 15.000073 18.499957 M 15.999972 18.499957 L 17.999928 18.499957 M 18.999986 18.499957 L 20.999943 18.499957 M 22.000001 18.499957 L 23.000059 18.499957 M 25.000015 18.499957 L 26.000073 18.499957 M 26.999972 18.499957 L 28.999929 18.499957 M 1.999957 19.500014 L 3.000014 19.500014 M 6.000029 19.500014 L 6.999928 19.500014 M 9.000044 19.500014 L 11 19.500014 M 17.00003 19.500014 L 26.999972 19.500014 M 28.00003 19.500014 L 28.999929 19.500014 M 29.999987 19.500014 L 31.000045 19.500014 M 1.999957 20.500072 L 3.000014 20.500072 M 4.000072 20.500072 L 4.999971 20.500072 M 6.999928 20.500072 L 9.000044 20.500072 M 9.999942 20.500072 L 14.000015 20.500072 M 18.999986 20.500072 L 20.000044 20.500072 M 22.000001 20.500072 L 23.000059 20.500072 M 25.000015 20.500072 L 26.000073 20.500072 M 28.00003 20.500072 L 28.999929 20.500072 M 1.999957 21.499971 L 3.000014 21.499971 M 4.000072 21.499971 L 7.999986 21.499971 M 9.000044 21.499971 L 9.999942 21.499971 M 12.000058 21.499971 L 12.999957 21.499971 M 14.000015 21.499971 L 15.000073 21.499971 M 15.999972 21.499971 L 17.00003 21.499971 M 17.999928 21.499971 L 18.999986 21.499971 M 20.000044 21.499971 L 20.999943 21.499971 M 25.000015 21.499971 L 26.999972 21.499971 M 28.999929 21.499971 L 29.999987 21.499971 M 1.999957 22.500029 L 3.000014 22.500029 M 4.000072 22.500029 L 4.999971 22.500029 M 6.000029 22.500029 L 6.999928 22.500029 M 7.999986 22.500029 L 9.000044 22.500029 M 12.000058 22.500029 L 15.000073 22.500029 M 18.999986 22.500029 L 20.000044 22.500029 M 22.000001 22.500029 L 26.999972 22.500029 M 28.00003 22.500029 L 31.000045 22.500029 M 9.999942 23.499928 L 11 23.499928 M 12.999957 23.499928 L 17.999928 23.499928 M 20.000044 23.499928 L 20.999943 23.499928 M 22.000001 23.499928 L 23.000059 23.499928 M 26.000073 23.499928 L 31.000045 23.499928 M 1.999957 24.499986 L 9.000044 24.499986 M 14.000015 24.499986 L 23.000059 24.499986 M 23.999957 24.499986 L 25.000015 24.499986 M 26.000073 24.499986 L 28.999929 24.499986 M 1.999957 25.500044 L 3.000014 25.500044 M 7.999986 25.500044 L 9.000044 25.500044 M 9.999942 25.500044 L 11 25.500044 M 15.000073 25.500044 L 15.999972 25.500044 M 17.999928 25.500044 L 18.999986 25.500044 M 20.999943 25.500044 L 23.000059 25.500044 M 26.000073 25.500044 L 26.999972 25.500044 M 29.999987 25.500044 L 31.000045 25.500044 M 1.999957 26.499942 L 3.000014 26.499942 M 4.000072 26.499942 L 6.999928 26.499942 M 7.999986 26.499942 L 9.000044 26.499942 M 9.999942 26.499942 L 11 26.499942 M 12.000058 26.499942 L 14.000015 26.499942 M 15.999972 26.499942 L 17.00003 26.499942 M 18.999986 26.499942 L 20.000044 26.499942 M 22.000001 26.499942 L 26.999972 26.499942 M 28.00003 26.499942 L 28.999929 26.499942 M 29.999987 26.499942 L 31.000045 26.499942 M 1.999957 27.5 L 3.000014 27.5 M 4.000072 27.5 L 6.999928 27.5 M 7.999986 27.5 L 9.000044 27.5 M 9.999942 27.5 L 11 27.5 M 12.999957 27.5 L 14.000015 27.5 M 15.000073 27.5 L 15.999972 27.5 M 18.999986 27.5 L 20.999943 27.5 M 22.000001 27.5 L 23.000059 27.5 M 25.000015 27.5 L 26.000073 27.5 M 26.999972 27.5 L 28.999929 27.5 M 1.999957 28.500058 L 3.000014 28.500058 M 4.000072 28.500058 L 6.999928 28.500058 M 7.999986 28.500058 L 9.000044 28.500058 M 9.999942 28.500058 L 14.000015 28.500058 M 15.000073 28.500058 L 20.000044 28.500058 M 23.999957 28.500058 L 29.999987 28.500058 M 1.999957 29.499957 L 3.000014 29.499957 M 7.999986 29.499957 L 9.000044 29.499957 M 11 29.499957 L 12.999957 29.499957 M 14.000015 29.499957 L 18.999986 29.499957 M 20.999943 29.499957 L 23.999957 29.499957 M 25.000015 29.499957 L 26.000073 29.499957 M 26.999972 29.499957 L 28.00003 29.499957 M 28.999929 29.499957 L 29.999987 29.499957 M 1.999957 30.500015 L 9.000044 30.500015 M 9.999942 30.500015 L 12.999957 30.500015 M 15.000073 30.500015 L 15.999972 30.500015 M 18.999986 30.500015 L 20.000044 30.500015 M 20.999943 30.500015 L 22.000001 30.500015 M 23.000059 30.500015 L 28.999929 30.500015 " stroke="#000000" stroke-width="1" fill="none"/></svg>`;
 
   // ---------------------------------------------------------------
   // Field registry
@@ -1989,6 +2024,15 @@
       if(val) pushRow(blockHTML('Comments', val));
     }
 
+    // ---- Website CTA: QR code + short invite, always shown ----
+    pushRow(`<div class="label-cta-row">
+        <div class="label-cta-qr">${SIERRA_QR_SVG}</div>
+        <div class="label-cta-text">
+          <span class="label-cta-headline">Visit our website</span>
+          <span class="label-cta-url">sierratextiles.com</span>
+        </div>
+      </div>`);
+
     // ---- Generated (footer, quiet) ----
     if(generatedOn){
       sections.push(`<div class="label-footer">Generated ${escapeHtml(valueInputs['generated'].value)}</div>`);
@@ -2066,7 +2110,6 @@
   function refreshActionButtonsState(){
     const warningEl = document.getElementById('height-warning');
     const printBtn = document.getElementById('print-btn');
-    const pdfBtn = document.getElementById('download-pdf-btn');
     const saveBtn = document.getElementById('save-gallery-btn');
 
     const missing = getMissingRequiredFields();
@@ -2082,7 +2125,7 @@
       warningEl.classList.remove('visible');
     }
 
-    [printBtn, pdfBtn, saveBtn].forEach(btn => {
+    [printBtn, saveBtn].forEach(btn => {
       btn.disabled = blocked;
       btn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
     });
@@ -2171,10 +2214,8 @@
   });
 
   // ---------------------------------------------------------------
-  // PDF DOWNLOAD (client-side, via html2canvas + jsPDF)
-  // ---------------------------------------------------------------
-  // ---------------------------------------------------------------
-  // html2canvas word-spacing workaround
+  // CANVAS CAPTURE (client-side, via html2canvas) — used by the gallery
+  // thumbnails and the batch PDF export below
   // ---------------------------------------------------------------
   // html2canvas has a known measurement bug where text with no explicit
   // letter-spacing (or letter-spacing: normal) gets word gaps rendered far
@@ -2212,64 +2253,6 @@
       return false; // if we can't inspect it, assume it's fine
     }
   }
-
-  async function generatePdfBlob(){
-    const label = document.querySelector('#labels-container .label');
-    if(!label) return null;
-
-    const canvas = await captureLabelCanvas(label, {
-      scale: 4,
-      backgroundColor: '#ffffff',
-      useCORS: true
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const widthMm = 62;
-    const heightMm = (canvas.height / canvas.width) * widthMm;
-
-    // IMPORTANT: jsPDF swaps width/height internally when orientation is
-    // "landscape" combined with a custom [w, h] format array. Since our
-    // label is always taller than it is wide in realistic use (62mm fixed
-    // width), we force "portrait" explicitly instead of computing it from
-    // the dimensions — letting jsPDF infer it caused a double-swap that
-    // rendered the content outside the visible page area (a blank-looking
-    // PDF, even though the data was technically present in the file).
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: [widthMm, heightMm]
-    });
-    pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
-    return pdf;
-  }
-
-  document.getElementById('download-pdf-btn').addEventListener('click', async (e) => {
-    if(getMissingRequiredFields().length > 0 || heightExceededState){
-      refreshActionButtonsState();
-      return;
-    }
-    const btn = e.currentTarget;
-    const label = btn.querySelector('.btn-label');
-    const originalText = label.textContent;
-    label.textContent = 'Generando...';
-    btn.disabled = true;
-    try{
-      setGeneratedTimestamp();
-      render();
-      await new Promise(r => requestAnimationFrame(r));
-      const pdf = await generatePdfBlob();
-      const titleVal = valueInputs['title'].value.trim() || 'etiqueta';
-      const filename = 'sierra-' + titleVal.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.pdf';
-      pdf.save(filename);
-    } catch(err){
-      console.error(err);
-      alert('No se pudo generar el PDF. Intenta de nuevo.');
-    } finally {
-      label.textContent = originalText;
-      btn.disabled = false;
-    }
-  });
 
   // ---------------------------------------------------------------
   // GALLERY (session-only, in-memory)
