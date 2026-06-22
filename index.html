@@ -1168,6 +1168,70 @@
     padding:1px 6px;
   }
 
+  /* Database search modal cards: richer preview + always-visible print
+     button + a discreet selection checkbox (only shown in select mode) */
+  .db-card{cursor:pointer;}
+  .db-card-selected{border-color:var(--ink); box-shadow:0 0 0 1px var(--ink);}
+
+  .db-card-top{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .db-row-checkbox{
+    width:14px;
+    height:14px;
+    margin:0;
+    flex-shrink:0;
+    accent-color:var(--ink);
+  }
+
+  .db-card-print-btn{
+    flex-shrink:0;
+    width:26px;
+    height:26px;
+    border-radius:7px;
+    border:1px solid var(--hairline);
+    background:var(--paper);
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background-color .15s ease;
+  }
+  .db-card-print-btn:hover{background:var(--sys-bg);}
+  .db-card-print-btn:disabled{opacity:0.5; cursor:default;}
+  .db-print-spinner{animation:db-spin .8s linear infinite;}
+  @keyframes db-spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+
+  .db-card-details{
+    margin-top:6px;
+    padding-top:6px;
+    border-top:1px solid var(--hairline);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .db-card-detail{
+    display:flex;
+    gap:6px;
+    font-size:11px;
+    line-height:1.3;
+  }
+  .db-card-detail-key{
+    color:var(--stone);
+    flex-shrink:0;
+    min-width:34px;
+  }
+  .db-card-detail-val{
+    color:var(--ink);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
   .gallery-card-name-row{
     display:flex;
     align-items:center;
@@ -1624,14 +1688,7 @@
 
     <div class="modal-toolbar" id="database-select-toolbar" style="display:none;">
       <span class="excel-menu-status" id="database-select-count">0 / 15 seleccionadas</span>
-      <button class="btn-export-all" id="database-select-all-btn" type="button" style="margin-left:auto;">
-        Seleccionar todo
-      </button>
-      <button class="btn btn-primary" id="database-print-selected-btn" type="button" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        <span class="btn-label">Imprimir seleccionadas</span>
-      </button>
-      <button class="btn-export-all" id="database-open-selected-btn" type="button" disabled>
+      <button class="btn-export-all" id="database-open-selected-btn" type="button" disabled style="margin-left:auto;">
         Abrir seleccionadas en pestañas
       </button>
       <button class="btn-export-all" id="database-cancel-select-btn" type="button">
@@ -3143,33 +3200,64 @@
       const construction = cleanCell(row[DB_COLUMN_MAP.title]) || '—';
       const lot = cleanCell(row[DB_COLUMN_MAP.lot]);
       const date = cleanCell(row[DB_COLUMN_MAP.recDate]);
+      const composition = cleanCell(row[DB_COLUMN_MAP.composition]);
+      const color = cleanCell(row[DB_COLUMN_MAP.color]);
+      const { widthValue, gsmValue } = firstAvailableVariantValues(row);
       const isSelected = databaseSelectedRows.has(row);
+
       const checkboxHTML = databaseSelectMode
-        ? `<div class="gallery-card-thumb" style="cursor:default; align-items:center; justify-content:center;">
-             <input type="checkbox" class="import-row-checkbox" data-db-checkbox="${idx}" ${isSelected ? 'checked' : ''} style="width:22px; height:22px; cursor:pointer;">
-           </div>`
+        ? `<input type="checkbox" class="db-row-checkbox" data-db-checkbox="${idx}" ${isSelected ? 'checked' : ''} style="pointer-events:none;" tabindex="-1">`
         : '';
+
+      const metaParts = [];
+      if(lot) metaParts.push(escapeHtml(lot));
+      if(date) metaParts.push(escapeHtml(date));
+
+      const detailRows = [];
+      if(composition) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Comp.</span><span class="db-card-detail-val">${escapeHtml(composition)}</span></div>`);
+      if(color) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Color</span><span class="db-card-detail-val">${escapeHtml(color)}</span></div>`);
+      if(widthValue || gsmValue){
+        const wg = [widthValue ? `W ${widthValue}` : '', gsmValue ? `GSM ${gsmValue}` : ''].filter(Boolean).join(' · ');
+        detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">&nbsp;</span><span class="db-card-detail-val">${escapeHtml(wg)}</span></div>`);
+      }
+
       return `
-      <div class="gallery-card" data-db-idx="${idx}" style="cursor:pointer;">
-        ${checkboxHTML}
-        <div class="gallery-card-name-row">
-          <span class="gallery-card-name">${escapeHtml(mill)}</span>
+      <div class="gallery-card db-card ${isSelected ? 'db-card-selected' : ''}" data-db-idx="${idx}">
+        <div class="db-card-top">
+          ${checkboxHTML}
+          <div class="gallery-card-name-row" style="flex:1;">
+            <span class="gallery-card-name">${escapeHtml(mill)}</span>
+          </div>
+          <button class="db-card-print-btn" data-db-print-idx="${idx}" type="button" title="Imprimir esta etiqueta">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </button>
         </div>
         <div class="gallery-card-sub">${escapeHtml(construction)}</div>
-        <div class="gallery-card-sub" style="margin-top:2px;">${lot ? escapeHtml(lot) : ''}${lot && date ? ' · ' : ''}${date ? escapeHtml(date) : ''}</div>
+        ${metaParts.length ? `<div class="gallery-card-sub" style="margin-top:2px;">${metaParts.join(' · ')}</div>` : ''}
+        ${detailRows.length ? `<div class="db-card-details">${detailRows.join('')}</div>` : ''}
       </div>`;
     }).join('');
 
+    grid.querySelectorAll('[data-db-print-idx]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.dbPrintIdx, 10);
+        printSingleDatabaseRow(results[idx], btn);
+      });
+    });
+
     if(databaseSelectMode){
       grid.querySelectorAll('[data-db-idx]').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+          if(e.target.closest('[data-db-print-idx]')) return;
           const idx = parseInt(card.dataset.dbIdx, 10);
           toggleDatabaseRowSelection(results[idx]);
         });
       });
     } else {
       grid.querySelectorAll('[data-db-idx]').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+          if(e.target.closest('[data-db-print-idx]')) return;
           const idx = parseInt(card.dataset.dbIdx, 10);
           pendingDatabaseRow = results[idx];
           databaseChainQueue = [];
@@ -3197,7 +3285,6 @@
   function updateDatabaseSelectToolbar(){
     const count = databaseSelectedRows.size;
     document.getElementById('database-select-count').textContent = `${count} / ${DB_SELECT_LIMIT} seleccionadas`;
-    document.getElementById('database-print-selected-btn').disabled = count === 0;
     document.getElementById('database-open-selected-btn').disabled = count === 0;
   }
 
@@ -3212,24 +3299,6 @@
 
   document.getElementById('database-select-mode-btn').addEventListener('click', () => setDatabaseSelectMode(true));
   document.getElementById('database-cancel-select-btn').addEventListener('click', () => setDatabaseSelectMode(false));
-
-  document.getElementById('database-select-all-btn').addEventListener('click', () => {
-    const results = getFilteredDatabase();
-    const anyUnselected = results.some(row => !databaseSelectedRows.has(row));
-    if(anyUnselected){
-      results.forEach(row => {
-        if(databaseSelectedRows.size >= DB_SELECT_LIMIT) return;
-        databaseSelectedRows.add(row);
-      });
-      if(results.length > DB_SELECT_LIMIT){
-        alert(`Solo se seleccionaron las primeras ${DB_SELECT_LIMIT} filas (límite máximo).`);
-      }
-    } else {
-      results.forEach(row => databaseSelectedRows.delete(row));
-    }
-    renderDatabaseGrid();
-    updateDatabaseSelectToolbar();
-  });
 
   document.getElementById('database-search').addEventListener('input', (e) => {
     databaseSearchTerm = e.target.value;
@@ -3389,64 +3458,45 @@
     openVariantModal();
   });
 
-  // ---- "Print selected" — auto-picks the first available width/gsm per
-  // row (no manual picker, per user preference) and produces a single
-  // multi-page PDF, one label per page, just like the gallery's batch
-  // export — without opening any tabs. ----
-  document.getElementById('database-print-selected-btn').addEventListener('click', async (e) => {
-    const rows = Array.from(databaseSelectedRows);
-    if(rows.length === 0) return;
-
-    const btn = e.currentTarget;
-    const originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = 'Generando...';
+  // ---- Print a single database row directly from its thumbnail, with
+  // no tab opened and no manual width/gsm picker (auto-picks the first
+  // available value per user preference). Generates a one-page PDF and
+  // saves it, same mechanism as the gallery's single-tag export. ----
+  async function printSingleDatabaseRow(row, btnEl){
+    const originalHTML = btnEl.innerHTML;
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<svg class="db-print-spinner" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>';
 
     const currentSnapshot = collectSnapshot();
-
     try{
+      const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+      const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+      applySnapshot(snap);
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
+
+      const labelEl = document.querySelector('#labels-container .label');
+      if(!labelEl) throw new Error('No label element found');
+
+      const canvas = await captureLabelCanvas(labelEl, { scale: 4, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const widthMm = 62;
+      const heightMm = (canvas.height / canvas.width) * widthMm;
+
       const { jsPDF } = window.jspdf;
-      let pdf = null;
-
-      for(let i = 0; i < rows.length; i++){
-        const row = rows[i];
-        const { widthValue, gsmValue } = firstAvailableVariantValues(row);
-        const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
-        applySnapshot(snap);
-        await new Promise(r => requestAnimationFrame(r));
-        await new Promise(r => requestAnimationFrame(r));
-
-        const labelEl = document.querySelector('#labels-container .label');
-        if(!labelEl) continue;
-
-        const canvas = await captureLabelCanvas(labelEl, { scale: 4, backgroundColor: '#ffffff' });
-        const imgData = canvas.toDataURL('image/png');
-        const widthMm = 62;
-        const heightMm = (canvas.height / canvas.width) * widthMm;
-
-        if(!pdf){
-          pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [widthMm, heightMm] });
-          pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
-        } else {
-          pdf.addPage([widthMm, heightMm], 'portrait');
-          pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
-        }
-      }
-
-      if(pdf){
-        pdf.save('sierra-fabric-tags-' + rows.length + '.pdf');
-      }
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [widthMm, heightMm] });
+      pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+      const titleVal = (snap.fields.title || 'etiqueta').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      pdf.save('sierra-' + titleVal + '.pdf');
     } catch(err){
       console.error(err);
-      alert('No se pudo generar el PDF combinado. Intenta de nuevo.');
+      alert('No se pudo generar el PDF. Intenta de nuevo.');
     } finally {
       applySnapshot(currentSnapshot);
-      btn.disabled = false;
-      btn.textContent = originalText;
-      setDatabaseSelectMode(false);
-      closeDatabaseModal();
+      btnEl.disabled = false;
+      btnEl.innerHTML = originalHTML;
     }
-  });
+  }
 
   // ---------------------------------------------------------------
   // init
