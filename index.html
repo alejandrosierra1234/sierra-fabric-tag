@@ -1616,6 +1616,27 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="database-search" placeholder="Buscar por Mill Article o Construction Type">
       </div>
+      <button class="btn btn-primary" id="database-select-mode-btn" type="button" style="margin-left:auto; flex-shrink:0;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="8 12 11 15 16 9"/></svg>
+        <span class="btn-label">Seleccionar varias</span>
+      </button>
+    </div>
+
+    <div class="modal-toolbar" id="database-select-toolbar" style="display:none;">
+      <span class="excel-menu-status" id="database-select-count">0 / 15 seleccionadas</span>
+      <button class="btn-export-all" id="database-select-all-btn" type="button" style="margin-left:auto;">
+        Seleccionar todo
+      </button>
+      <button class="btn btn-primary" id="database-print-selected-btn" type="button" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span class="btn-label">Imprimir seleccionadas</span>
+      </button>
+      <button class="btn-export-all" id="database-open-selected-btn" type="button" disabled>
+        Abrir seleccionadas en pestañas
+      </button>
+      <button class="btn-export-all" id="database-cancel-select-btn" type="button">
+        Cancelar
+      </button>
     </div>
 
     <div class="gallery-grid" id="database-grid"></div>
@@ -1628,7 +1649,7 @@
     <div class="modal-header">
       <div>
         <p class="modal-title">Elige Width y GSM</p>
-        <p class="modal-warning">Tu base de datos tiene tres versiones de cada valor. Elige cuál se debe imprimir en la etiqueta.</p>
+        <p class="modal-warning" id="variant-modal-warning">Tu base de datos tiene tres versiones de cada valor. Elige cuál se debe imprimir en la etiqueta.</p>
       </div>
       <button class="modal-close" id="close-variant-btn" type="button">×</button>
     </div>
@@ -1643,7 +1664,7 @@
       </div>
       <button class="btn btn-primary" id="confirm-variant-btn" type="button" style="width:100%; margin-top:22px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span class="btn-label">Abrir etiqueta</span>
+        <span class="btn-label" id="confirm-variant-label">Abrir etiqueta</span>
       </button>
     </div>
   </div>
@@ -2993,6 +3014,17 @@
   let chosenWidthKey = null;
   let chosenGsmKey = null;
 
+  // Multi-select state for the database modal — lets the user pick up to
+  // DB_SELECT_LIMIT rows, then either open them one by one (chaining the
+  // width/gsm picker for each) or print them all at once.
+  const DB_SELECT_LIMIT = 15;
+  let databaseSelectMode = false;
+  let databaseSelectedRows = new Set(); // holds row references (objects), not indices, since filtering can change indices
+  let databaseChainQueue = []; // rows still pending in an "open in tabs" chain
+  let databaseChainMode = null; // null | 'open' — only 'open' needs the variant picker per row
+  let databaseChainTotal = 0; // total rows in the current chain (fixed at start, doesn't shrink)
+  let databaseChainStep = 0; // 1-based index of the row currently being confirmed
+
   function cleanCell(val){
     if(val === undefined || val === null) return '';
     if(typeof val === 'number'){
@@ -3073,11 +3105,13 @@
     }
     databaseSearchTerm = '';
     document.getElementById('database-search').value = '';
+    setDatabaseSelectMode(false);
     renderDatabaseGrid();
     document.getElementById('database-modal').classList.add('visible');
   }
   function closeDatabaseModal(){
     document.getElementById('database-modal').classList.remove('visible');
+    setDatabaseSelectMode(false);
   }
   document.getElementById('close-database-btn').addEventListener('click', closeDatabaseModal);
   document.getElementById('database-modal').addEventListener('click', (e) => {
@@ -3109,8 +3143,15 @@
       const construction = cleanCell(row[DB_COLUMN_MAP.title]) || '—';
       const lot = cleanCell(row[DB_COLUMN_MAP.lot]);
       const date = cleanCell(row[DB_COLUMN_MAP.recDate]);
+      const isSelected = databaseSelectedRows.has(row);
+      const checkboxHTML = databaseSelectMode
+        ? `<div class="gallery-card-thumb" style="cursor:default; align-items:center; justify-content:center;">
+             <input type="checkbox" class="import-row-checkbox" data-db-checkbox="${idx}" ${isSelected ? 'checked' : ''} style="width:22px; height:22px; cursor:pointer;">
+           </div>`
+        : '';
       return `
       <div class="gallery-card" data-db-idx="${idx}" style="cursor:pointer;">
+        ${checkboxHTML}
         <div class="gallery-card-name-row">
           <span class="gallery-card-name">${escapeHtml(mill)}</span>
         </div>
@@ -3119,14 +3160,76 @@
       </div>`;
     }).join('');
 
-    grid.querySelectorAll('[data-db-idx]').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.dataset.dbIdx, 10);
-        pendingDatabaseRow = results[idx];
-        openVariantModal();
+    if(databaseSelectMode){
+      grid.querySelectorAll('[data-db-idx]').forEach(card => {
+        card.addEventListener('click', () => {
+          const idx = parseInt(card.dataset.dbIdx, 10);
+          toggleDatabaseRowSelection(results[idx]);
+        });
       });
-    });
+    } else {
+      grid.querySelectorAll('[data-db-idx]').forEach(card => {
+        card.addEventListener('click', () => {
+          const idx = parseInt(card.dataset.dbIdx, 10);
+          pendingDatabaseRow = results[idx];
+          databaseChainQueue = [];
+          databaseChainMode = null;
+          openVariantModal();
+        });
+      });
+    }
   }
+
+  function toggleDatabaseRowSelection(row){
+    if(databaseSelectedRows.has(row)){
+      databaseSelectedRows.delete(row);
+    } else {
+      if(databaseSelectedRows.size >= DB_SELECT_LIMIT){
+        alert(`Puedes seleccionar hasta ${DB_SELECT_LIMIT} filas a la vez.`);
+        return;
+      }
+      databaseSelectedRows.add(row);
+    }
+    renderDatabaseGrid();
+    updateDatabaseSelectToolbar();
+  }
+
+  function updateDatabaseSelectToolbar(){
+    const count = databaseSelectedRows.size;
+    document.getElementById('database-select-count').textContent = `${count} / ${DB_SELECT_LIMIT} seleccionadas`;
+    document.getElementById('database-print-selected-btn').disabled = count === 0;
+    document.getElementById('database-open-selected-btn').disabled = count === 0;
+  }
+
+  function setDatabaseSelectMode(on){
+    databaseSelectMode = on;
+    if(!on) databaseSelectedRows.clear();
+    document.getElementById('database-select-toolbar').style.display = on ? 'flex' : 'none';
+    document.getElementById('database-select-mode-btn').style.display = on ? 'none' : '';
+    updateDatabaseSelectToolbar();
+    renderDatabaseGrid();
+  }
+
+  document.getElementById('database-select-mode-btn').addEventListener('click', () => setDatabaseSelectMode(true));
+  document.getElementById('database-cancel-select-btn').addEventListener('click', () => setDatabaseSelectMode(false));
+
+  document.getElementById('database-select-all-btn').addEventListener('click', () => {
+    const results = getFilteredDatabase();
+    const anyUnselected = results.some(row => !databaseSelectedRows.has(row));
+    if(anyUnselected){
+      results.forEach(row => {
+        if(databaseSelectedRows.size >= DB_SELECT_LIMIT) return;
+        databaseSelectedRows.add(row);
+      });
+      if(results.length > DB_SELECT_LIMIT){
+        alert(`Solo se seleccionaron las primeras ${DB_SELECT_LIMIT} filas (límite máximo).`);
+      }
+    } else {
+      results.forEach(row => databaseSelectedRows.delete(row));
+    }
+    renderDatabaseGrid();
+    updateDatabaseSelectToolbar();
+  });
 
   document.getElementById('database-search').addEventListener('input', (e) => {
     databaseSearchTerm = e.target.value;
@@ -3168,31 +3271,8 @@
   let chosenWidthValue = '';
   let chosenGsmValue = '';
 
-  function openVariantModal(){
-    if(!pendingDatabaseRow) return;
-    buildVariantOptions('variant-width-options', DB_WIDTH_SOURCES, pendingDatabaseRow, (key, val) => {
-      chosenWidthKey = key; chosenWidthValue = val;
-    });
-    buildVariantOptions('variant-gsm-options', DB_GSM_SOURCES, pendingDatabaseRow, (key, val) => {
-      chosenGsmKey = key; chosenGsmValue = val;
-    });
-    closeDatabaseModal();
-    document.getElementById('variant-modal').classList.add('visible');
-  }
-  function closeVariantModal(){
-    document.getElementById('variant-modal').classList.remove('visible');
-    pendingDatabaseRow = null;
-  }
-  document.getElementById('close-variant-btn').addEventListener('click', closeVariantModal);
-  document.getElementById('variant-modal').addEventListener('click', (e) => {
-    if(e.target.id === 'variant-modal') closeVariantModal();
-  });
-
-  document.getElementById('confirm-variant-btn').addEventListener('click', () => {
-    if(!pendingDatabaseRow) return;
-    const row = pendingDatabaseRow;
+  function buildSnapshotFromDatabaseRow(row, widthValue, gsmValue){
     const snap = emptySnapshot();
-
     snap.fields.title = cleanCell(row[DB_COLUMN_MAP.title]);
     snap.fields.millarticle = cleanCell(row[DB_COLUMN_MAP.millarticle]);
     snap.fields.lot = cleanCell(row[DB_COLUMN_MAP.lot]);
@@ -3202,15 +3282,64 @@
     snap.fields.dia = cleanCell(row[DB_COLUMN_MAP.dia]);
     snap.fields.gauge = cleanCell(row[DB_COLUMN_MAP.gauge]);
     snap.fields.needles = cleanCell(row[DB_COLUMN_MAP.needles]);
-    snap.fields.width = chosenWidthValue;
-    snap.fields.gsm = chosenGsmValue;
+    snap.fields.width = widthValue;
+    snap.fields.gsm = gsmValue;
     snap.yarns = DB_YARN_COLUMNS.map(col => cleanCell(row[col])).filter(v => v.length > 0);
+    return snap;
+  }
+
+  // Returns the first-available Width/GSM values for a row, without
+  // touching the picker UI — used by "print selected" where there's no
+  // per-row manual choice (per user preference: auto-pick first available).
+  function firstAvailableVariantValues(row){
+    const widthMatch = DB_WIDTH_SOURCES.map(s => ({ ...s, value: formatWidthValue(row[s.column]) })).find(s => s.value);
+    const gsmMatch = DB_GSM_SOURCES.map(s => ({ ...s, value: formatGsmValue(row[s.column]) })).find(s => s.value);
+    return { widthValue: widthMatch ? widthMatch.value : '', gsmValue: gsmMatch ? gsmMatch.value : '' };
+  }
+
+  function openVariantModal(){
+    if(!pendingDatabaseRow) return;
+    buildVariantOptions('variant-width-options', DB_WIDTH_SOURCES, pendingDatabaseRow, (key, val) => {
+      chosenWidthKey = key; chosenWidthValue = val;
+    });
+    buildVariantOptions('variant-gsm-options', DB_GSM_SOURCES, pendingDatabaseRow, (key, val) => {
+      chosenGsmKey = key; chosenGsmValue = val;
+    });
+
+    if(databaseChainMode === 'open' && databaseChainTotal > 1){
+      document.getElementById('variant-modal-warning').textContent = `Etiqueta ${databaseChainStep} de ${databaseChainTotal}. Elige Width y GSM para esta fila.`;
+      document.getElementById('confirm-variant-label').textContent = databaseChainStep < databaseChainTotal ? 'Abrir y continuar' : 'Abrir última etiqueta';
+    } else {
+      document.getElementById('variant-modal-warning').textContent = 'Tu base de datos tiene tres versiones de cada valor. Elige cuál se debe imprimir en la etiqueta.';
+      document.getElementById('confirm-variant-label').textContent = 'Abrir etiqueta';
+    }
+
+    closeDatabaseModal();
+    document.getElementById('variant-modal').classList.add('visible');
+  }
+  function closeVariantModal(){
+    document.getElementById('variant-modal').classList.remove('visible');
+    pendingDatabaseRow = null;
+    databaseChainQueue = [];
+    databaseChainMode = null;
+    databaseChainTotal = 0;
+    databaseChainStep = 0;
+  }
+  document.getElementById('close-variant-btn').addEventListener('click', closeVariantModal);
+  document.getElementById('variant-modal').addEventListener('click', (e) => {
+    if(e.target.id === 'variant-modal') closeVariantModal();
+  });
+
+  document.getElementById('confirm-variant-btn').addEventListener('click', () => {
+    if(!pendingDatabaseRow) return;
 
     if(tabs.length >= MAX_TABS){
       alert(`Ya tienes el máximo de ${MAX_TABS} pestañas abiertas. Cierra alguna antes de abrir otra desde la base de datos.`);
+      closeVariantModal();
       return;
     }
 
+    const snap = buildSnapshotFromDatabaseRow(pendingDatabaseRow, chosenWidthValue, chosenGsmValue);
     persistActiveTabSnapshot();
     const tab = makeTab(snap);
     tabs.push(tab);
@@ -3218,7 +3347,105 @@
     applySnapshot(tab.snapshot);
     saveTabsToStorage();
     renderTabBar();
-    closeVariantModal();
+
+    // If we're chaining through a multi-row selection, advance to the
+    // next row instead of closing — otherwise this was a single-row pick.
+    if(databaseChainMode === 'open' && databaseChainQueue.length > 0){
+      if(tabs.length >= MAX_TABS){
+        alert(`Se alcanzó el máximo de ${MAX_TABS} pestañas abiertas. Las filas restantes no se abrieron.`);
+        closeVariantModal();
+        return;
+      }
+      pendingDatabaseRow = databaseChainQueue.shift();
+      databaseChainStep++;
+      openVariantModal();
+    } else {
+      closeVariantModal();
+    }
+  });
+
+  // ---- "Open selected in tabs" — chains the variant picker row by row ----
+  document.getElementById('database-open-selected-btn').addEventListener('click', () => {
+    const rows = Array.from(databaseSelectedRows);
+    if(rows.length === 0) return;
+
+    const availableSlots = MAX_TABS - tabs.length;
+    if(availableSlots <= 0){
+      alert(`Ya tienes el máximo de ${MAX_TABS} pestañas abiertas. Cierra alguna antes de abrir más.`);
+      return;
+    }
+
+    const toOpen = rows.slice(0, availableSlots);
+    if(rows.length > toOpen.length){
+      alert(`Solo se abrirán ${toOpen.length} de ${rows.length} filas seleccionadas porque exceden el máximo de ${MAX_TABS} pestañas abiertas.`);
+    }
+
+    databaseChainMode = 'open';
+    pendingDatabaseRow = toOpen[0];
+    databaseChainQueue = toOpen.slice(1);
+    databaseChainTotal = toOpen.length;
+    databaseChainStep = 1;
+    setDatabaseSelectMode(false);
+    openVariantModal();
+  });
+
+  // ---- "Print selected" — auto-picks the first available width/gsm per
+  // row (no manual picker, per user preference) and produces a single
+  // multi-page PDF, one label per page, just like the gallery's batch
+  // export — without opening any tabs. ----
+  document.getElementById('database-print-selected-btn').addEventListener('click', async (e) => {
+    const rows = Array.from(databaseSelectedRows);
+    if(rows.length === 0) return;
+
+    const btn = e.currentTarget;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Generando...';
+
+    const currentSnapshot = collectSnapshot();
+
+    try{
+      const { jsPDF } = window.jspdf;
+      let pdf = null;
+
+      for(let i = 0; i < rows.length; i++){
+        const row = rows[i];
+        const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+        const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+        applySnapshot(snap);
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => requestAnimationFrame(r));
+
+        const labelEl = document.querySelector('#labels-container .label');
+        if(!labelEl) continue;
+
+        const canvas = await captureLabelCanvas(labelEl, { scale: 4, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const widthMm = 62;
+        const heightMm = (canvas.height / canvas.width) * widthMm;
+
+        if(!pdf){
+          pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [widthMm, heightMm] });
+          pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+        } else {
+          pdf.addPage([widthMm, heightMm], 'portrait');
+          pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+        }
+      }
+
+      if(pdf){
+        pdf.save('sierra-fabric-tags-' + rows.length + '.pdf');
+      }
+    } catch(err){
+      console.error(err);
+      alert('No se pudo generar el PDF combinado. Intenta de nuevo.');
+    } finally {
+      applySnapshot(currentSnapshot);
+      btn.disabled = false;
+      btn.textContent = originalText;
+      setDatabaseSelectMode(false);
+      closeDatabaseModal();
+    }
   });
 
   // ---------------------------------------------------------------
