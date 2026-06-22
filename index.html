@@ -1203,8 +1203,6 @@
   }
   .db-card-print-btn:hover{background:var(--sys-bg);}
   .db-card-print-btn:disabled{opacity:0.5; cursor:default;}
-  .db-print-spinner{animation:db-spin .8s linear infinite;}
-  @keyframes db-spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
 
   .db-card-details{
     margin-top:6px;
@@ -3458,44 +3456,41 @@
     openVariantModal();
   });
 
-  // ---- Print a single database row directly from its thumbnail, with
-  // no tab opened and no manual width/gsm picker (auto-picks the first
-  // available value per user preference). Generates a one-page PDF and
-  // saves it, same mechanism as the gallery's single-tag export. ----
-  async function printSingleDatabaseRow(row, btnEl){
-    const originalHTML = btnEl.innerHTML;
-    btnEl.disabled = true;
-    btnEl.innerHTML = '<svg class="db-print-spinner" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>';
-
+  // ---- Print a single database row directly from its thumbnail: applies
+  // the row's data to the current label and opens the browser's native
+  // print dialog (window.print()), exactly like the main "Imprimir" button
+  // — no PDF is generated or downloaded. No tab is opened and there's no
+  // manual width/gsm picker (auto-picks the first available value, per
+  // user preference). The previous form state is restored only after the
+  // print dialog closes, via the "afterprint" event, so the print dialog
+  // itself sees the row's data instead of whatever was restored too early. ----
+  function printSingleDatabaseRow(row, btnEl){
     const currentSnapshot = collectSnapshot();
-    try{
-      const { widthValue, gsmValue } = firstAvailableVariantValues(row);
-      const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
-      applySnapshot(snap);
-      await new Promise(r => requestAnimationFrame(r));
-      await new Promise(r => requestAnimationFrame(r));
+    const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+    const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
 
-      const labelEl = document.querySelector('#labels-container .label');
-      if(!labelEl) throw new Error('No label element found');
+    applySnapshot(snap);
+    setGeneratedTimestamp();
+    render();
 
-      const canvas = await captureLabelCanvas(labelEl, { scale: 4, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/png');
-      const widthMm = 62;
-      const heightMm = (canvas.height / canvas.width) * widthMm;
-
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [widthMm, heightMm] });
-      pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
-      const titleVal = (snap.fields.title || 'etiqueta').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      pdf.save('sierra-' + titleVal + '.pdf');
-    } catch(err){
-      console.error(err);
-      alert('No se pudo generar el PDF. Intenta de nuevo.');
-    } finally {
+    const missing = getMissingRequiredFields();
+    if(missing.length > 0){
       applySnapshot(currentSnapshot);
-      btnEl.disabled = false;
-      btnEl.innerHTML = originalHTML;
+      alert(`Esta fila no se puede imprimir porque le falta: ${missing.join(', ')}.`);
+      return;
     }
+
+    function restoreAndCleanup(){
+      window.removeEventListener('afterprint', restoreAndCleanup);
+      applySnapshot(currentSnapshot);
+    }
+    window.addEventListener('afterprint', restoreAndCleanup);
+
+    closeDatabaseModal();
+    requestAnimationFrame(() => {
+      injectExactPageSize();
+      setTimeout(() => window.print(), 50);
+    });
   }
 
   // ---------------------------------------------------------------
