@@ -2238,17 +2238,17 @@
       pushRow(`<div class="label-grid-row ${cls}">${cells.join('')}${filler}</div>`);
     }
 
-    // ---- Header: logo + "Manufactured in Honduras" note ----
-    sections.push(`<div class="label-header-row">
-        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
-        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
-      </div>`);
-
-    // ---- Mill name (fixed) + collection tag ----
-    sections.push(`<div class="label-divider"></div>`);
+    // ---- Mill name (fixed) + collection tag — first thing read on the label ----
     sections.push(`<div class="label-mill-row">
         <span class="label-title">NORTHERN TEXTILES</span>
         <span class="label-collection-tag">GIS FW2026</span>
+      </div>`);
+    sections.push(`<div class="label-divider"></div>`);
+
+    // ---- Logo + "Manufactured in Honduras" note ----
+    sections.push(`<div class="label-header-row">
+        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
+        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
       </div>`);
     sections.push(`<div class="label-divider"></div>`);
 
