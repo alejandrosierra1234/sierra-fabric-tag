@@ -251,6 +251,44 @@
     max-width:42ch;
   }
 
+  .excel-menu-section{
+    display:block;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--stone);
+    padding:6px 10px 2px;
+  }
+
+  .tagtype-switch{
+    display:flex;
+    gap:4px;
+    margin-top:16px;
+    padding:3px;
+    background:var(--mist);
+    border-radius:9px;
+  }
+  .tagtype-btn{
+    flex:1;
+    border:none;
+    background:transparent;
+    border-radius:7px;
+    padding:8px 10px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    color:var(--graphite);
+    cursor:pointer;
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .tagtype-btn:hover{color:var(--ink);}
+  .tagtype-btn.active{
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 1px 2px rgba(0,0,0,0.08);
+  }
+
   .panel-body{
     padding:20px 32px 48px;
     flex:1;
@@ -931,6 +969,30 @@
     white-space:nowrap;
   }
 
+  /* KNITS · GIS FW2026 — explicit Arial stack per spec, reuses every
+     other .label-* primitive (grid rows, dividers, blocks) as-is. */
+  .label-knits{
+    font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
+  }
+  .label-mill-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:calc(2mm * var(--lscale, 1));
+  }
+  .label-mill-row .label-title{
+    font-size:calc(4mm * var(--lscale, 1));
+  }
+  .label-collection-tag{
+    flex-shrink:0;
+    font-size:calc(2.1mm * var(--lscale, 1));
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:#000000;
+    white-space:nowrap;
+  }
+
   .height-warning{
     margin-top:16px;
     padding:10px 14px;
@@ -1347,11 +1409,22 @@
             <svg class="action-btn-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="excel-menu-dropdown" id="create-menu-dropdown">
+            <span class="excel-menu-section">WOVENS</span>
             <button class="excel-menu-item" id="header-template-btn" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Descargar plantilla
             </button>
             <button class="excel-menu-item" id="import-excel-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importar para crear en bulk
+            </button>
+            <div class="excel-menu-divider"></div>
+            <span class="excel-menu-section">KNITS · GIS FW2026</span>
+            <button class="excel-menu-item" id="header-template-knits-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar plantilla
+            </button>
+            <button class="excel-menu-item" id="import-excel-knits-btn" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Importar para crear en bulk
             </button>
@@ -1390,6 +1463,11 @@
       </div>
       <h1>Fabric Tag</h1>
       <p class="lede">Completa los datos técnicos. Tu etiqueta se actualiza al instante a la derecha.</p>
+
+      <div class="tagtype-switch" id="tagtype-switch">
+        <button type="button" class="tagtype-btn active" data-type="wovens">WOVENS</button>
+        <button type="button" class="tagtype-btn" data-type="knits-gis-fw2026">KNITS · GIS FW2026</button>
+      </div>
     </div>
 
     <div class="tab-bar" id="tab-bar">
@@ -1400,6 +1478,8 @@
     </div>
 
     <div class="panel-body">
+
+      <div id="group-wovens">
 
       <!-- GROUP 1: Construction -->
       <div class="group">
@@ -1569,6 +1649,189 @@
 
         </div>
       </div>
+
+      </div><!-- /#group-wovens -->
+
+      <div id="group-knits" style="display:none;">
+
+        <!-- GROUP: Mill & Construction -->
+        <div class="group">
+          <div class="group-header">
+            <span class="group-title">Mill &amp; Construction</span>
+          </div>
+          <div class="card">
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-millarticle">Mill Article # <span class="required-mark">*</span></label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-millarticle" data-value="millarticle" type="text" placeholder="e.g. NT26-K104-2">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-constructiontype">Construction Type <span class="required-mark">*</span> <span class="char-hint">se imprime en mayúsculas</span></label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-constructiontype" data-value="constructiontype" type="text" placeholder="e.g. Single Jersey">
+                </div>
+              </div>
+            </div>
+            <div class="field-row grouped">
+              <div class="field-main">
+                <div class="grouped-inputs cols-2">
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Gauge</span>
+                    <input class="field-input" id="val-k-gauge" data-value="gauge" type="text" placeholder="e.g. 28">
+                  </div>
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Compression Level</span>
+                    <input class="field-input" id="val-k-compression" data-value="compression" type="text" placeholder="e.g. Medium">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROUP: Content & Specs -->
+        <div class="group">
+          <div class="group-header">
+            <span class="group-title">Content &amp; Specs</span>
+          </div>
+          <div class="card">
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-content">Content <span class="required-mark">*</span> <span class="char-hint">one line per value</span></label>
+                <div class="field-input-wrap">
+                  <textarea class="field-textarea" id="val-k-content" data-value="content" placeholder="92% Cotton 8% Spandex"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-contentrpet">Content (rPET) <span class="char-hint">one line per value</span></label>
+                <div class="field-input-wrap">
+                  <textarea class="field-textarea" id="val-k-contentrpet" data-value="contentrpet" placeholder="100% rPET Polyester"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-yarnsize">Yarn Size</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-yarnsize" data-value="yarnsize" type="text" placeholder="e.g. 30/1 Combed">
+                </div>
+              </div>
+            </div>
+            <div class="field-row grouped">
+              <div class="field-main">
+                <div class="grouped-inputs cols-2">
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Weight (GSM)</span>
+                    <input class="field-input" id="val-k-weight" data-value="weight" type="text" placeholder="180">
+                  </div>
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">CW (Inch)</span>
+                    <input class="field-input" id="val-k-cw" data-value="cw" type="text" placeholder="58">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROUP: Country of Origin -->
+        <div class="group">
+          <div class="group-header">
+            <span class="group-title">Country of Origin</span>
+          </div>
+          <div class="card">
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-coo">COO's</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-coo" data-value="coo" type="text" placeholder="e.g. Honduras">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-yarncoo">Yarn COO's</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-yarncoo" data-value="yarncoo" type="text" placeholder="e.g. Honduras, Vietnam">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-greigecoo">Greige COO's</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-greigecoo" data-value="greigecoo" type="text" placeholder="e.g. Honduras">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROUP: Pricing -->
+        <div class="group">
+          <div class="group-header">
+            <span class="group-title">Pricing</span>
+          </div>
+          <div class="card">
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-price">Price <span class="char-hint">$/YD, $/LB</span></label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-price" data-value="price" type="text" placeholder="$3.25/YD, $9.10/LB">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-pricerpet">Price (rPET) <span class="char-hint">$/YD, $/LB</span></label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-pricerpet" data-value="pricerpet" type="text" placeholder="$3.60/YD, $10.05/LB">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-price58">Price @58" CW <span class="char-hint">$/YD</span></label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-price58" data-value="price58" type="text" placeholder="$3.30/YD">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-pricevalid">Price Valid Till</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-pricevalid" data-value="pricevalid" type="text" placeholder="MM/DD/YYYY">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROUP: Performance Features -->
+        <div class="group">
+          <div class="group-header">
+            <span class="group-title">Performance Features</span>
+          </div>
+          <div class="card">
+            <div class="field-row">
+              <div class="field-main">
+                <label class="field-label" for="val-k-performance">Performance Features <span class="char-hint">e.g. with Vertical Wicking (+20¢); N/A if not applicable</span></label>
+                <div class="field-input-wrap">
+                  <textarea class="field-textarea" id="val-k-performance" data-value="performance" placeholder="with Vertical Wicking (+20¢), with Water-Resistant (+40¢), N/A if not applicable"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /#group-knits -->
 
       <!-- ACTIONS -->
       <div class="action-footer">
@@ -1770,6 +2033,37 @@
   });
   SWITCHABLE_FIELDS.forEach(bindField);
 
+  // ---------------------------------------------------------------
+  // KNITS · GIS FW2026 field registry — a separate flat set of fields,
+  // all optional except MILL_ARTICLE/CONSTRUCTION/CONTENT, no switches.
+  // ---------------------------------------------------------------
+  const KNITS_FIELDS = ['millarticle','constructiontype','gauge','compression','content','contentrpet','yarnsize','weight','cw','coo','yarncoo','greigecoo','price','pricerpet','price58','pricevalid','performance'];
+  const kValueInputs = {};
+  KNITS_FIELDS.forEach(key => { kValueInputs[key] = document.getElementById('val-k-' + key); });
+
+  // ---------------------------------------------------------------
+  // TAG TYPE — switches which field group is shown/edited and which
+  // label template gets rendered. Stored per-tab in the snapshot.
+  // ---------------------------------------------------------------
+  let currentType = 'wovens';
+
+  function setTagTypeUI(type){
+    document.querySelectorAll('.tagtype-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+    document.getElementById('group-wovens').style.display = type === 'wovens' ? '' : 'none';
+    document.getElementById('group-knits').style.display = type === 'knits-gis-fw2026' ? '' : 'none';
+  }
+
+  function setTagType(type){
+    if(type === currentType) return;
+    currentType = type;
+    setTagTypeUI(type);
+    render();
+  }
+
+  document.querySelectorAll('.tagtype-btn').forEach(btn => {
+    btn.addEventListener('click', () => setTagType(btn.dataset.type));
+  });
+
   function isOn(key){
     if(ALWAYS_ON_FIELDS.includes(key)) return true;
     const el = checkboxes[key];
@@ -1925,7 +2219,112 @@
     </div>`;
   }
 
+  // ---------------------------------------------------------------
+  // KNITS · GIS FW2026 label builder — same visual language and grid
+  // primitives as the WOVENS label, but its own fixed field set. Mill
+  // Name is hardcoded (this whole collection ships from one mill), so
+  // it isn't part of the editable field registry.
+  // ---------------------------------------------------------------
+  function buildKnitsLabelHTML(){
+    const kf = {};
+    KNITS_FIELDS.forEach(k => { kf[k] = kValueInputs[k].value.trim(); });
+
+    const hasAnyContent = KNITS_FIELDS.some(k => kf[k].length > 0);
+    if(!hasAnyContent){
+      return `<div class="empty-state">Activa al menos un campo para generar la etiqueta.</div>`;
+    }
+
+    let sections = [];
+    let contentRowCount = 0;
+
+    function pushRow(html){
+      if(contentRowCount > 0){
+        sections.push(`<div class="label-row-divider"></div>`);
+      }
+      sections.push(html);
+      contentRowCount++;
+    }
+
+    function gridRow(cells){
+      if(cells.length === 0) return;
+      const cls = cells.length >= 3 ? 'cols-3' : 'cols-2';
+      const filler = cells.length === 1 ? '<div></div>' : '';
+      pushRow(`<div class="label-grid-row ${cls}">${cells.join('')}${filler}</div>`);
+    }
+
+    // ---- Header: logo + "Manufactured in Honduras" note ----
+    sections.push(`<div class="label-header-row">
+        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
+        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
+      </div>`);
+
+    // ---- Mill name (fixed) + collection tag ----
+    sections.push(`<div class="label-divider"></div>`);
+    sections.push(`<div class="label-mill-row">
+        <span class="label-title">NORTHERN TEXTILES</span>
+        <span class="label-collection-tag">GIS FW2026</span>
+      </div>`);
+    sections.push(`<div class="label-divider"></div>`);
+
+    // ---- Mill Article # / Construction Type ----
+    gridRow([
+      kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
+      kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '',
+    ].filter(Boolean));
+
+    // ---- Content / Content (rPET) ----
+    gridRow([
+      kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
+      kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : '',
+    ].filter(Boolean));
+
+    // ---- Yarn Size / Weight / CW ----
+    gridRow([
+      kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
+      kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : '',
+      kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
+    ].filter(Boolean));
+
+    // ---- Gauge / Compression Level ----
+    gridRow([
+      kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
+      kf.compression ? blockHTML('Compression Level', escapeHtml(kf.compression)) : '',
+    ].filter(Boolean));
+
+    // ---- COO's / Yarn COO's / Greige COO's ----
+    gridRow([
+      kf.coo ? blockHTML("COO&#39;s", escapeHtml(kf.coo)) : '',
+      kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
+      kf.greigecoo ? blockHTML("Greige COO&#39;s", escapeHtml(kf.greigecoo)) : '',
+    ].filter(Boolean));
+
+    // ---- Price / Price (rPET) ----
+    gridRow([
+      kf.price ? blockHTML('Price', escapeHtml(kf.price)) : '',
+      kf.pricerpet ? blockHTML('Price (rPET)', escapeHtml(kf.pricerpet)) : '',
+    ].filter(Boolean));
+
+    // ---- Price @58" CW / Price Valid Till ----
+    gridRow([
+      kf.price58 ? blockHTML('Price @58&quot; CW', escapeHtml(kf.price58)) : '',
+      kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
+    ].filter(Boolean));
+
+    // ---- Performance Features ----
+    if(kf.performance){
+      pushRow(blockHTML('Performance Features', multilineToHtml(kf.performance)));
+    }
+
+    return `
+      <div class="label label-knits">
+        ${sections.join('\n')}
+      </div>`;
+  }
+
   function buildLabelHTML(){
+    if(currentType === 'knits-gis-fw2026'){
+      return buildKnitsLabelHTML();
+    }
     const titleOn = isOn('title');
     const titleVal = valueInputs['title'].value.trim();
 
@@ -2118,7 +2517,12 @@
 
   function autoFitLabel(){
     const firstLabel = document.querySelector('#labels-container .label');
-    if(!firstLabel) return;
+    if(!firstLabel){
+      // No label rendered (e.g. empty form right after switching tag type) —
+      // still refresh the button/warning state instead of leaving it stale.
+      setHeightExceeded(false);
+      return;
+    }
     const root = document.documentElement;
 
     root.style.setProperty('--lscale', 1);
@@ -2153,9 +2557,18 @@
     { key: 'millarticle', label: 'Mill Article' },
   ];
 
+  const REQUIRED_FIELDS_KNITS = [
+    { key: 'millarticle', label: 'Mill Article #' },
+    { key: 'constructiontype', label: 'Construction Type' },
+    { key: 'content', label: 'Content' },
+  ];
+
   let heightExceededState = false;
 
   function getMissingRequiredFields(){
+    if(currentType === 'knits-gis-fw2026'){
+      return REQUIRED_FIELDS_KNITS.filter(f => !kValueInputs[f.key].value.trim()).map(f => f.label);
+    }
     return REQUIRED_FIELDS.filter(f => !valueInputs[f.key].value.trim()).map(f => f.label);
   }
 
@@ -2215,6 +2628,12 @@
   // ---------------------------------------------------------------
   ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts'].forEach(key => {
     const input = valueInputs[key];
+    input.addEventListener('input', render);
+    input.addEventListener('change', render);
+  });
+
+  KNITS_FIELDS.forEach(key => {
+    const input = kValueInputs[key];
     input.addEventListener('input', render);
     input.addEventListener('change', render);
   });
@@ -2318,12 +2737,15 @@
   let gallerySearchTerm = '';
 
   function collectSnapshot(){
-    const snap = { fields: {}, switches: {}, yarns: getYarnValues(), copies: copiesInput.value };
+    const snap = { type: currentType, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
     ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated'].forEach(k => {
       snap.fields[k] = valueInputs[k].value;
     });
     ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated','title'].forEach(k => {
       if(checkboxes[k]) snap.switches[k] = isOn(k);
+    });
+    KNITS_FIELDS.forEach(k => {
+      snap.kfields[k] = kValueInputs[k].value;
     });
     return snap;
   }
@@ -2355,6 +2777,15 @@
     snap.yarns.forEach(y => addYarnRow(y));
     if(snap.yarns.length === 0) addYarnRow('');
     copiesInput.value = snap.copies || '1';
+
+    const kfields = snap.kfields || {};
+    KNITS_FIELDS.forEach(k => {
+      if(kValueInputs[k]) kValueInputs[k].value = kfields[k] || '';
+    });
+
+    currentType = snap.type === 'knits-gis-fw2026' ? 'knits-gis-fw2026' : 'wovens';
+    setTagTypeUI(currentType);
+
     render();
   }
 
@@ -2594,10 +3025,18 @@
   const TABS_STORAGE_KEY = 'sierra-fabric-tag-tabs-v1';
   const MAX_TABS = 8;
 
+  function emptyKnitsFields(){
+    const kf = {};
+    KNITS_FIELDS.forEach(k => { kf[k] = ''; });
+    return kf;
+  }
+
   function emptySnapshot(){
     return {
+      type: 'wovens',
       fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', cmmts:'', generated:'' },
       switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, cmmts:true, generated:true },
+      kfields: emptyKnitsFields(),
       yarns: [],
       copies: '1'
     };
@@ -2634,11 +3073,18 @@
   }
 
   function tabDisplayName(tab){
+    if(tab.snapshot.type === 'knits-gis-fw2026'){
+      const construction = ((tab.snapshot.kfields || {}).constructiontype || '').trim();
+      return construction || 'Nueva etiqueta';
+    }
     const construction = (tab.snapshot.fields.title || '').trim();
     return construction || 'Nueva etiqueta';
   }
 
   function tabSubLabel(tab){
+    if(tab.snapshot.type === 'knits-gis-fw2026'){
+      return ((tab.snapshot.kfields || {}).millarticle || '').trim();
+    }
     const mill = (tab.snapshot.fields.millarticle || '').split('\n')[0].trim();
     return mill;
   }
@@ -2859,6 +3305,62 @@
   document.getElementById('download-template-btn').addEventListener('click', downloadExcelTemplate);
   document.getElementById('header-template-btn').addEventListener('click', downloadExcelTemplate);
 
+  // ---------------------------------------------------------------
+  // KNITS · GIS FW2026 — separate Excel column mapping. Mill Name isn't
+  // a column: every row in this collection is NORTHERN TEXTILES.
+  // ---------------------------------------------------------------
+  const EXCEL_COLUMNS_KNITS = [
+    { header: 'Mill Article #', field: 'millarticle', required: true },
+    { header: 'Construction Type', field: 'constructiontype', required: true },
+    { header: 'Content', field: 'content', required: true },
+    { header: 'Content (rPET)', field: 'contentrpet' },
+    { header: 'Yarn Size', field: 'yarnsize' },
+    { header: 'Weight (GSM)', field: 'weight' },
+    { header: 'CW (Inch)', field: 'cw' },
+    { header: "COO's", field: 'coo' },
+    { header: "Yarn COO's", field: 'yarncoo' },
+    { header: "Greige COO's", field: 'greigecoo' },
+    { header: 'Gauge', field: 'gauge' },
+    { header: 'Compression Level', field: 'compression' },
+    { header: 'Price ($/YD, $/LB)', field: 'price' },
+    { header: 'Price rPET ($/YD, $/LB)', field: 'pricerpet' },
+    { header: 'Price @58" CW ($/YD)', field: 'price58' },
+    { header: 'Price Valid Till', field: 'pricevalid' },
+    { header: 'Performance Features', field: 'performance' },
+  ];
+
+  function downloadExcelTemplateKnits(){
+    const headers = EXCEL_COLUMNS_KNITS.map(c => c.header);
+    const sampleRow = [
+      'NT26-K104-2', 'Single Jersey', '92% Cotton 8% Spandex', '100% rPET Polyester', '30/1 Combed',
+      '180', '58',
+      'Honduras', 'Honduras, Vietnam', 'Honduras', '28', 'Medium',
+      '$3.25/YD, $9.10/LB', '$3.60/YD, $10.05/LB', '$3.30/YD', '12/31/2026',
+      'with Vertical Wicking (+20c), N/A if not applicable'
+    ];
+    const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
+    ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Etiquetas KNITS');
+    XLSX.writeFile(wb, 'sierra-knits-gis-fw2026-plantilla.xlsx');
+  }
+
+  document.getElementById('header-template-knits-btn').addEventListener('click', downloadExcelTemplateKnits);
+
+  function snapshotFromExcelRowKnits(row){
+    const snap = emptySnapshot();
+    snap.type = 'knits-gis-fw2026';
+    EXCEL_COLUMNS_KNITS.forEach(col => {
+      const raw = (row[col.header] !== undefined && row[col.header] !== null) ? String(row[col.header]).trim() : '';
+      snap.kfields[col.field] = raw;
+    });
+    return snap;
+  }
+
+  function validateExcelRowKnits(row){
+    return EXCEL_COLUMNS_KNITS.filter(c => c.required && !String(row[c.header] || '').trim()).map(c => c.header);
+  }
+
   // Builds a full snapshot from one parsed Excel row, reusing emptySnapshot()
   // as the base so every field the form expects is always present.
   function snapshotFromExcelRow(row){
@@ -2893,8 +3395,10 @@
   }
 
   let pendingImportRows = []; // [{ rowIndex, snapshot, missing, selected }]
+  let pendingImportMode = 'wovens'; // set right before opening the file picker
 
-  function handleExcelFile(file){
+  function handleExcelFile(file, mode){
+    mode = mode || 'wovens';
     const reader = new FileReader();
     reader.onload = (e) => {
       try{
@@ -2909,10 +3413,11 @@
         }
 
         pendingImportRows = rows.map((row, idx) => {
-          const missing = validateExcelRow(row);
+          const missing = mode === 'knits-gis-fw2026' ? validateExcelRowKnits(row) : validateExcelRow(row);
+          const snapshot = mode === 'knits-gis-fw2026' ? snapshotFromExcelRowKnits(row) : snapshotFromExcelRow(row);
           return {
             rowIndex: idx + 2, // +2 accounts for the header row and 1-indexing, matches what the user sees in Excel
-            snapshot: snapshotFromExcelRow(row),
+            snapshot,
             missing,
             selected: missing.length === 0,
           };
@@ -2929,11 +3434,16 @@
   }
 
   document.getElementById('import-excel-btn').addEventListener('click', () => {
+    pendingImportMode = 'wovens';
+    document.getElementById('excel-file-input').click();
+  });
+  document.getElementById('import-excel-knits-btn').addEventListener('click', () => {
+    pendingImportMode = 'knits-gis-fw2026';
     document.getElementById('excel-file-input').click();
   });
   document.getElementById('excel-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if(file) handleExcelFile(file);
+    if(file) handleExcelFile(file, pendingImportMode);
     e.target.value = ''; // allow re-selecting the same file later
   });
 
@@ -2954,9 +3464,10 @@
     }
 
     grid.innerHTML = pendingImportRows.map((item, idx) => {
-      const f = item.snapshot.fields;
       const isInvalid = item.missing.length > 0;
-      const name = f.title || `Fila ${item.rowIndex}`;
+      const isKnits = item.snapshot.type === 'knits-gis-fw2026';
+      const f = isKnits ? item.snapshot.kfields : item.snapshot.fields;
+      const name = (isKnits ? f.constructiontype : f.title) || `Fila ${item.rowIndex}`;
       const sub = f.millarticle || (isInvalid ? `Falta: ${item.missing.join(', ')}` : '');
       return `
       <div class="gallery-card" data-import-idx="${idx}" style="${isInvalid ? 'opacity:0.55;' : ''}">
