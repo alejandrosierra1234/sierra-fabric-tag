@@ -2245,13 +2245,6 @@
       </div>`);
     sections.push(`<div class="label-divider"></div>`);
 
-    // ---- Logo + "Manufactured in Honduras" note ----
-    sections.push(`<div class="label-header-row">
-        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
-        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
-      </div>`);
-    sections.push(`<div class="label-divider"></div>`);
-
     // ---- Mill Article # / Construction Type ----
     gridRow([
       kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
@@ -2296,6 +2289,13 @@
 
     // ---- Performance Features (defaults to N/A when left blank) ----
     pushRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
+
+    // ---- Logo + "Manufactured in Honduras" note — sits at the very bottom ----
+    sections.push(`<div class="label-divider"></div>`);
+    sections.push(`<div class="label-header-row">
+        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
+        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
+      </div>`);
 
     return `
       <div class="label label-knits">
