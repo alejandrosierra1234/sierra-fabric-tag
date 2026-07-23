@@ -1676,17 +1676,11 @@
                 </div>
               </div>
             </div>
-            <div class="field-row grouped">
+            <div class="field-row">
               <div class="field-main">
-                <div class="grouped-inputs cols-2">
-                  <div class="grouped-mini">
-                    <span class="grouped-mini-label">Gauge</span>
-                    <input class="field-input" id="val-k-gauge" data-value="gauge" type="text" placeholder="e.g. 28">
-                  </div>
-                  <div class="grouped-mini">
-                    <span class="grouped-mini-label">Compression Level</span>
-                    <input class="field-input" id="val-k-compression" data-value="compression" type="text" placeholder="e.g. Medium">
-                  </div>
+                <label class="field-label" for="val-k-gauge">Gauge</label>
+                <div class="field-input-wrap">
+                  <input class="field-input" id="val-k-gauge" data-value="gauge" type="text" placeholder="e.g. 28">
                 </div>
               </div>
             </div>
@@ -1748,9 +1742,9 @@
           <div class="card">
             <div class="field-row">
               <div class="field-main">
-                <label class="field-label" for="val-k-coo">COO's</label>
+                <label class="field-label" for="val-k-coo">Fabric COO's</label>
                 <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-coo" data-value="coo" type="text" placeholder="e.g. Honduras">
+                  <input class="field-input" id="val-k-coo" data-value="coo" type="text" placeholder="e.g. SPS, Honduras" value="SPS, Honduras">
                 </div>
               </div>
             </div>
@@ -1758,15 +1752,7 @@
               <div class="field-main">
                 <label class="field-label" for="val-k-yarncoo">Yarn COO's</label>
                 <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-yarncoo" data-value="yarncoo" type="text" placeholder="e.g. Honduras, Vietnam">
-                </div>
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field-main">
-                <label class="field-label" for="val-k-greigecoo">Greige COO's</label>
-                <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-greigecoo" data-value="greigecoo" type="text" placeholder="e.g. Honduras">
+                  <input class="field-input" id="val-k-yarncoo" data-value="yarncoo" type="text" placeholder="e.g. SPS, Honduras" value="SPS, Honduras">
                 </div>
               </div>
             </div>
@@ -2037,7 +2023,7 @@
   // KNITS · GIS FW2026 field registry — a separate flat set of fields,
   // all optional except MILL_ARTICLE/CONSTRUCTION/CONTENT, no switches.
   // ---------------------------------------------------------------
-  const KNITS_FIELDS = ['millarticle','constructiontype','gauge','compression','content','contentrpet','yarnsize','weight','cw','coo','yarncoo','greigecoo','price','pricerpet','price58','pricevalid','performance'];
+  const KNITS_FIELDS = ['millarticle','constructiontype','gauge','content','contentrpet','yarnsize','weight','cw','coo','yarncoo','price','pricerpet','price58','pricevalid','performance'];
   const kValueInputs = {};
   KNITS_FIELDS.forEach(key => { kValueInputs[key] = document.getElementById('val-k-' + key); });
 
@@ -2285,17 +2271,15 @@
       kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
     ].filter(Boolean));
 
-    // ---- Gauge / Compression Level ----
+    // ---- Gauge ----
     gridRow([
       kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
-      kf.compression ? blockHTML('Compression Level', escapeHtml(kf.compression)) : '',
     ].filter(Boolean));
 
-    // ---- COO's / Yarn COO's / Greige COO's ----
+    // ---- Fabric COO's / Yarn COO's ----
     gridRow([
-      kf.coo ? blockHTML("COO&#39;s", escapeHtml(kf.coo)) : '',
+      kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
       kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
-      kf.greigecoo ? blockHTML("Greige COO&#39;s", escapeHtml(kf.greigecoo)) : '',
     ].filter(Boolean));
 
     // ---- Price / Price (rPET) ----
@@ -2310,10 +2294,8 @@
       kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
     ].filter(Boolean));
 
-    // ---- Performance Features ----
-    if(kf.performance){
-      pushRow(blockHTML('Performance Features', multilineToHtml(kf.performance)));
-    }
+    // ---- Performance Features (defaults to N/A when left blank) ----
+    pushRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
 
     return `
       <div class="label label-knits">
@@ -3028,6 +3010,8 @@
   function emptyKnitsFields(){
     const kf = {};
     KNITS_FIELDS.forEach(k => { kf[k] = ''; });
+    kf.coo = 'SPS, Honduras';
+    kf.yarncoo = 'SPS, Honduras';
     return kf;
   }
 
@@ -3317,11 +3301,9 @@
     { header: 'Yarn Size', field: 'yarnsize' },
     { header: 'Weight (GSM)', field: 'weight' },
     { header: 'CW (Inch)', field: 'cw' },
-    { header: "COO's", field: 'coo' },
+    { header: "Fabric COO's", field: 'coo' },
     { header: "Yarn COO's", field: 'yarncoo' },
-    { header: "Greige COO's", field: 'greigecoo' },
     { header: 'Gauge', field: 'gauge' },
-    { header: 'Compression Level', field: 'compression' },
     { header: 'Price ($/YD, $/LB)', field: 'price' },
     { header: 'Price rPET ($/YD, $/LB)', field: 'pricerpet' },
     { header: 'Price @58" CW ($/YD)', field: 'price58' },
@@ -3329,12 +3311,16 @@
     { header: 'Performance Features', field: 'performance' },
   ];
 
+  // Columns whose blank cells should fall back to the default "SPS, Honduras"
+  // instead of being left empty, matching the form's own default fields.
+  const EXCEL_COLUMNS_KNITS_DEFAULTS = { coo: 'SPS, Honduras', yarncoo: 'SPS, Honduras' };
+
   function downloadExcelTemplateKnits(){
     const headers = EXCEL_COLUMNS_KNITS.map(c => c.header);
     const sampleRow = [
       'NT26-K104-2', 'Single Jersey', '92% Cotton 8% Spandex', '100% rPET Polyester', '30/1 Combed',
       '180', '58',
-      'Honduras', 'Honduras, Vietnam', 'Honduras', '28', 'Medium',
+      'SPS, Honduras', 'SPS, Honduras', '28',
       '$3.25/YD, $9.10/LB', '$3.60/YD, $10.05/LB', '$3.30/YD', '12/31/2026',
       'with Vertical Wicking (+20c), N/A if not applicable'
     ];
@@ -3352,7 +3338,7 @@
     snap.type = 'knits-gis-fw2026';
     EXCEL_COLUMNS_KNITS.forEach(col => {
       const raw = (row[col.header] !== undefined && row[col.header] !== null) ? String(row[col.header]).trim() : '';
-      snap.kfields[col.field] = raw;
+      snap.kfields[col.field] = raw || EXCEL_COLUMNS_KNITS_DEFAULTS[col.field] || '';
     });
     return snap;
   }
