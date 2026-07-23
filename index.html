@@ -969,28 +969,34 @@
     white-space:nowrap;
   }
 
-  /* KNITS · GIS FW2026 — explicit Arial stack per spec, reuses every
-     other .label-* primitive (grid rows, dividers, blocks) as-is. */
+  /* KNITS · OLD NAVY FALL 2027 — explicit Arial stack per spec, reuses
+     every other .label-* primitive (grid rows, dividers, blocks) as-is. */
   .label-knits{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
   }
-  .label-mill-row{
+  .label-mill-block{
     display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    gap:calc(2mm * var(--lscale, 1));
+    flex-direction:column;
+    gap:calc(0.8mm * var(--lscale, 1));
   }
-  .label-mill-row .label-title{
+  .label-mill-block .label-title{
     font-size:calc(4mm * var(--lscale, 1));
   }
   .label-collection-tag{
-    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:calc(1mm * var(--lscale, 1));
     font-size:calc(2.1mm * var(--lscale, 1));
     font-weight:700;
-    letter-spacing:0.04em;
+    letter-spacing:0.06em;
     text-transform:uppercase;
     color:#000000;
-    white-space:nowrap;
+  }
+  .label-collection-icon{
+    flex-shrink:0;
+    width:calc(2.6mm * var(--lscale, 1));
+    height:calc(2.6mm * var(--lscale, 1));
+    fill:#000000;
   }
 
   .height-warning{
@@ -1419,7 +1425,7 @@
               Importar para crear en bulk
             </button>
             <div class="excel-menu-divider"></div>
-            <span class="excel-menu-section">KNITS · GIS FW2026</span>
+            <span class="excel-menu-section">KNITS · OLD NAVY FALL 2027</span>
             <button class="excel-menu-item" id="header-template-knits-btn" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Descargar plantilla
@@ -1466,7 +1472,7 @@
 
       <div class="tagtype-switch" id="tagtype-switch">
         <button type="button" class="tagtype-btn active" data-type="wovens">WOVENS</button>
-        <button type="button" class="tagtype-btn" data-type="knits-gis-fw2026">KNITS · GIS FW2026</button>
+        <button type="button" class="tagtype-btn" data-type="knits-gis-fw2026">KNITS · OLD NAVY FALL 2027</button>
       </div>
     </div>
 
@@ -1765,27 +1771,52 @@
             <span class="group-title">Pricing</span>
           </div>
           <div class="card">
-            <div class="field-row">
+            <div class="field-row grouped">
               <div class="field-main">
-                <label class="field-label" for="val-k-price">Price <span class="char-hint">$/YD, $/LB</span></label>
-                <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-price" data-value="price" type="text" placeholder="$3.25/YD, $9.10/LB">
+                <div class="grouped-inputs cols-2">
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Price / YD</span>
+                    <div class="field-input-wrap prefix-wrap">
+                      <span class="prefix-symbol">$</span>
+                      <input class="field-input prefixed" id="val-k-priceyd" data-value="priceyd" type="text" placeholder="3.25">
+                    </div>
+                  </div>
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Price / LB</span>
+                    <div class="field-input-wrap prefix-wrap">
+                      <span class="prefix-symbol">$</span>
+                      <input class="field-input prefixed" id="val-k-pricelb" data-value="pricelb" type="text" placeholder="9.10">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field-row grouped">
+              <div class="field-main">
+                <div class="grouped-inputs cols-2">
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Price (rPET) / YD</span>
+                    <div class="field-input-wrap prefix-wrap">
+                      <span class="prefix-symbol">$</span>
+                      <input class="field-input prefixed" id="val-k-pricerpetyd" data-value="pricerpetyd" type="text" placeholder="3.60">
+                    </div>
+                  </div>
+                  <div class="grouped-mini">
+                    <span class="grouped-mini-label">Price (rPET) / LB</span>
+                    <div class="field-input-wrap prefix-wrap">
+                      <span class="prefix-symbol">$</span>
+                      <input class="field-input prefixed" id="val-k-pricerpetlb" data-value="pricerpetlb" type="text" placeholder="10.05">
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
             <div class="field-row">
               <div class="field-main">
-                <label class="field-label" for="val-k-pricerpet">Price (rPET) <span class="char-hint">$/YD, $/LB</span></label>
-                <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-pricerpet" data-value="pricerpet" type="text" placeholder="$3.60/YD, $10.05/LB">
-                </div>
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field-main">
-                <label class="field-label" for="val-k-price58">Price @58" CW <span class="char-hint">$/YD</span></label>
-                <div class="field-input-wrap">
-                  <input class="field-input" id="val-k-price58" data-value="price58" type="text" placeholder="$3.30/YD">
+                <label class="field-label" for="val-k-price58">Price @58" CW / YD</label>
+                <div class="field-input-wrap prefix-wrap">
+                  <span class="prefix-symbol">$</span>
+                  <input class="field-input prefixed" id="val-k-price58" data-value="price58" type="text" placeholder="3.30">
                 </div>
               </div>
             </div>
@@ -1987,6 +2018,9 @@
     <path fill="#000000" d="M1677.57,49.41h7.55l11.35,27.91,11.14-27.91h7.4v35.46h-5.62v-26.09l-10.64,26.09h-4.91l-10.64-26.09v26.09h-5.62v-35.46Z"/>
   </svg>`;
 
+  // Small leaf glyph marking the OLD NAVY FALL 2027 collection line
+  const FALL_LEAF_ICON_SVG = `<svg class="label-collection-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.05 8.05c-2.73 2.73-2.73 7.15-.02 9.88 1.47-3.4 4.09-6.24 7.36-7.93-2.77 2.34-4.71 5.61-5.39 9.32 2.6 1.23 5.8.78 7.95-1.37C19.43 14.47 20 4 20 4S9.53 4.57 6.05 8.05z"/></svg>`;
+
   // Colored variant for the form UI (isotype in brand teal, wordmark in ink)
   const SIERRA_LOGO_SVG_COLOR = SIERRA_LOGO_SVG.replace(
     '<path fill="#000000" d="M410.85,119.97',
@@ -2020,10 +2054,10 @@
   SWITCHABLE_FIELDS.forEach(bindField);
 
   // ---------------------------------------------------------------
-  // KNITS · GIS FW2026 field registry — a separate flat set of fields,
+  // KNITS · OLD NAVY FALL 2027 field registry — a separate flat set of fields,
   // all optional except MILL_ARTICLE/CONSTRUCTION/CONTENT, no switches.
   // ---------------------------------------------------------------
-  const KNITS_FIELDS = ['millarticle','constructiontype','gauge','content','contentrpet','yarnsize','weight','cw','coo','yarncoo','price','pricerpet','price58','pricevalid','performance'];
+  const KNITS_FIELDS = ['millarticle','constructiontype','gauge','content','contentrpet','yarnsize','weight','cw','coo','yarncoo','priceyd','pricelb','pricerpetyd','pricerpetlb','price58','pricevalid','performance'];
   const kValueInputs = {};
   KNITS_FIELDS.forEach(key => { kValueInputs[key] = document.getElementById('val-k-' + key); });
 
@@ -2206,7 +2240,7 @@
   }
 
   // ---------------------------------------------------------------
-  // KNITS · GIS FW2026 label builder — same visual language and grid
+  // KNITS · OLD NAVY FALL 2027 label builder — same visual language and grid
   // primitives as the WOVENS label, but its own fixed field set. Mill
   // Name is hardcoded (this whole collection ships from one mill), so
   // it isn't part of the editable field registry.
@@ -2238,18 +2272,23 @@
       pushRow(`<div class="label-grid-row ${cls}">${cells.join('')}${filler}</div>`);
     }
 
-    // ---- Mill name (fixed) + collection tag — first thing read on the label ----
-    sections.push(`<div class="label-mill-row">
+    // ---- Mill name (fixed) + collection line — first thing read on the label ----
+    sections.push(`<div class="label-mill-block">
         <span class="label-title">NORTHERN TEXTILES</span>
-        <span class="label-collection-tag">GIS FW2026</span>
+        <span class="label-collection-tag">${FALL_LEAF_ICON_SVG}OLD NAVY FALL 2027</span>
       </div>`);
     sections.push(`<div class="label-divider"></div>`);
 
-    // ---- Mill Article # / Construction Type ----
-    gridRow([
-      kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
-      kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '',
-    ].filter(Boolean));
+    // ---- Construction Type: its own headline, the protagonist of the label ----
+    if(kf.constructiontype){
+      sections.push(`<div class="label-title label-title-standalone">${escapeHtml(kf.constructiontype)}</div>`);
+      sections.push(`<div class="label-divider"></div>`);
+    }
+
+    // ---- Mill Article #: its own supporting line ----
+    if(kf.millarticle){
+      pushRow(blockHTML('Mill Article #', escapeHtml(kf.millarticle)));
+    }
 
     // ---- Content / Content (rPET) ----
     gridRow([
@@ -2275,15 +2314,29 @@
       kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
     ].filter(Boolean));
 
-    // ---- Price / Price (rPET) ----
+    // ---- Price: the commercial headline number, always carries its $ ----
+    function money(val, suffix){
+      const clean = val.trim();
+      return clean ? `$${escapeHtml(clean)}${suffix}` : '';
+    }
+    const priceParts = [money(kf.priceyd, '/YD'), money(kf.pricelb, '/LB')].filter(Boolean);
+    if(priceParts.length){
+      pushRow(`<div class="label-price-block">
+        <span class="label-price-key">Price</span>
+        <span class="label-price-val">${priceParts.join(', ')}</span>
+      </div>`);
+    }
+
+    // ---- Price (rPET) / Price @58" CW ----
+    const priceRpetParts = [money(kf.pricerpetyd, '/YD'), money(kf.pricerpetlb, '/LB')].filter(Boolean);
+    const price58Part = money(kf.price58, '/YD');
     gridRow([
-      kf.price ? blockHTML('Price', escapeHtml(kf.price)) : '',
-      kf.pricerpet ? blockHTML('Price (rPET)', escapeHtml(kf.pricerpet)) : '',
+      priceRpetParts.length ? blockHTML('Price (rPET)', priceRpetParts.join(', ')) : '',
+      price58Part ? blockHTML('Price @58&quot; CW', price58Part) : '',
     ].filter(Boolean));
 
-    // ---- Price @58" CW / Price Valid Till ----
+    // ---- Price Valid Till ----
     gridRow([
-      kf.price58 ? blockHTML('Price @58&quot; CW', escapeHtml(kf.price58)) : '',
       kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
     ].filter(Boolean));
 
@@ -3290,7 +3343,7 @@
   document.getElementById('header-template-btn').addEventListener('click', downloadExcelTemplate);
 
   // ---------------------------------------------------------------
-  // KNITS · GIS FW2026 — separate Excel column mapping. Mill Name isn't
+  // KNITS · OLD NAVY FALL 2027 — separate Excel column mapping. Mill Name isn't
   // a column: every row in this collection is NORTHERN TEXTILES.
   // ---------------------------------------------------------------
   const EXCEL_COLUMNS_KNITS = [
@@ -3304,9 +3357,11 @@
     { header: "Fabric COO's", field: 'coo' },
     { header: "Yarn COO's", field: 'yarncoo' },
     { header: 'Gauge', field: 'gauge' },
-    { header: 'Price ($/YD, $/LB)', field: 'price' },
-    { header: 'Price rPET ($/YD, $/LB)', field: 'pricerpet' },
-    { header: 'Price @58" CW ($/YD)', field: 'price58' },
+    { header: 'Price / YD ($)', field: 'priceyd' },
+    { header: 'Price / LB ($)', field: 'pricelb' },
+    { header: 'Price rPET / YD ($)', field: 'pricerpetyd' },
+    { header: 'Price rPET / LB ($)', field: 'pricerpetlb' },
+    { header: 'Price @58" CW / YD ($)', field: 'price58' },
     { header: 'Price Valid Till', field: 'pricevalid' },
     { header: 'Performance Features', field: 'performance' },
   ];
@@ -3321,14 +3376,14 @@
       'NT26-K104-2', 'Single Jersey', '92% Cotton 8% Spandex', '100% rPET Polyester', '30/1 Combed',
       '180', '58',
       'SPS, Honduras', 'SPS, Honduras', '28',
-      '$3.25/YD, $9.10/LB', '$3.60/YD, $10.05/LB', '$3.30/YD', '12/31/2026',
+      '3.25', '9.10', '3.60', '10.05', '3.30', '12/31/2026',
       'with Vertical Wicking (+20c), N/A if not applicable'
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
     ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Etiquetas KNITS');
-    XLSX.writeFile(wb, 'sierra-knits-gis-fw2026-plantilla.xlsx');
+    XLSX.writeFile(wb, 'sierra-knits-old-navy-fall-2027-plantilla.xlsx');
   }
 
   document.getElementById('header-template-knits-btn').addEventListener('click', downloadExcelTemplateKnits);
