@@ -1052,6 +1052,9 @@
     grid-template-columns:1fr 1fr;
     border-top:calc(0.3mm * var(--lscale, 1)) solid #000000;
   }
+  .label-knits-table-row:first-child{
+    border-top:none;
+  }
   .label-knits-table-row.full{
     grid-template-columns:1fr;
   }
@@ -2396,33 +2399,28 @@
         <span class="label-collection-tag">${FALL_LEAF_ICON_SVG}OLD NAVY FALL 2027</span>
       </div>`);
 
-    // ---- Identification: RID, Name, Mill Article #, and an auto "IPSS"
-    // marker when both RID and Name are present — boxed like every other
-    // section instead of sitting as loose, unboxed lines. RID/Name keep a
-    // larger value size than ordinary fields to preserve their top
-    // hierarchy, but now inside the same ruled grid as the rest. ----
-    if(kf.rid || kf.name || kf.millarticle){
-      tableTitle('Identification');
+    // ---- First (untitled) box: RID, Mill Article #, Name, Construction
+    // Type — just the data, no section title bar. Name carries the
+    // "IPSS Name" label and gets its own full-width row (both it and RID
+    // keep the bigger hero value size), and Construction Type lives here
+    // too, ahead of Composition, since it's part of the same identifying
+    // info rather than a composition spec. ----
+    if(kf.rid || kf.name || kf.millarticle || kf.constructiontype){
       pairRow(
         kf.rid ? heroBlockHTML('RID', escapeHtml(kf.rid)) : '',
-        kf.name ? heroBlockHTML('Name', escapeHtml(kf.name)) : ''
+        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : ''
       );
-      pairRow(
-        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
-        (kf.rid && kf.name) ? blockHTML('Program', 'IPSS') : ''
-      );
+      fullRow(kf.name ? heroBlockHTML('IPSS Name', escapeHtml(kf.name)) : '');
+      fullRow(kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
     }
 
-    // ---- Composition: Content, Content (rPET), Construction Type, Yarn
-    // Size, Weight, CW, Gauge — Construction Type gets its own full-width
-    // row since it can run long and shouldn't wrap inside a half column ----
-    if(kf.content || kf.contentrpet || kf.constructiontype || kf.yarnsize || kf.weight || kf.cw || kf.gauge){
+    // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW, Gauge ----
+    if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw || kf.gauge){
       tableTitle('Composition');
       pairRow(
         kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
         kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : ''
       );
-      fullRow(kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
       pairRow(
         kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
         kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : ''
