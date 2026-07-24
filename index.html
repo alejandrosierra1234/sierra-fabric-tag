@@ -1025,6 +1025,22 @@
     line-height:1.05;
     color:#000000;
   }
+  .label-headline-sep{
+    font-size:calc(3.2mm * var(--lscale, 1));
+    font-weight:400;
+    color:#000000;
+  }
+  /* IPSS reads as part of the same headline sentence, not a separate
+     bordered chip — a boxed badge here fought with the free-typography
+     header zone and the real boxed table right below it. */
+  .label-ipss-tag{
+    font-size:calc(2.6mm * var(--lscale, 1));
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:#000000;
+    align-self:baseline;
+  }
 
   /* Field-level keys read quieter than section titles — lighter weight,
      tighter tracking, smaller — so the two tiers never blur together. */
@@ -1079,19 +1095,6 @@
     gap:calc(0.2mm * var(--lscale, 1));
   }
 
-  /* Shown only when both RID and Name are filled — a small bordered tag
-     marking that pairing, echoing the table's own bordered-box language. */
-  .label-ipss-badge{
-    display:inline-block;
-    align-self:center;
-    border:calc(0.3mm * var(--lscale, 1)) solid #000000;
-    padding:calc(0.3mm * var(--lscale, 1)) calc(1.6mm * var(--lscale, 1));
-    font-size:calc(2mm * var(--lscale, 1));
-    font-weight:700;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:#000000;
-  }
 
   .height-warning{
     margin-top:16px;
@@ -2416,15 +2419,17 @@
     // ---- RID / Name: the label's protagonist when present, replacing
     // Construction Type's old headline spot — both optional, both at the
     // same top hierarchy, sharing one headline row instead of stacking as
-    // two full title lines. When both are filled, an IPSS badge sits
-    // right alongside to mark that pairing. ----
+    // two full title lines. When both are filled, "IPSS" joins the same
+    // sentence as plain text (no bordered chip — that fought with the
+    // free-typography header zone right above the real boxed table). ----
     if(kf.rid || kf.name){
       const parts = [
         kf.rid ? `<span class="label-headline-part">${escapeHtml(kf.rid)}</span>` : '',
         kf.name ? `<span class="label-headline-part">${escapeHtml(kf.name)}</span>` : '',
-        (kf.rid && kf.name) ? `<span class="label-ipss-badge">IPSS</span>` : '',
+        (kf.rid && kf.name) ? `<span class="label-ipss-tag">IPSS</span>` : '',
       ].filter(Boolean);
-      sections.push(`<div class="label-headline-row">${parts.join('')}</div>`);
+      const sep = `<span class="label-headline-sep">&middot;</span>`;
+      sections.push(`<div class="label-headline-row">${parts.join(sep)}</div>`);
     }
 
     // ---- Mill Article #: a compact, unboxed line — a single value
