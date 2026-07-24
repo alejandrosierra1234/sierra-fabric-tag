@@ -2056,7 +2056,10 @@
 
     <div class="modal-toolbar" id="database-select-toolbar" style="display:none;">
       <span class="excel-menu-status" id="database-select-count">0 / 15 seleccionadas</span>
-      <button class="btn-export-all" id="database-open-selected-btn" type="button" disabled style="margin-left:auto;">
+      <button class="btn-export-all" id="database-print-selected-btn" type="button" disabled style="margin-left:auto;">
+        Imprimir seleccionadas
+      </button>
+      <button class="btn-export-all" id="database-open-selected-btn" type="button" disabled>
         Abrir seleccionadas en pestañas
       </button>
       <button class="btn-export-all" id="database-cancel-select-btn" type="button">
@@ -3739,7 +3742,10 @@
   ];
   const DB_YARN_COLUMNS = ['YARN 1', 'YARN 2', 'YARN 3'];
 
+  const DATABASE_STORAGE_KEY = 'sierra-fabric-tag-database-v1';
+
   let database = []; // array of raw row objects from the loaded sheet
+  let databaseStamp = ''; // "N filas cargadas · dd/mm/yyyy" label, persisted alongside the rows
   let databaseSearchTerm = '';
   let pendingDatabaseRow = null; // row chosen from search, awaiting width/gsm choice
   let chosenWidthKey = null;
@@ -3803,19 +3809,15 @@
 
         database = rows.filter(r => cleanCell(r[DB_COLUMN_MAP.millarticle]) || cleanCell(r[DB_COLUMN_MAP.title]));
 
-        const statusEl = document.getElementById('database-status');
-        const badge = document.getElementById('database-count-badge');
-        const loadLabel = document.getElementById('load-database-label');
         if(database.length === 0){
-          statusEl.textContent = 'El archivo no tiene filas reconocibles. Verifica las columnas.';
-          badge.style.display = 'none';
+          databaseStamp = '';
+          renderDatabaseStatus();
+          alert('El archivo no tiene filas reconocibles. Verifica las columnas.');
         } else {
           const now = new Date();
-          const stamp = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
-          statusEl.textContent = `${database.length} filas cargadas · ${stamp}`;
-          badge.textContent = database.length;
-          badge.style.display = 'flex';
-          loadLabel.textContent = 'Actualizar base de datos';
+          databaseStamp = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+          renderDatabaseStatus();
+          saveDatabaseToStorage();
         }
       } catch(err){
         console.error(err);
@@ -3823,6 +3825,48 @@
       }
     };
     reader.readAsArrayBuffer(file);
+  }
+
+  // Persists the loaded database to localStorage so it stays available
+  // across page reloads/sessions — the whole point is to load the Excel
+  // once and keep printing from it without re-uploading each time.
+  function saveDatabaseToStorage(){
+    try{
+      localStorage.setItem(DATABASE_STORAGE_KEY, JSON.stringify({ database, databaseStamp }));
+    } catch(err){
+      console.error(err);
+      alert('La base de datos se cargó, pero es demasiado grande para guardarse en este navegador. Tendrás que volver a cargarla si recargas la página.');
+    }
+  }
+
+  function loadDatabaseFromStorage(){
+    try{
+      const raw = localStorage.getItem(DATABASE_STORAGE_KEY);
+      if(!raw) return;
+      const parsed = JSON.parse(raw);
+      if(!parsed || !Array.isArray(parsed.database) || parsed.database.length === 0) return;
+      database = parsed.database;
+      databaseStamp = parsed.databaseStamp || '';
+      renderDatabaseStatus();
+    } catch(err){
+      console.error(err);
+    }
+  }
+
+  function renderDatabaseStatus(){
+    const statusEl = document.getElementById('database-status');
+    const badge = document.getElementById('database-count-badge');
+    const loadLabel = document.getElementById('load-database-label');
+    if(database.length === 0){
+      statusEl.textContent = 'Sin base de datos cargada';
+      badge.style.display = 'none';
+      loadLabel.textContent = 'Cargar base de datos';
+    } else {
+      statusEl.textContent = databaseStamp ? `${database.length} filas cargadas · ${databaseStamp}` : `${database.length} filas cargadas`;
+      badge.textContent = database.length;
+      badge.style.display = 'flex';
+      loadLabel.textContent = 'Actualizar base de datos';
+    }
   }
 
   // search modal -------------------------------------------------
@@ -3960,6 +4004,7 @@
     const count = databaseSelectedRows.size;
     document.getElementById('database-select-count').textContent = `${count} / ${DB_SELECT_LIMIT} seleccionadas`;
     document.getElementById('database-open-selected-btn').disabled = count === 0;
+    document.getElementById('database-print-selected-btn').disabled = count === 0;
   }
 
   function setDatabaseSelectMode(on){
@@ -4169,12 +4214,74 @@
     });
   }
 
+  // ---- Print several selected database rows back-to-back, without
+  // opening a tab for each one. Same approach as printSingleDatabaseRow
+  // (apply row -> window.print()) but chained through the "afterprint"
+  // event so the next row's print dialog only opens once the previous
+  // one is closed. The original form state is restored once the queue
+  // is empty. ----
+  let printQueueRows = [];
+  let printQueueOriginalSnapshot = null;
+
+  function printSelectedDatabaseRows(rows){
+    if(rows.length === 0) return;
+    printQueueOriginalSnapshot = collectSnapshot();
+    printQueueRows = rows.slice();
+    closeDatabaseModal();
+    setDatabaseSelectMode(false);
+    printNextQueuedRow();
+  }
+
+  function printNextQueuedRow(){
+    if(printQueueRows.length === 0){
+      if(printQueueOriginalSnapshot){
+        applySnapshot(printQueueOriginalSnapshot);
+        printQueueOriginalSnapshot = null;
+      }
+      return;
+    }
+
+    const row = printQueueRows.shift();
+    const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+    const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+
+    applySnapshot(snap);
+    setGeneratedTimestamp();
+    render();
+
+    const missing = getMissingRequiredFields();
+    if(missing.length > 0){
+      const label = cleanCell(row[DB_COLUMN_MAP.millarticle]) || cleanCell(row[DB_COLUMN_MAP.title]) || 'una fila';
+      alert(`Se omitió "${label}" porque le falta: ${missing.join(', ')}.`);
+      printNextQueuedRow();
+      return;
+    }
+
+    function afterThisPrint(){
+      window.removeEventListener('afterprint', afterThisPrint);
+      printNextQueuedRow();
+    }
+    window.addEventListener('afterprint', afterThisPrint);
+
+    requestAnimationFrame(() => {
+      injectExactPageSize();
+      setTimeout(() => window.print(), 50);
+    });
+  }
+
+  document.getElementById('database-print-selected-btn').addEventListener('click', () => {
+    const rows = Array.from(databaseSelectedRows);
+    if(rows.length === 0) return;
+    printSelectedDatabaseRows(rows);
+  });
+
   // ---------------------------------------------------------------
   // init
   // ---------------------------------------------------------------
   applySnapshot(getActiveTab().snapshot);
   renderTabBar();
   positionTabBar();
+  loadDatabaseFromStorage();
 </script>
 
 </body>
