@@ -53,63 +53,70 @@
     grid-template-columns:minmax(380px,460px) 1fr;
     min-height:100vh;
   }
-  /* Reserves room on the right so the fixed, pinned database dock doesn't
-     sit on top of the label preview. */
-  .app.db-pinned{
-    padding-right:340px;
-  }
-  @media (max-width:1100px){
-    .app.db-pinned{padding-right:300px;}
-  }
+  /* Everything about the pinned database dock is screen-only. It's wrapped
+     in @media screen (rather than relying on !important vs. the print
+     rules below) so there is no specificity fight: no matter how it's
+     positioned on screen, it simply doesn't exist as far as printing is
+     concerned, and can never end up on the printed label. */
+  @media screen{
+    /* Reserves room on the right so the fixed, pinned database dock
+       doesn't sit on top of the label preview. */
+    .app.db-pinned{
+      padding-right:340px;
+    }
+    @media (max-width:1100px){
+      .app.db-pinned{padding-right:300px;}
+    }
 
-  /* ============================================================
-     DATABASE DOCK — the database search modal, pinned as a permanent
-     right-hand sidebar instead of a dismissible overlay, so it doesn't
-     need to be reopened every time. Reuses all of #database-modal's
-     normal markup/behavior; this just repositions it.
-     ============================================================ */
-  #database-modal.pinned{
-    display:flex !important;
-    position:fixed;
-    background:transparent;
-    padding:0;
-    justify-content:flex-end;
-    align-items:stretch;
-    pointer-events:none;
-  }
-  #database-modal.pinned .modal-box{
-    pointer-events:auto;
-    width:340px;
-    max-width:340px;
-    height:100vh;
-    max-height:100vh;
-    border-radius:0;
-    box-shadow:-6px 0 24px rgba(0,0,0,0.10);
-  }
-  @media (max-width:1100px){
-    #database-modal.pinned .modal-box{width:300px; max-width:300px;}
-  }
-  #pin-database-btn.active{background:var(--ink); color:var(--paper);}
+    /* ============================================================
+       DATABASE DOCK — the database search modal, pinned as a permanent
+       right-hand sidebar instead of a dismissible overlay, so it doesn't
+       need to be reopened every time. Reuses all of #database-modal's
+       normal markup/behavior; this just repositions it.
+       ============================================================ */
+    #database-modal.pinned{
+      display:flex !important;
+      position:fixed;
+      background:transparent;
+      padding:0;
+      justify-content:flex-end;
+      align-items:stretch;
+      pointer-events:none;
+    }
+    #database-modal.pinned .modal-box{
+      pointer-events:auto;
+      width:340px;
+      max-width:340px;
+      height:100vh;
+      max-height:100vh;
+      border-radius:0;
+      box-shadow:-6px 0 24px rgba(0,0,0,0.10);
+    }
+    @media (max-width:1100px){
+      #database-modal.pinned .modal-box{width:300px; max-width:300px;}
+    }
+    #pin-database-btn.active{background:var(--ink); color:var(--paper);}
 
-  /* The dock is much narrower than the normal centered modal, so its
-     toolbar (search + "select several" button) needs to stack instead of
-     sitting side by side. */
-  #database-modal.pinned .modal-header{padding:18px 18px 14px;}
-  #database-modal.pinned .modal-toolbar{
-    flex-wrap:wrap;
-    padding:12px 18px;
-    gap:8px;
-  }
-  #database-modal.pinned .modal-toolbar .search-wrap{flex:1 1 100%;}
-  #database-modal.pinned .modal-toolbar .btn{margin-left:0 !important; flex:1 1 100%;}
-  #database-modal.pinned #database-select-toolbar{
-    flex-wrap:wrap;
-    padding:10px 18px;
-  }
-  #database-modal.pinned #database-select-toolbar .btn-export-all{margin-left:0 !important; flex:1 1 100%;}
-  #database-modal.pinned .gallery-grid{
-    padding:14px 18px 20px;
-    grid-template-columns:1fr;
+    /* The dock is much narrower than the normal centered modal, so its
+       toolbar (search + "select several" button) needs to stack instead of
+       sitting side by side. */
+    #database-modal.pinned .modal-header{padding:18px 18px 14px;}
+    #database-modal.pinned .modal-toolbar{
+      flex-wrap:wrap;
+      padding:12px 18px;
+      gap:8px;
+    }
+    #database-modal.pinned .modal-toolbar .search-wrap{flex:1 1 100%;}
+    #database-modal.pinned .modal-toolbar .btn{margin-left:0 !important; flex:1 1 100%;}
+    #database-modal.pinned #database-select-toolbar{
+      flex-wrap:wrap;
+      padding:10px 18px;
+    }
+    #database-modal.pinned #database-select-toolbar .btn-export-all{margin-left:0 !important; flex:1 1 100%;}
+    #database-modal.pinned .gallery-grid{
+      padding:14px 18px 20px;
+      grid-template-columns:1fr;
+    }
   }
 
   /* ============================================================
@@ -1497,10 +1504,10 @@
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
-    .panel, .preview-meta, .roll-frame::before, .roll-frame::after, .height-warning, .modal-overlay{
+    .panel, .preview-meta, .roll-frame::before, .roll-frame::after, .height-warning, .modal-overlay, #database-modal.pinned{
       display:none !important;
     }
-    .app{display:block;}
+    .app{display:block !important; padding-right:0 !important;}
     .preview-area{
       padding:0; background:#ffffff; display:block;
       position:static; height:auto; overflow:visible;
