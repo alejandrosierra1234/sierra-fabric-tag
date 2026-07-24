@@ -2348,11 +2348,6 @@
     const kf = {};
     KNITS_FIELDS.forEach(k => { kf[k] = kValueInputs[k].value.trim(); });
 
-    const hasAnyContent = KNITS_FIELDS.some(k => kf[k].length > 0);
-    if(!hasAnyContent){
-      return `<div class="empty-state">Activa al menos un campo para generar la etiqueta.</div>`;
-    }
-
     let sections = [];
     let tableRows = [];
 
@@ -2376,18 +2371,16 @@
       return `<div class="label-knits-table-cell">${html || ''}</div>`;
     }
 
-    // Every data row is always exactly two ruled columns, even when only
-    // one side has content — a blank cell keeps the grid lines fixed all
-    // the way down the table instead of the width shifting row to row.
+    // Every row is always rendered — the full template shows from the
+    // start, with blank values that fill in as fields are typed, instead
+    // of rows/sections only appearing once they have data.
     function pairRow(aHtml, bHtml){
-      if(!aHtml && !bHtml) return;
       tableRows.push(`<div class="label-knits-table-row">${tableCell(aHtml)}${tableCell(bHtml)}</div>`);
     }
 
     // A row that intentionally spans the full width, no vertical rule —
     // for long-form text like Performance Features.
     function fullRow(html){
-      if(!html) return;
       tableRows.push(`<div class="label-knits-table-row full">${tableCell(html)}</div>`);
     }
 
@@ -2407,60 +2400,49 @@
     // uses the bigger hero size (same key style and grid as the rest of
     // the label, just one hierarchy tier up), since this box as a whole
     // is the label's top-priority info. ----
-    if(kf.rid || kf.name || kf.millarticle || kf.constructiontype){
-      pairRow(
-        kf.rid ? heroBlockHTML('RID', escapeHtml(kf.rid)) : '',
-        kf.millarticle ? heroBlockHTML('Mill Article #', escapeHtml(kf.millarticle)) : ''
-      );
-      fullRow(kf.name ? heroBlockHTML('IPSS Name', escapeHtml(kf.name)) : '');
-      fullRow(kf.constructiontype ? heroBlockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
-    }
+    pairRow(
+      heroBlockHTML('RID', escapeHtml(kf.rid)),
+      heroBlockHTML('Mill Article #', escapeHtml(kf.millarticle))
+    );
+    fullRow(heroBlockHTML('IPSS Name', escapeHtml(kf.name)));
+    fullRow(heroBlockHTML('Construction Type', escapeHtml(kf.constructiontype)));
 
     // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW, Gauge ----
-    if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw || kf.gauge){
-      tableTitle('Composition');
-      pairRow(
-        kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
-        kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : ''
-      );
-      pairRow(
-        kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
-        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : ''
-      );
-      pairRow(
-        kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
-        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
-      );
-    }
+    tableTitle('Composition');
+    pairRow(
+      blockHTML('Content', multilineToHtml(kf.content)),
+      blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet))
+    );
+    pairRow(
+      blockHTML('Yarn Size', escapeHtml(kf.yarnsize)),
+      blockHTML('Weight', kf.weight ? escapeHtml(kf.weight) + ' GSM' : '')
+    );
+    pairRow(
+      blockHTML('CW', kf.cw ? escapeHtml(kf.cw) + '"' : ''),
+      blockHTML('Gauge', escapeHtml(kf.gauge))
+    );
 
     // ---- Origin: Fabric COO's, Yarn COO's ----
-    if(kf.coo || kf.yarncoo){
-      tableTitle('Origin');
-      pairRow(
-        kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
-        kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : ''
-      );
-    }
+    tableTitle('Origin');
+    pairRow(
+      blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)),
+      blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo))
+    );
 
     // ---- Pricing: same ruled two-column rows as the rest of the table ----
-    const priceRows = [
-      { label: 'Regular', yd: money(kf.priceyd), lb: money(kf.pricelb) },
-      { label: 'rPET', yd: money(kf.pricerpetyd), lb: money(kf.pricerpetlb) },
-    ].filter(r => r.yd || r.lb);
-
-    if(priceRows.length || kf.price58 || kf.pricevalid){
-      tableTitle('Pricing');
-      priceRows.forEach(r => {
-        pairRow(
-          r.yd ? blockHTML(`${r.label} / YD`, r.yd) : '',
-          r.lb ? blockHTML(`${r.label} / LB`, r.lb) : ''
-        );
-      });
-      pairRow(
-        kf.price58 ? blockHTML('Price @58&quot; CW / YD', money(kf.price58)) : '',
-        kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : ''
-      );
-    }
+    tableTitle('Pricing');
+    pairRow(
+      blockHTML('Regular / YD', money(kf.priceyd)),
+      blockHTML('Regular / LB', money(kf.pricelb))
+    );
+    pairRow(
+      blockHTML('rPET / YD', money(kf.pricerpetyd)),
+      blockHTML('rPET / LB', money(kf.pricerpetlb))
+    );
+    pairRow(
+      blockHTML('Price @58&quot; CW / YD', money(kf.price58)),
+      blockHTML('Price Valid Till', escapeHtml(kf.pricevalid))
+    );
 
     // ---- Performance Features (defaults to N/A when left blank) ----
     // No repeated "Performance Features" key here — the "Performance"
@@ -2779,8 +2761,15 @@
 
     // Tab bar reflects live edits (e.g. typing Construction Type renames
     // the active tab instantly) and every render persists tab state.
-    // renderTabBar/saveTabsToStorage are defined later in the script but
-    // exist by the time any render() call actually happens at runtime.
+    // persistActiveTabSnapshot/renderTabBar/saveTabsToStorage are defined
+    // later in the script but exist by the time any render() call
+    // actually happens at runtime. Without refreshing the active tab's
+    // own snapshot here, saveTabsToStorage() below would keep writing
+    // the stale snapshot from the last tab switch, so a page reload lost
+    // anything typed since — this is what actually persists live edits.
+    if(typeof persistActiveTabSnapshot === 'function'){
+      persistActiveTabSnapshot();
+    }
     if(typeof renderTabBar === 'function'){
       renderTabBar();
       saveTabsToStorage();
