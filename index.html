@@ -2319,10 +2319,19 @@
     let sections = [];
     let tableRows = [];
 
-    // A real bordered ticket table: every row is a ruled two-column strip
-    // inside one continuous box, with a centered title bar opening each
-    // section — the grid lines themselves carry the structure.
+    // Each section is its own bordered box — flushing the buffered rows
+    // into `sections` right before a new title starts (and once more at
+    // the end) is what splits the table into separate boxes with real
+    // breathing room between them, instead of one continuous ruled table.
+    function flushTable(){
+      if(tableRows.length){
+        sections.push(`<div class="label-knits-table">${tableRows.join('')}</div>`);
+        tableRows = [];
+      }
+    }
+
     function tableTitle(text){
+      flushTable();
       tableRows.push(`<div class="label-knits-table-title">${text}</div>`);
     }
 
@@ -2420,7 +2429,7 @@
     tableTitle('Performance');
     fullRow(`<span class="label-block-val">${kf.performance ? multilineToHtml(kf.performance) : 'N/A'}</span>`);
 
-    sections.push(`<div class="label-knits-table">${tableRows.join('')}</div>`);
+    flushTable();
 
     // ---- Logo + "Manufactured in Honduras" note — sits at the very bottom ----
     sections.push(`<div class="label-header-row">
