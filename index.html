@@ -1001,51 +1001,28 @@
 
   /* Section headers dividing the KNITS label by kind of information —
      margin-top gives it a beat more room than ordinary field spacing,
-     signaling "new group" without needing another ruled divider. */
+     signaling "new group" without needing another ruled divider. Sized
+     and weighted between the headline and field-level keys so the three
+     tiers (headline / section / field) stay visually distinct at a
+     glance, without ever leaning on color (the label prints monochrome). */
   .label-section-title{
     display:block;
     margin-top:calc(0.8mm * var(--lscale, 1));
-    font-size:calc(2.5mm * var(--lscale, 1));
+    font-size:calc(2.8mm * var(--lscale, 1));
     font-weight:700;
-    letter-spacing:0.08em;
+    letter-spacing:0.1em;
     text-transform:uppercase;
     color:#000000;
   }
 
-  /* Compact YD/LB price table — reads as an actual price sheet instead
-     of run-on "$X/YD, $Y/LB" strings. */
-  .label-price-table{
-    display:flex;
-    flex-direction:column;
-    gap:calc(0.6mm * var(--lscale, 1));
-  }
-  .label-price-table-row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    align-items:baseline;
-    gap:calc(2mm * var(--lscale, 1));
-  }
-  .label-price-table-row.label-price-table-head{
-    font-size:calc(2.2mm * var(--lscale, 1));
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-    color:#000000;
-  }
-  .label-price-table-head span:not(:first-child){
-    text-align:right;
-  }
-  .label-price-table-label{
-    font-size:calc(2.6mm * var(--lscale, 1));
-    font-weight:700;
-    text-transform:uppercase;
-    color:#000000;
-  }
-  .label-price-table-val{
-    font-size:calc(3.3mm * var(--lscale, 1));
-    font-weight:700;
-    color:#000000;
-    text-align:right;
+  /* Field-level keys read quieter than section titles — lighter weight,
+     tighter tracking, smaller — so the two tiers never blur together and
+     the eye keeps one consistent left-aligned line to follow down the
+     label (no separate right-aligned tables breaking the rhythm). */
+  .label-knits .label-block-key{
+    font-size:calc(2.3mm * var(--lscale, 1));
+    font-weight:600;
+    letter-spacing:0.02em;
   }
 
   .height-warning{
@@ -2377,10 +2354,9 @@
       ]);
     }
 
-    // ---- Pricing: a compact YD/LB table instead of run-on "$X/YD, $Y/LB"
-    // strings — Regular and rPET only appear as rows when they have data,
-    // and a missing cell within an active row reads as "—" rather than
-    // silently vanishing (so the column meaning stays unambiguous). ----
+    // ---- Pricing: same left-aligned label/value blocks as every other
+    // field on the label — no separate right-aligned table, so the eye
+    // never has to break its reading rhythm to scan this one section. ----
     const priceRows = [
       { label: 'Regular', yd: money(kf.priceyd), lb: money(kf.pricelb) },
       { label: 'rPET', yd: money(kf.pricerpetyd), lb: money(kf.pricerpetlb) },
@@ -2388,19 +2364,12 @@
 
     if(priceRows.length || kf.price58 || kf.pricevalid){
       sectionTitle('Pricing');
-      if(priceRows.length){
-        const rowsHtml = priceRows.map(r => `<div class="label-price-table-row">
-            <span class="label-price-table-label">${r.label}</span>
-            <span class="label-price-table-val">${r.yd || '&mdash;'}</span>
-            <span class="label-price-table-val">${r.lb || '&mdash;'}</span>
-          </div>`).join('');
-        pushRow(`<div class="label-price-table">
-            <div class="label-price-table-row label-price-table-head">
-              <span></span><span>YD</span><span>LB</span>
-            </div>
-            ${rowsHtml}
-          </div>`);
-      }
+      priceRows.forEach(r => {
+        gridRow([
+          r.yd ? blockHTML(`${r.label} / YD`, r.yd) : '',
+          r.lb ? blockHTML(`${r.label} / LB`, r.lb) : '',
+        ]);
+      });
       gridRow([
         kf.price58 ? blockHTML('Price @58&quot; CW / YD', money(kf.price58)) : '',
         kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
