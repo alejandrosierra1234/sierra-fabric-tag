@@ -3742,9 +3742,14 @@
   ];
   const DB_YARN_COLUMNS = ['YARN 1', 'YARN 2', 'YARN 3'];
 
-  const DATABASE_STORAGE_KEY = 'sierra-fabric-tag-database-v1';
+  // The database can hold either a Master Data (wovens) export or a KNITS ·
+  // OLD NAVY FALL 2027 export — they use completely different column sets
+  // (see EXCEL_COLUMNS_KNITS above) and produce different label types.
+  // Detected from the sheet's own headers when a file is loaded.
+  const DATABASE_STORAGE_KEY = 'sierra-fabric-tag-database-v2';
 
   let database = []; // array of raw row objects from the loaded sheet
+  let databaseType = 'wovens'; // 'wovens' | 'knits-gis-fw2026'
   let databaseStamp = ''; // "N filas cargadas · dd/mm/yyyy" label, persisted alongside the rows
   let databaseSearchTerm = '';
   let pendingDatabaseRow = null; // row chosen from search, awaiting width/gsm choice
@@ -3795,6 +3800,18 @@
     e.target.value = '';
   });
 
+  // Detects which schema a loaded sheet matches by checking for a couple of
+  // its distinctive headers, so the same "Base de Datos" loader accepts
+  // either a Master Data (wovens) export or a KNITS · OLD NAVY FALL 2027
+  // export without the user having to pick a mode up front.
+  function detectDatabaseType(rows){
+    const sample = rows[0] || {};
+    const keys = Object.keys(sample);
+    const hasKnitsHeaders = keys.includes('Mill Article #') || keys.includes('Construction Type');
+    if(hasKnitsHeaders) return 'knits-gis-fw2026';
+    return 'wovens';
+  }
+
   function loadDatabaseFile(file){
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -3807,7 +3824,13 @@
         const sheet = wb.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-        database = rows.filter(r => cleanCell(r[DB_COLUMN_MAP.millarticle]) || cleanCell(r[DB_COLUMN_MAP.title]));
+        const type = detectDatabaseType(rows);
+        const validRows = type === 'knits-gis-fw2026'
+          ? rows.filter(r => cleanCell(r['Mill Article #']) || cleanCell(r['Construction Type']))
+          : rows.filter(r => cleanCell(r[DB_COLUMN_MAP.millarticle]) || cleanCell(r[DB_COLUMN_MAP.title]));
+
+        database = validRows;
+        databaseType = type;
 
         if(database.length === 0){
           databaseStamp = '';
@@ -3832,7 +3855,7 @@
   // once and keep printing from it without re-uploading each time.
   function saveDatabaseToStorage(){
     try{
-      localStorage.setItem(DATABASE_STORAGE_KEY, JSON.stringify({ database, databaseStamp }));
+      localStorage.setItem(DATABASE_STORAGE_KEY, JSON.stringify({ database, databaseType, databaseStamp }));
     } catch(err){
       console.error(err);
       alert('La base de datos se cargó, pero es demasiado grande para guardarse en este navegador. Tendrás que volver a cargarla si recargas la página.');
@@ -3846,6 +3869,7 @@
       const parsed = JSON.parse(raw);
       if(!parsed || !Array.isArray(parsed.database) || parsed.database.length === 0) return;
       database = parsed.database;
+      databaseType = parsed.databaseType === 'knits-gis-fw2026' ? 'knits-gis-fw2026' : 'wovens';
       databaseStamp = parsed.databaseStamp || '';
       renderDatabaseStatus();
     } catch(err){
@@ -3862,7 +3886,10 @@
       badge.style.display = 'none';
       loadLabel.textContent = 'Cargar base de datos';
     } else {
-      statusEl.textContent = databaseStamp ? `${database.length} filas cargadas · ${databaseStamp}` : `${database.length} filas cargadas`;
+      const typeLabel = databaseType === 'knits-gis-fw2026' ? 'KNITS · Old Navy Fall 2027' : 'Master Data';
+      statusEl.textContent = databaseStamp
+        ? `${database.length} filas cargadas (${typeLabel}) · ${databaseStamp}`
+        : `${database.length} filas cargadas (${typeLabel})`;
       badge.textContent = database.length;
       badge.style.display = 'flex';
       loadLabel.textContent = 'Actualizar base de datos';
@@ -3874,7 +3901,7 @@
 
   function openDatabaseModal(){
     if(database.length === 0){
-      document.getElementById('database-summary').textContent = 'Carga tu Master Data primero con el botón "Base de Datos" → Cargar base de datos.';
+      document.getElementById('database-summary').textContent = 'Carga tu Master Data o tu Excel de KNITS · Old Navy Fall 2027 con el botón "Base de Datos" → Cargar base de datos.';
     } else {
       document.getElementById('database-summary').textContent = `Mostrando las ${database.length} filas cargadas. Escribe para filtrar.`;
     }
@@ -3893,13 +3920,22 @@
     if(e.target.id === 'database-modal') closeDatabaseModal();
   });
 
+  // Returns { mill, construction } for a row, reading from whichever
+  // column set matches the currently loaded database's schema.
+  function getRowIdentity(row){
+    if(databaseType === 'knits-gis-fw2026'){
+      return { mill: cleanCell(row['Mill Article #']), construction: cleanCell(row['Construction Type']) };
+    }
+    return { mill: cleanCell(row[DB_COLUMN_MAP.millarticle]), construction: cleanCell(row[DB_COLUMN_MAP.title]) };
+  }
+
   function getFilteredDatabase(){
     if(!databaseSearchTerm) return database;
     const term = databaseSearchTerm.toLowerCase();
-    return database.filter(row =>
-      cleanCell(row[DB_COLUMN_MAP.millarticle]).toLowerCase().includes(term) ||
-      cleanCell(row[DB_COLUMN_MAP.title]).toLowerCase().includes(term)
-    );
+    return database.filter(row => {
+      const { mill, construction } = getRowIdentity(row);
+      return mill.toLowerCase().includes(term) || construction.toLowerCase().includes(term);
+    });
   }
 
   function renderDatabaseGrid(){
@@ -3914,13 +3950,9 @@
       return;
     }
     grid.innerHTML = results.map((row, idx) => {
-      const mill = cleanCell(row[DB_COLUMN_MAP.millarticle]) || '—';
-      const construction = cleanCell(row[DB_COLUMN_MAP.title]) || '—';
-      const lot = cleanCell(row[DB_COLUMN_MAP.lot]);
-      const date = cleanCell(row[DB_COLUMN_MAP.recDate]);
-      const composition = cleanCell(row[DB_COLUMN_MAP.composition]);
-      const color = cleanCell(row[DB_COLUMN_MAP.color]);
-      const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+      const { mill: millRaw, construction: constructionRaw } = getRowIdentity(row);
+      const mill = millRaw || '—';
+      const construction = constructionRaw || '—';
       const isSelected = databaseSelectedRows.has(row);
 
       const checkboxHTML = databaseSelectMode
@@ -3928,15 +3960,31 @@
         : '';
 
       const metaParts = [];
-      if(lot) metaParts.push(escapeHtml(lot));
-      if(date) metaParts.push(escapeHtml(date));
-
       const detailRows = [];
-      if(composition) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Comp.</span><span class="db-card-detail-val">${escapeHtml(composition)}</span></div>`);
-      if(color) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Color</span><span class="db-card-detail-val">${escapeHtml(color)}</span></div>`);
-      if(widthValue || gsmValue){
-        const wg = [widthValue ? `W ${widthValue}` : '', gsmValue ? `GSM ${gsmValue}` : ''].filter(Boolean).join(' · ');
-        detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">&nbsp;</span><span class="db-card-detail-val">${escapeHtml(wg)}</span></div>`);
+
+      if(databaseType === 'knits-gis-fw2026'){
+        const content = cleanCell(row['Content']);
+        const weight = cleanCell(row['Weight (GSM)']);
+        const cw = cleanCell(row['CW (Inch)']);
+        if(content) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Content</span><span class="db-card-detail-val">${escapeHtml(content)}</span></div>`);
+        if(weight || cw){
+          const wg = [weight ? `GSM ${weight}` : '', cw ? `CW ${cw}"` : ''].filter(Boolean).join(' · ');
+          detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">&nbsp;</span><span class="db-card-detail-val">${escapeHtml(wg)}</span></div>`);
+        }
+      } else {
+        const lot = cleanCell(row[DB_COLUMN_MAP.lot]);
+        const date = cleanCell(row[DB_COLUMN_MAP.recDate]);
+        const composition = cleanCell(row[DB_COLUMN_MAP.composition]);
+        const color = cleanCell(row[DB_COLUMN_MAP.color]);
+        const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+        if(lot) metaParts.push(escapeHtml(lot));
+        if(date) metaParts.push(escapeHtml(date));
+        if(composition) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Comp.</span><span class="db-card-detail-val">${escapeHtml(composition)}</span></div>`);
+        if(color) detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">Color</span><span class="db-card-detail-val">${escapeHtml(color)}</span></div>`);
+        if(widthValue || gsmValue){
+          const wg = [widthValue ? `W ${widthValue}` : '', gsmValue ? `GSM ${gsmValue}` : ''].filter(Boolean).join(' · ');
+          detailRows.push(`<div class="db-card-detail"><span class="db-card-detail-key">&nbsp;</span><span class="db-card-detail-val">${escapeHtml(wg)}</span></div>`);
+        }
       }
 
       return `
@@ -3977,10 +4025,27 @@
         card.addEventListener('click', (e) => {
           if(e.target.closest('[data-db-print-idx]')) return;
           const idx = parseInt(card.dataset.dbIdx, 10);
-          pendingDatabaseRow = results[idx];
-          databaseChainQueue = [];
-          databaseChainMode = null;
-          openVariantModal();
+          const row = results[idx];
+          if(databaseType === 'knits-gis-fw2026'){
+            // No width/gsm variants to choose for KNITS rows — open the tab directly.
+            if(tabs.length >= MAX_TABS){
+              alert(`Ya tienes el máximo de ${MAX_TABS} pestañas abiertas. Cierra alguna antes de abrir otra desde la base de datos.`);
+              return;
+            }
+            persistActiveTabSnapshot();
+            const tab = makeTab(snapshotFromExcelRowKnits(row));
+            tabs.push(tab);
+            activeTabId = tab.id;
+            applySnapshot(tab.snapshot);
+            saveTabsToStorage();
+            renderTabBar();
+            closeDatabaseModal();
+          } else {
+            pendingDatabaseRow = row;
+            databaseChainQueue = [];
+            databaseChainMode = null;
+            openVariantModal();
+          }
         });
       });
     }
@@ -4168,6 +4233,19 @@
       alert(`Solo se abrirán ${toOpen.length} de ${rows.length} filas seleccionadas porque exceden el máximo de ${MAX_TABS} pestañas abiertas.`);
     }
 
+    if(databaseType === 'knits-gis-fw2026'){
+      // No width/gsm variants to choose for KNITS rows — open every tab directly.
+      persistActiveTabSnapshot();
+      toOpen.forEach(row => { tabs.push(makeTab(snapshotFromExcelRowKnits(row))); });
+      activeTabId = tabs[tabs.length - 1].id;
+      applySnapshot(getActiveTab().snapshot);
+      saveTabsToStorage();
+      renderTabBar();
+      setDatabaseSelectMode(false);
+      closeDatabaseModal();
+      return;
+    }
+
     databaseChainMode = 'open';
     pendingDatabaseRow = toOpen[0];
     databaseChainQueue = toOpen.slice(1);
@@ -4185,10 +4263,21 @@
   // user preference). The previous form state is restored only after the
   // print dialog closes, via the "afterprint" event, so the print dialog
   // itself sees the row's data instead of whatever was restored too early. ----
+  // Builds the right snapshot for a database row regardless of which
+  // schema is loaded — KNITS rows already carry a single Weight/CW value
+  // (no variant picker needed), wovens rows use the first-available
+  // Req/STD/Actual variant.
+  function buildSnapshotForDatabaseRow(row){
+    if(databaseType === 'knits-gis-fw2026'){
+      return snapshotFromExcelRowKnits(row);
+    }
+    const { widthValue, gsmValue } = firstAvailableVariantValues(row);
+    return buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+  }
+
   function printSingleDatabaseRow(row, btnEl){
     const currentSnapshot = collectSnapshot();
-    const { widthValue, gsmValue } = firstAvailableVariantValues(row);
-    const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+    const snap = buildSnapshotForDatabaseRow(row);
 
     applySnapshot(snap);
     setGeneratedTimestamp();
@@ -4242,8 +4331,7 @@
     }
 
     const row = printQueueRows.shift();
-    const { widthValue, gsmValue } = firstAvailableVariantValues(row);
-    const snap = buildSnapshotFromDatabaseRow(row, widthValue, gsmValue);
+    const snap = buildSnapshotForDatabaseRow(row);
 
     applySnapshot(snap);
     setGeneratedTimestamp();
@@ -4251,7 +4339,7 @@
 
     const missing = getMissingRequiredFields();
     if(missing.length > 0){
-      const label = cleanCell(row[DB_COLUMN_MAP.millarticle]) || cleanCell(row[DB_COLUMN_MAP.title]) || 'una fila';
+      const label = getRowIdentity(row).mill || getRowIdentity(row).construction || 'una fila';
       alert(`Se omitió "${label}" porque le falta: ${missing.join(', ')}.`);
       printNextQueuedRow();
       return;
