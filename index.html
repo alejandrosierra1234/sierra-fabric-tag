@@ -1024,6 +1024,9 @@
   .label-knits .label-block-val-hero{
     font-size:calc(3.6mm * var(--lscale, 1));
   }
+  .label-knits .label-block-key-hero{
+    font-size:calc(2.5mm * var(--lscale, 1));
+  }
 
   /* A real bordered ticket table — one continuous ruled box holding every
      section, each opened by a centered title bar, cells separated by a
@@ -2330,7 +2333,7 @@
   // RID/Name so they keep their top hierarchy even inside the ruled table.
   function heroBlockHTML(label, value){
     return `<div class="label-block">
-      <span class="label-block-key">${label}</span>
+      <span class="label-block-key label-block-key-hero">${label}</span>
       <span class="label-block-val label-block-val-hero">${value}</span>
     </div>`;
   }
@@ -2400,18 +2403,17 @@
       </div>`);
 
     // ---- First (untitled) box: RID, Mill Article #, Name, Construction
-    // Type — just the data, no section title bar. Name carries the
-    // "IPSS Name" label and gets its own full-width row (both it and RID
-    // keep the bigger hero value size), and Construction Type lives here
-    // too, ahead of Composition, since it's part of the same identifying
-    // info rather than a composition spec. ----
+    // Type — just the data, no section title bar. Every value in this box
+    // uses the bigger hero size (same key style and grid as the rest of
+    // the label, just one hierarchy tier up), since this box as a whole
+    // is the label's top-priority info. ----
     if(kf.rid || kf.name || kf.millarticle || kf.constructiontype){
       pairRow(
         kf.rid ? heroBlockHTML('RID', escapeHtml(kf.rid)) : '',
-        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : ''
+        kf.millarticle ? heroBlockHTML('Mill Article #', escapeHtml(kf.millarticle)) : ''
       );
       fullRow(kf.name ? heroBlockHTML('IPSS Name', escapeHtml(kf.name)) : '');
-      fullRow(kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
+      fullRow(kf.constructiontype ? heroBlockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
     }
 
     // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW, Gauge ----
