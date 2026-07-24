@@ -2281,23 +2281,24 @@
     }
 
     let sections = [];
+    let contentRowCount = 0;
 
-    // No per-row hairline dividers here — sections carry their own bold
-    // small-caps title instead, so structure reads through typography and
-    // whitespace rather than a ruled line after every field.
+    // A thin rule between every row — the "table" grid line — so the eye
+    // always has a fixed structure to land on, row after row.
     function pushRow(html){
+      if(contentRowCount > 0){
+        sections.push(`<div class="label-row-divider"></div>`);
+      }
       sections.push(html);
+      contentRowCount++;
     }
 
-    // A themed pair/trio only spans multiple columns when more than one
-    // of its fields actually has content — a lone value goes full width
-    // instead of sitting in a half column next to empty space.
-    function gridRow(cells){
-      const active = cells.filter(Boolean);
-      if(active.length === 0) return;
-      if(active.length === 1){ pushRow(active[0]); return; }
-      const cls = active.length >= 3 ? 'cols-3' : 'cols-2';
-      pushRow(`<div class="label-grid-row ${cls}">${active.join('')}</div>`);
+    // Every table row is always exactly two columns, even when only one
+    // side has data — a blank cell keeps the column edges fixed all the
+    // way down the label instead of the width shifting row to row.
+    function pairRow(aHtml, bHtml){
+      if(!aHtml && !bHtml) return;
+      pushRow(`<div class="label-grid-row cols-2">${aHtml || '<div></div>'}${bHtml || '<div></div>'}</div>`);
     }
 
     function sectionTitle(text){
@@ -2325,38 +2326,40 @@
     // ---- Identification: Mill Article #, Gauge ----
     if(kf.millarticle || kf.gauge){
       sectionTitle('Identification');
-      gridRow([
+      pairRow(
         kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
-        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
-      ]);
+        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
+      );
     }
 
     // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW ----
     if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw){
       sectionTitle('Composition');
-      gridRow([
+      pairRow(
         kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
-        kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : '',
-      ]);
-      gridRow([
+        kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : ''
+      );
+      pairRow(
         kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
-        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : '',
+        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : ''
+      );
+      pairRow(
         kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
-      ]);
+        ''
+      );
     }
 
     // ---- Origin: Fabric COO's, Yarn COO's ----
     if(kf.coo || kf.yarncoo){
       sectionTitle('Origin');
-      gridRow([
+      pairRow(
         kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
-        kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
-      ]);
+        kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : ''
+      );
     }
 
-    // ---- Pricing: same left-aligned label/value blocks as every other
-    // field on the label — no separate right-aligned table, so the eye
-    // never has to break its reading rhythm to scan this one section. ----
+    // ---- Pricing: same fixed two-column table rows as the rest of the
+    // label, so pricing doesn't break the table's rhythm either. ----
     const priceRows = [
       { label: 'Regular', yd: money(kf.priceyd), lb: money(kf.pricelb) },
       { label: 'rPET', yd: money(kf.pricerpetyd), lb: money(kf.pricerpetlb) },
@@ -2365,15 +2368,15 @@
     if(priceRows.length || kf.price58 || kf.pricevalid){
       sectionTitle('Pricing');
       priceRows.forEach(r => {
-        gridRow([
+        pairRow(
           r.yd ? blockHTML(`${r.label} / YD`, r.yd) : '',
-          r.lb ? blockHTML(`${r.label} / LB`, r.lb) : '',
-        ]);
+          r.lb ? blockHTML(`${r.label} / LB`, r.lb) : ''
+        );
       });
-      gridRow([
+      pairRow(
         kf.price58 ? blockHTML('Price @58&quot; CW / YD', money(kf.price58)) : '',
-        kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
-      ]);
+        kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : ''
+      );
     }
 
     // ---- Performance Features (defaults to N/A when left blank) — its own
