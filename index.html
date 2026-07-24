@@ -1008,40 +1008,6 @@
     fill:#000000;
   }
 
-  /* RID + Name share one headline row — same top hierarchy, but on one
-     line instead of two stacked title lines, to keep a dense label
-     within the print height. */
-  .label-headline-row{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    column-gap:calc(2.2mm * var(--lscale, 1));
-    row-gap:0;
-  }
-  .label-headline-part{
-    font-size:calc(3.7mm * var(--lscale, 1));
-    font-weight:700;
-    text-transform:uppercase;
-    line-height:1.05;
-    color:#000000;
-  }
-  .label-headline-sep{
-    font-size:calc(3.2mm * var(--lscale, 1));
-    font-weight:400;
-    color:#000000;
-  }
-  /* IPSS reads as part of the same headline sentence, not a separate
-     bordered chip — a boxed badge here fought with the free-typography
-     header zone and the real boxed table right below it. */
-  .label-ipss-tag{
-    font-size:calc(2.6mm * var(--lscale, 1));
-    font-weight:700;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color:#000000;
-    align-self:baseline;
-  }
-
   /* Field-level keys read quieter than section titles — lighter weight,
      tighter tracking, smaller — so the two tiers never blur together. */
   .label-knits .label-block-key{
@@ -1052,6 +1018,11 @@
   .label-knits .label-block-val{
     font-size:calc(2.85mm * var(--lscale, 1));
     line-height:1.05;
+  }
+  /* RID/Name keep a bigger value than ordinary fields even inside the
+     ruled table, so they still read as the label's top hierarchy. */
+  .label-knits .label-block-val-hero{
+    font-size:calc(3.6mm * var(--lscale, 1));
   }
 
   /* A real bordered ticket table — one continuous ruled box holding every
@@ -2352,6 +2323,15 @@
     </div>`;
   }
 
+  // Same key/value structure as blockHTML, but a bigger value — used for
+  // RID/Name so they keep their top hierarchy even inside the ruled table.
+  function heroBlockHTML(label, value){
+    return `<div class="label-block">
+      <span class="label-block-key">${label}</span>
+      <span class="label-block-val label-block-val-hero">${value}</span>
+    </div>`;
+  }
+
   // ---------------------------------------------------------------
   // KNITS · OLD NAVY FALL 2027 label builder — same visual language and grid
   // primitives as the WOVENS label, but its own fixed field set. Mill
@@ -2416,48 +2396,40 @@
         <span class="label-collection-tag">${FALL_LEAF_ICON_SVG}OLD NAVY FALL 2027</span>
       </div>`);
 
-    // ---- RID / Name: the label's protagonist when present, replacing
-    // Construction Type's old headline spot — both optional, both at the
-    // same top hierarchy, sharing one headline row instead of stacking as
-    // two full title lines. When both are filled, "IPSS" joins the same
-    // sentence as plain text (no bordered chip — that fought with the
-    // free-typography header zone right above the real boxed table). ----
-    if(kf.rid || kf.name){
-      const parts = [
-        kf.rid ? `<span class="label-headline-part">${escapeHtml(kf.rid)}</span>` : '',
-        kf.name ? `<span class="label-headline-part">${escapeHtml(kf.name)}</span>` : '',
-        (kf.rid && kf.name) ? `<span class="label-ipss-tag">IPSS</span>` : '',
-      ].filter(Boolean);
-      const sep = `<span class="label-headline-sep">&middot;</span>`;
-      sections.push(`<div class="label-headline-row">${parts.join(sep)}</div>`);
-    }
-
-    // ---- Mill Article #: a compact, unboxed line — a single value
-    // doesn't need its own titled table section ----
-    if(kf.millarticle){
-      sections.push(blockHTML('Mill Article #', escapeHtml(kf.millarticle)));
+    // ---- Identification: RID, Name, Mill Article #, and an auto "IPSS"
+    // marker when both RID and Name are present — boxed like every other
+    // section instead of sitting as loose, unboxed lines. RID/Name keep a
+    // larger value size than ordinary fields to preserve their top
+    // hierarchy, but now inside the same ruled grid as the rest. ----
+    if(kf.rid || kf.name || kf.millarticle){
+      tableTitle('Identification');
+      pairRow(
+        kf.rid ? heroBlockHTML('RID', escapeHtml(kf.rid)) : '',
+        kf.name ? heroBlockHTML('Name', escapeHtml(kf.name)) : ''
+      );
+      pairRow(
+        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
+        (kf.rid && kf.name) ? blockHTML('Program', 'IPSS') : ''
+      );
     }
 
     // ---- Composition: Content, Content (rPET), Construction Type, Yarn
-    // Size, Weight, CW, Gauge — Construction Type now lives here as a
-    // regular spec field instead of the headline (RID/Name took that spot) ----
+    // Size, Weight, CW, Gauge — Construction Type gets its own full-width
+    // row since it can run long and shouldn't wrap inside a half column ----
     if(kf.content || kf.contentrpet || kf.constructiontype || kf.yarnsize || kf.weight || kf.cw || kf.gauge){
       tableTitle('Composition');
       pairRow(
         kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
         kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : ''
       );
+      fullRow(kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '');
       pairRow(
-        kf.constructiontype ? blockHTML('Construction Type', escapeHtml(kf.constructiontype)) : '',
-        kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : ''
+        kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
+        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : ''
       );
       pairRow(
-        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : '',
-        kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : ''
-      );
-      pairRow(
-        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
-        ''
+        kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
+        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
       );
     }
 
