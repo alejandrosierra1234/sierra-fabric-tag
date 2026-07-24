@@ -973,14 +973,22 @@
      every other .label-* primitive (grid rows, dividers, blocks) as-is. */
   .label-knits{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
+    /* A dense, fully-filled label has a lot to say in 3.5in — trim the
+       outer margin and the gap between top-level blocks so that budget
+       goes to content, not whitespace. */
+    padding:calc(2.6mm * var(--lscale, 1)) calc(4.2mm * var(--lscale, 1));
+    gap:calc(1.1mm * var(--lscale, 1));
   }
   .label-mill-block{
     display:flex;
     flex-direction:column;
-    gap:calc(0.8mm * var(--lscale, 1));
+    gap:calc(0.6mm * var(--lscale, 1));
   }
   .label-mill-block .label-title{
     font-size:calc(4mm * var(--lscale, 1));
+  }
+  .label-knits .label-title-standalone{
+    padding:calc(0.5mm * var(--lscale, 1)) 0;
   }
   .label-collection-tag{
     display:flex;
@@ -1002,9 +1010,13 @@
   /* Field-level keys read quieter than section titles — lighter weight,
      tighter tracking, smaller — so the two tiers never blur together. */
   .label-knits .label-block-key{
-    font-size:calc(2.3mm * var(--lscale, 1));
+    font-size:calc(2.1mm * var(--lscale, 1));
     font-weight:600;
     letter-spacing:0.02em;
+  }
+  .label-knits .label-block-val{
+    font-size:calc(2.85mm * var(--lscale, 1));
+    line-height:1.05;
   }
 
   /* A real bordered ticket table — one continuous ruled box holding every
@@ -1018,12 +1030,12 @@
   }
   .label-knits-table-title{
     text-align:center;
-    font-size:calc(2.6mm * var(--lscale, 1));
+    font-size:calc(2.35mm * var(--lscale, 1));
     font-weight:700;
-    letter-spacing:0.1em;
+    letter-spacing:0.08em;
     text-transform:uppercase;
     color:#000000;
-    padding:calc(1mm * var(--lscale, 1)) 0;
+    padding:calc(0.5mm * var(--lscale, 1)) 0;
     border-top:calc(0.3mm * var(--lscale, 1)) solid #000000;
   }
   .label-knits-table-title:first-child{
@@ -1038,7 +1050,7 @@
     grid-template-columns:1fr;
   }
   .label-knits-table-cell{
-    padding:calc(1.1mm * var(--lscale, 1)) calc(1.8mm * var(--lscale, 1));
+    padding:calc(0.55mm * var(--lscale, 1)) calc(1.6mm * var(--lscale, 1));
     min-width:0;
   }
   .label-knits-table-cell + .label-knits-table-cell{
