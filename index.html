@@ -999,30 +999,53 @@
     fill:#000000;
   }
 
-  /* Section headers dividing the KNITS label by kind of information —
-     margin-top gives it a beat more room than ordinary field spacing,
-     signaling "new group" without needing another ruled divider. Sized
-     and weighted between the headline and field-level keys so the three
-     tiers (headline / section / field) stay visually distinct at a
-     glance, without ever leaning on color (the label prints monochrome). */
-  .label-section-title{
-    display:block;
-    margin-top:calc(0.8mm * var(--lscale, 1));
-    font-size:calc(2.8mm * var(--lscale, 1));
-    font-weight:700;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color:#000000;
-  }
-
   /* Field-level keys read quieter than section titles — lighter weight,
-     tighter tracking, smaller — so the two tiers never blur together and
-     the eye keeps one consistent left-aligned line to follow down the
-     label (no separate right-aligned tables breaking the rhythm). */
+     tighter tracking, smaller — so the two tiers never blur together. */
   .label-knits .label-block-key{
     font-size:calc(2.3mm * var(--lscale, 1));
     font-weight:600;
     letter-spacing:0.02em;
+  }
+
+  /* A real bordered ticket table — one continuous ruled box holding every
+     section, each opened by a centered title bar, cells separated by a
+     fixed grid of horizontal and vertical rules. Pure black only, no
+     fills or grays — the label prints on a monochrome thermal printer. */
+  .label-knits-table{
+    display:flex;
+    flex-direction:column;
+    border:calc(0.35mm * var(--lscale, 1)) solid #000000;
+  }
+  .label-knits-table-title{
+    text-align:center;
+    font-size:calc(2.6mm * var(--lscale, 1));
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:#000000;
+    padding:calc(1mm * var(--lscale, 1)) 0;
+    border-top:calc(0.3mm * var(--lscale, 1)) solid #000000;
+  }
+  .label-knits-table-title:first-child{
+    border-top:none;
+  }
+  .label-knits-table-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-top:calc(0.3mm * var(--lscale, 1)) solid #000000;
+  }
+  .label-knits-table-row.full{
+    grid-template-columns:1fr;
+  }
+  .label-knits-table-cell{
+    padding:calc(1.1mm * var(--lscale, 1)) calc(1.8mm * var(--lscale, 1));
+    min-width:0;
+  }
+  .label-knits-table-cell + .label-knits-table-cell{
+    border-left:calc(0.3mm * var(--lscale, 1)) solid #000000;
+  }
+  .label-knits-table-cell .label-block{
+    gap:calc(0.2mm * var(--lscale, 1));
   }
 
   .height-warning{
@@ -2281,28 +2304,32 @@
     }
 
     let sections = [];
-    let contentRowCount = 0;
+    let tableRows = [];
 
-    // A thin rule between every row — the "table" grid line — so the eye
-    // always has a fixed structure to land on, row after row.
-    function pushRow(html){
-      if(contentRowCount > 0){
-        sections.push(`<div class="label-row-divider"></div>`);
-      }
-      sections.push(html);
-      contentRowCount++;
+    // A real bordered ticket table: every row is a ruled two-column strip
+    // inside one continuous box, with a centered title bar opening each
+    // section — the grid lines themselves carry the structure.
+    function tableTitle(text){
+      tableRows.push(`<div class="label-knits-table-title">${text}</div>`);
     }
 
-    // Every table row is always exactly two columns, even when only one
-    // side has data — a blank cell keeps the column edges fixed all the
-    // way down the label instead of the width shifting row to row.
+    function tableCell(html){
+      return `<div class="label-knits-table-cell">${html || ''}</div>`;
+    }
+
+    // Every data row is always exactly two ruled columns, even when only
+    // one side has content — a blank cell keeps the grid lines fixed all
+    // the way down the table instead of the width shifting row to row.
     function pairRow(aHtml, bHtml){
       if(!aHtml && !bHtml) return;
-      pushRow(`<div class="label-grid-row cols-2">${aHtml || '<div></div>'}${bHtml || '<div></div>'}</div>`);
+      tableRows.push(`<div class="label-knits-table-row">${tableCell(aHtml)}${tableCell(bHtml)}</div>`);
     }
 
-    function sectionTitle(text){
-      sections.push(`<span class="label-section-title">${text}</span>`);
+    // A row that intentionally spans the full width, no vertical rule —
+    // for long-form text like Performance Features.
+    function fullRow(html){
+      if(!html) return;
+      tableRows.push(`<div class="label-knits-table-row full">${tableCell(html)}</div>`);
     }
 
     function money(val){
@@ -2325,7 +2352,7 @@
 
     // ---- Identification: Mill Article #, Gauge ----
     if(kf.millarticle || kf.gauge){
-      sectionTitle('Identification');
+      tableTitle('Identification');
       pairRow(
         kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
         kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
@@ -2334,7 +2361,7 @@
 
     // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW ----
     if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw){
-      sectionTitle('Composition');
+      tableTitle('Composition');
       pairRow(
         kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
         kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : ''
@@ -2351,22 +2378,21 @@
 
     // ---- Origin: Fabric COO's, Yarn COO's ----
     if(kf.coo || kf.yarncoo){
-      sectionTitle('Origin');
+      tableTitle('Origin');
       pairRow(
         kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
         kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : ''
       );
     }
 
-    // ---- Pricing: same fixed two-column table rows as the rest of the
-    // label, so pricing doesn't break the table's rhythm either. ----
+    // ---- Pricing: same ruled two-column rows as the rest of the table ----
     const priceRows = [
       { label: 'Regular', yd: money(kf.priceyd), lb: money(kf.pricelb) },
       { label: 'rPET', yd: money(kf.pricerpetyd), lb: money(kf.pricerpetlb) },
     ].filter(r => r.yd || r.lb);
 
     if(priceRows.length || kf.price58 || kf.pricevalid){
-      sectionTitle('Pricing');
+      tableTitle('Pricing');
       priceRows.forEach(r => {
         pairRow(
           r.yd ? blockHTML(`${r.label} / YD`, r.yd) : '',
@@ -2379,9 +2405,11 @@
       );
     }
 
-    // ---- Performance Features (defaults to N/A when left blank) — its own
-    // block label already names the section, no separate title needed ----
-    pushRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
+    // ---- Performance Features (defaults to N/A when left blank) ----
+    tableTitle('Performance');
+    fullRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
+
+    sections.push(`<div class="label-knits-table">${tableRows.join('')}</div>`);
 
     // ---- Logo + "Manufactured in Honduras" note — sits at the very bottom ----
     sections.push(`<div class="label-divider"></div>`);
