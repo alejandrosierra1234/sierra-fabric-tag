@@ -975,8 +975,9 @@
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
     /* A dense, fully-filled label has a lot to say in 3.5in — trim the
        outer margin and the gap between top-level blocks so that budget
-       goes to content, not whitespace. */
-    padding:calc(2.6mm * var(--lscale, 1)) calc(4.2mm * var(--lscale, 1));
+       goes to content, not whitespace. Top keeps more headroom than the
+       other sides so NORTHERN TEXTILES never clips when printed. */
+    padding:calc(3.2mm * var(--lscale, 1)) calc(4.2mm * var(--lscale, 1)) calc(2.6mm * var(--lscale, 1));
     gap:calc(1.1mm * var(--lscale, 1));
   }
   .label-mill-block{
@@ -2414,8 +2415,10 @@
     }
 
     // ---- Performance Features (defaults to N/A when left blank) ----
+    // No repeated "Performance Features" key here — the "Performance"
+    // section title above already names it, so the row is just the value.
     tableTitle('Performance');
-    fullRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
+    fullRow(`<span class="label-block-val">${kf.performance ? multilineToHtml(kf.performance) : 'N/A'}</span>`);
 
     sections.push(`<div class="label-knits-table">${tableRows.join('')}</div>`);
 
