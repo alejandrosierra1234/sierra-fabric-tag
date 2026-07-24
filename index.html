@@ -999,6 +999,55 @@
     fill:#000000;
   }
 
+  /* Section headers dividing the KNITS label by kind of information —
+     margin-top gives it a beat more room than ordinary field spacing,
+     signaling "new group" without needing another ruled divider. */
+  .label-section-title{
+    display:block;
+    margin-top:calc(0.8mm * var(--lscale, 1));
+    font-size:calc(2.5mm * var(--lscale, 1));
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#000000;
+  }
+
+  /* Compact YD/LB price table — reads as an actual price sheet instead
+     of run-on "$X/YD, $Y/LB" strings. */
+  .label-price-table{
+    display:flex;
+    flex-direction:column;
+    gap:calc(0.6mm * var(--lscale, 1));
+  }
+  .label-price-table-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    align-items:baseline;
+    gap:calc(2mm * var(--lscale, 1));
+  }
+  .label-price-table-row.label-price-table-head{
+    font-size:calc(2.2mm * var(--lscale, 1));
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:#000000;
+  }
+  .label-price-table-head span:not(:first-child){
+    text-align:right;
+  }
+  .label-price-table-label{
+    font-size:calc(2.6mm * var(--lscale, 1));
+    font-weight:700;
+    text-transform:uppercase;
+    color:#000000;
+  }
+  .label-price-table-val{
+    font-size:calc(3.3mm * var(--lscale, 1));
+    font-weight:700;
+    color:#000000;
+    text-align:right;
+  }
+
   .height-warning{
     margin-top:16px;
     padding:10px 14px;
@@ -2255,21 +2304,32 @@
     }
 
     let sections = [];
-    let contentRowCount = 0;
 
+    // No per-row hairline dividers here — sections carry their own bold
+    // small-caps title instead, so structure reads through typography and
+    // whitespace rather than a ruled line after every field.
     function pushRow(html){
-      if(contentRowCount > 0){
-        sections.push(`<div class="label-row-divider"></div>`);
-      }
       sections.push(html);
-      contentRowCount++;
     }
 
+    // A themed pair/trio only spans multiple columns when more than one
+    // of its fields actually has content — a lone value goes full width
+    // instead of sitting in a half column next to empty space.
     function gridRow(cells){
-      if(cells.length === 0) return;
-      const cls = cells.length >= 3 ? 'cols-3' : 'cols-2';
-      const filler = cells.length === 1 ? '<div></div>' : '';
-      pushRow(`<div class="label-grid-row ${cls}">${cells.join('')}${filler}</div>`);
+      const active = cells.filter(Boolean);
+      if(active.length === 0) return;
+      if(active.length === 1){ pushRow(active[0]); return; }
+      const cls = active.length >= 3 ? 'cols-3' : 'cols-2';
+      pushRow(`<div class="label-grid-row ${cls}">${active.join('')}</div>`);
+    }
+
+    function sectionTitle(text){
+      sections.push(`<span class="label-section-title">${text}</span>`);
+    }
+
+    function money(val){
+      const clean = val.trim();
+      return clean ? `$${escapeHtml(clean)}` : '';
     }
 
     // ---- Mill name (fixed) + collection line — first thing read on the label ----
@@ -2285,62 +2345,70 @@
       sections.push(`<div class="label-divider"></div>`);
     }
 
-    // ---- Mill Article #: its own supporting line ----
-    if(kf.millarticle){
-      pushRow(blockHTML('Mill Article #', escapeHtml(kf.millarticle)));
+    // ---- Identification: Mill Article #, Gauge ----
+    if(kf.millarticle || kf.gauge){
+      sectionTitle('Identification');
+      gridRow([
+        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
+        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
+      ]);
     }
 
-    // ---- Content / Content (rPET) ----
-    gridRow([
-      kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
-      kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : '',
-    ].filter(Boolean));
-
-    // ---- Yarn Size / Weight / CW ----
-    gridRow([
-      kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
-      kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : '',
-      kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
-    ].filter(Boolean));
-
-    // ---- Gauge ----
-    gridRow([
-      kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : '',
-    ].filter(Boolean));
-
-    // ---- Fabric COO's / Yarn COO's ----
-    gridRow([
-      kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
-      kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
-    ].filter(Boolean));
-
-    // ---- Price: the commercial headline number, always carries its $ ----
-    function money(val, suffix){
-      const clean = val.trim();
-      return clean ? `$${escapeHtml(clean)}${suffix}` : '';
-    }
-    const priceParts = [money(kf.priceyd, '/YD'), money(kf.pricelb, '/LB')].filter(Boolean);
-    if(priceParts.length){
-      pushRow(`<div class="label-price-block">
-        <span class="label-price-key">Price</span>
-        <span class="label-price-val">${priceParts.join(', ')}</span>
-      </div>`);
+    // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW ----
+    if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw){
+      sectionTitle('Composition');
+      gridRow([
+        kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
+        kf.contentrpet ? blockHTML('Content (rPET)', multilineToHtml(kf.contentrpet)) : '',
+      ]);
+      gridRow([
+        kf.yarnsize ? blockHTML('Yarn Size', escapeHtml(kf.yarnsize)) : '',
+        kf.weight ? blockHTML('Weight', escapeHtml(kf.weight) + ' GSM') : '',
+        kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
+      ]);
     }
 
-    // ---- Price (rPET) / Price @58" CW ----
-    const priceRpetParts = [money(kf.pricerpetyd, '/YD'), money(kf.pricerpetlb, '/LB')].filter(Boolean);
-    const price58Part = money(kf.price58, '/YD');
-    gridRow([
-      priceRpetParts.length ? blockHTML('Price (rPET)', priceRpetParts.join(', ')) : '',
-      price58Part ? blockHTML('Price @58&quot; CW', price58Part) : '',
-    ].filter(Boolean));
+    // ---- Origin: Fabric COO's, Yarn COO's ----
+    if(kf.coo || kf.yarncoo){
+      sectionTitle('Origin');
+      gridRow([
+        kf.coo ? blockHTML("Fabric COO&#39;s", escapeHtml(kf.coo)) : '',
+        kf.yarncoo ? blockHTML("Yarn COO&#39;s", escapeHtml(kf.yarncoo)) : '',
+      ]);
+    }
 
-    // ---- Price Valid Till ----
-    gridRow([
-      kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
-    ].filter(Boolean));
+    // ---- Pricing: a compact YD/LB table instead of run-on "$X/YD, $Y/LB"
+    // strings — Regular and rPET only appear as rows when they have data,
+    // and a missing cell within an active row reads as "—" rather than
+    // silently vanishing (so the column meaning stays unambiguous). ----
+    const priceRows = [
+      { label: 'Regular', yd: money(kf.priceyd), lb: money(kf.pricelb) },
+      { label: 'rPET', yd: money(kf.pricerpetyd), lb: money(kf.pricerpetlb) },
+    ].filter(r => r.yd || r.lb);
 
-    // ---- Performance Features (defaults to N/A when left blank) ----
+    if(priceRows.length || kf.price58 || kf.pricevalid){
+      sectionTitle('Pricing');
+      if(priceRows.length){
+        const rowsHtml = priceRows.map(r => `<div class="label-price-table-row">
+            <span class="label-price-table-label">${r.label}</span>
+            <span class="label-price-table-val">${r.yd || '&mdash;'}</span>
+            <span class="label-price-table-val">${r.lb || '&mdash;'}</span>
+          </div>`).join('');
+        pushRow(`<div class="label-price-table">
+            <div class="label-price-table-row label-price-table-head">
+              <span></span><span>YD</span><span>LB</span>
+            </div>
+            ${rowsHtml}
+          </div>`);
+      }
+      gridRow([
+        kf.price58 ? blockHTML('Price @58&quot; CW / YD', money(kf.price58)) : '',
+        kf.pricevalid ? blockHTML('Price Valid Till', escapeHtml(kf.pricevalid)) : '',
+      ]);
+    }
+
+    // ---- Performance Features (defaults to N/A when left blank) — its own
+    // block label already names the section, no separate title needed ----
     pushRow(blockHTML('Performance Features', kf.performance ? multilineToHtml(kf.performance) : 'N/A'));
 
     // ---- Logo + "Manufactured in Honduras" note — sits at the very bottom ----
