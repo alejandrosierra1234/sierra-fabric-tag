@@ -2342,25 +2342,21 @@
         <span class="label-title">NORTHERN TEXTILES</span>
         <span class="label-collection-tag">${FALL_LEAF_ICON_SVG}OLD NAVY FALL 2027</span>
       </div>`);
-    sections.push(`<div class="label-divider"></div>`);
 
-    // ---- Construction Type: its own headline, the protagonist of the label ----
+    // ---- Construction Type: its own headline, the protagonist of the
+    // label — no rules around it, whitespace alone sets it apart ----
     if(kf.constructiontype){
       sections.push(`<div class="label-title label-title-standalone">${escapeHtml(kf.constructiontype)}</div>`);
-      sections.push(`<div class="label-divider"></div>`);
     }
 
-    // ---- Identification: Mill Article #, Gauge ----
-    if(kf.millarticle || kf.gauge){
-      tableTitle('Identification');
-      pairRow(
-        kf.millarticle ? blockHTML('Mill Article #', escapeHtml(kf.millarticle)) : '',
-        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
-      );
+    // ---- Mill Article #: a compact, unboxed line — a single value
+    // doesn't need its own titled table section ----
+    if(kf.millarticle){
+      sections.push(blockHTML('Mill Article #', escapeHtml(kf.millarticle)));
     }
 
-    // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW ----
-    if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw){
+    // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW/Gauge ----
+    if(kf.content || kf.contentrpet || kf.yarnsize || kf.weight || kf.cw || kf.gauge){
       tableTitle('Composition');
       pairRow(
         kf.content ? blockHTML('Content', multilineToHtml(kf.content)) : '',
@@ -2372,7 +2368,7 @@
       );
       pairRow(
         kf.cw ? blockHTML('CW', escapeHtml(kf.cw) + '"') : '',
-        ''
+        kf.gauge ? blockHTML('Gauge', escapeHtml(kf.gauge)) : ''
       );
     }
 
@@ -2412,7 +2408,6 @@
     sections.push(`<div class="label-knits-table">${tableRows.join('')}</div>`);
 
     // ---- Logo + "Manufactured in Honduras" note — sits at the very bottom ----
-    sections.push(`<div class="label-divider"></div>`);
     sections.push(`<div class="label-header-row">
         <div class="label-logo">${SIERRA_LOGO_SVG}</div>
         <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
