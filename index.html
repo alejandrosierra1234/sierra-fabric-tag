@@ -2395,16 +2395,20 @@
         <span class="label-collection-tag">${FALL_LEAF_ICON_SVG}OLD NAVY FALL 2027</span>
       </div>`);
 
-    // ---- First (untitled) box: RID, Mill Article #, Name, Construction
-    // Type — just the data, no section title bar. Every value in this box
-    // uses the bigger hero size (same key style and grid as the rest of
-    // the label, just one hierarchy tier up), since this box as a whole
-    // is the label's top-priority info. ----
+    // ---- First (untitled) box: Mill Article #, RID, Name, Construction
+    // Type — just the data, no section title bar. Mill Article # always
+    // leads the first column since every article has one; RID and IPSS
+    // Name don't (not every article carries them), so unlike the rest of
+    // this template they stay conditional — no ghost label when blank.
+    // Every value here uses the bigger hero size (same key style and grid
+    // as the rest of the label, just one hierarchy tier up). ----
     pairRow(
-      heroBlockHTML('RID', escapeHtml(kf.rid)),
-      heroBlockHTML('Mill Article #', escapeHtml(kf.millarticle))
+      heroBlockHTML('Mill Article #', escapeHtml(kf.millarticle)),
+      kf.rid ? heroBlockHTML('RID', escapeHtml(kf.rid)) : ''
     );
-    fullRow(heroBlockHTML('IPSS Name', escapeHtml(kf.name)));
+    if(kf.name){
+      fullRow(heroBlockHTML('IPSS Name', escapeHtml(kf.name)));
+    }
     fullRow(heroBlockHTML('Construction Type', escapeHtml(kf.constructiontype)));
 
     // ---- Composition: Content, Content (rPET), Yarn Size, Weight, CW, Gauge ----
@@ -3465,9 +3469,9 @@
   // a column: every row in this collection is NORTHERN TEXTILES.
   // ---------------------------------------------------------------
   const EXCEL_COLUMNS_KNITS = [
+    { header: 'Mill Article #', field: 'millarticle', required: true },
     { header: 'RID', field: 'rid' },
     { header: 'Name', field: 'name' },
-    { header: 'Mill Article #', field: 'millarticle', required: true },
     { header: 'Construction Type', field: 'constructiontype', required: true },
     { header: 'Content', field: 'content', required: true },
     { header: 'Content (rPET)', field: 'contentrpet' },
@@ -3493,7 +3497,7 @@
   function downloadExcelTemplateKnits(){
     const headers = EXCEL_COLUMNS_KNITS.map(c => c.header);
     const sampleRow = [
-      '', '', 'NT26-K104-2', 'Single Jersey', '92% Cotton 8% Spandex', '100% rPET Polyester', '30/1 Combed',
+      'NT26-K104-2', '', '', 'Single Jersey', '92% Cotton 8% Spandex', '100% rPET Polyester', '30/1 Combed',
       '180', '58',
       'SPS, Honduras', 'SPS, Honduras', '28',
       '3.25', '9.10', '3.60', '10.05', '3.30', '12/31/2026',
