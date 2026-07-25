@@ -2132,7 +2132,7 @@
     <div class="modal-toolbar">
       <div class="search-wrap">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="database-search" placeholder="Buscar por Mill Article o Construction Type">
+        <input type="text" id="database-search" placeholder="Buscar por Mill Article, Construction Type, RID o Name">
       </div>
       <button class="btn btn-primary" id="database-select-mode-btn" type="button" style="margin-left:auto; flex-shrink:0;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="8 12 11 15 16 9"/></svg>
@@ -4038,21 +4038,30 @@
     if(e.target.id === 'database-modal') closeDatabaseModal();
   });
 
-  // Returns { mill, construction } for a row, reading from whichever
-  // column set matches the currently loaded database's schema.
+  // Returns { mill, construction, rid, name } for a row, reading from
+  // whichever column set matches the currently loaded database's schema.
+  // rid/name only exist on the KNITS schema; they come back empty for wovens.
   function getRowIdentity(row){
     if(databaseType === 'knits-gis-fw2026'){
-      return { mill: cleanCell(row['Mill Article #']), construction: cleanCell(row['Construction Type']) };
+      return {
+        mill: cleanCell(row['Mill Article #']),
+        construction: cleanCell(row['Construction Type']),
+        rid: cleanCell(row['RID']),
+        name: cleanCell(row['Name']),
+      };
     }
-    return { mill: cleanCell(row[DB_COLUMN_MAP.millarticle]), construction: cleanCell(row[DB_COLUMN_MAP.title]) };
+    return { mill: cleanCell(row[DB_COLUMN_MAP.millarticle]), construction: cleanCell(row[DB_COLUMN_MAP.title]), rid: '', name: '' };
   }
 
   function getFilteredDatabase(){
     if(!databaseSearchTerm) return database;
     const term = databaseSearchTerm.toLowerCase();
     return database.filter(row => {
-      const { mill, construction } = getRowIdentity(row);
-      return mill.toLowerCase().includes(term) || construction.toLowerCase().includes(term);
+      const { mill, construction, rid, name } = getRowIdentity(row);
+      return mill.toLowerCase().includes(term)
+        || construction.toLowerCase().includes(term)
+        || rid.toLowerCase().includes(term)
+        || name.toLowerCase().includes(term);
     });
   }
 
