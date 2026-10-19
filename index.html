@@ -1855,9 +1855,9 @@
           <div class="field-row">
             <button class="switch on" id="chk-cmmts" data-field="cmmts" type="button" role="switch" aria-checked="true"></button>
             <div class="field-main">
-              <label class="field-label">Comments</label>
+              <label class="field-label">Finish</label>
               <div class="field-input-wrap">
-                <textarea class="field-textarea" id="val-cmmts" data-value="cmmts" placeholder="Additional comments"></textarea>
+                <textarea class="field-textarea" id="val-cmmts" data-value="cmmts" placeholder="e.g. Brushed, Peached, Bio Polish"></textarea>
               </div>
             </div>
           </div>
@@ -2793,10 +2793,10 @@
       }
     }
 
-    // ---- Comments, only if it has content ----
+    // ---- Finish, only if it has content ----
     if(cmmtsOn){
       const val = multilineToHtml(valueInputs['cmmts'].value);
-      if(val) pushRow(blockHTML('Comments', val));
+      if(val) pushRow(blockHTML('Finish', val));
     }
 
     // ---- Generated (footer, quiet) ----
@@ -3633,7 +3633,7 @@
     { header: 'Yarn 4', field: 'yarn4' },
     { header: 'Yarn 5', field: 'yarn5' },
     { header: 'Price', field: 'price' },
-    { header: 'Comments', field: 'cmmts' },
+    { header: 'Finish', legacyHeaders: ['Comments'], field: 'cmmts' },
   ];
 
   function downloadExcelTemplate(){
@@ -3642,7 +3642,7 @@
       'Single Jersey', 'NT23-S286-3', 'NT25-SJ369', '95% Modal 5% Spandex', 'Black', 'Piece Dyed',
       '65/67', '200', '32', '27', '',
       '30/1 CPRS 100% Modal', '20D Spandex', '', '', '',
-      '5.69', 'For reference only'
+      '5.69', 'Brushed'
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
     ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
@@ -3718,10 +3718,17 @@
 
   // Builds a full snapshot from one parsed Excel row, reusing emptySnapshot()
   // as the base so every field the form expects is always present.
+  function excelCell(row, col){
+    const headers = [col.header].concat(col.legacyHeaders || []);
+    const header = headers.find(key => Object.prototype.hasOwnProperty.call(row, key));
+    const value = header ? row[header] : '';
+    return (value !== undefined && value !== null) ? String(value).trim() : '';
+  }
+
   function snapshotFromExcelRow(row){
     const snap = emptySnapshot();
     EXCEL_COLUMNS.forEach(col => {
-      const raw = (row[col.header] !== undefined && row[col.header] !== null) ? String(row[col.header]).trim() : '';
+      const raw = excelCell(row, col);
       if(col.field.startsWith('yarn')) return; // handled separately below
       if(col.field === 'width'){
         // Accept "65/67", "65 / 67", or a bare "65" and normalize to the
@@ -3737,7 +3744,7 @@
     snap.yarns = ['yarn1','yarn2','yarn3','yarn4','yarn5']
       .map(key => {
         const col = EXCEL_COLUMNS.find(c => c.field === key);
-        const raw = (row[col.header] !== undefined && row[col.header] !== null) ? String(row[col.header]).trim() : '';
+        const raw = excelCell(row, col);
         return raw;
       })
       .filter(v => v.length > 0);
@@ -3745,7 +3752,7 @@
   }
 
   function validateExcelRow(row){
-    const missing = EXCEL_COLUMNS.filter(c => c.required && !String(row[c.header] || '').trim()).map(c => c.header);
+    const missing = EXCEL_COLUMNS.filter(c => c.required && !excelCell(row, c)).map(c => c.header);
     return missing;
   }
 
