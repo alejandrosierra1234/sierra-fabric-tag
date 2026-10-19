@@ -3738,9 +3738,23 @@
 
   // Builds a full snapshot from one parsed Excel row, reusing emptySnapshot()
   // as the base so every field the form expects is always present.
+  function normalizeExcelHeader(value){
+    return String(value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '');
+  }
+
   function excelCell(row, col){
     const headers = [col.header].concat(col.legacyHeaders || []);
-    const header = headers.find(key => Object.prototype.hasOwnProperty.call(row, key));
+    const rowHeadersByNormalizedName = new Map(
+      Object.keys(row).map(key => [normalizeExcelHeader(key), key])
+    );
+    const header = headers.find(key => Object.prototype.hasOwnProperty.call(row, key))
+      || headers.map(normalizeExcelHeader)
+        .map(key => rowHeadersByNormalizedName.get(key))
+        .find(Boolean);
     const value = header ? row[header] : '';
     return (value !== undefined && value !== null) ? String(value).trim() : '';
   }
