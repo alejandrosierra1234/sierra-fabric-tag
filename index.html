@@ -1847,7 +1847,7 @@
               <label class="field-label">Price / lb <span class="char-hint">$ se agrega automático</span></label>
               <div class="field-input-wrap prefix-wrap">
                 <span class="prefix-symbol">$</span>
-                <input class="field-input prefixed" id="val-price" data-value="price" type="text" placeholder="5.69">
+                <input class="field-input prefixed" id="val-price" data-value="price" type="text" inputmode="decimal" placeholder="5.69">
               </div>
             </div>
           </div>
@@ -2481,6 +2481,21 @@
     return value.split('\n').map(l => l.trim()).filter(l => l.length > 0).map(l => escapeHtml(l)).join('<br>');
   }
 
+  // Normalizes numeric prices from Excel or manual entry. It accepts an
+  // optional $ sign, decimal comma, and thousands separators, then always
+  // returns exactly two decimal places. Non-numeric text is preserved so
+  // malformed source data is visible instead of being silently discarded.
+  function formatPriceTwoDecimals(value){
+    const raw = String(value ?? '').trim().replace(/^\$\s*/, '').replace(/\s+/g, '');
+    if(!raw) return '';
+    let normalized = raw;
+    if(raw.includes(',') && raw.includes('.')) normalized = raw.replace(/,/g, '');
+    else if(raw.includes(',')) normalized = raw.replace(',', '.');
+    if(!/^-?\d+(?:\.\d+)?$/.test(normalized)) return raw;
+    const numeric = Number(normalized);
+    return Number.isFinite(numeric) ? numeric.toFixed(2) : raw;
+  }
+
   // ---------------------------------------------------------------
   // Editorial label builder: groups short fields into multi-column rows,
   // gives long fields their own full-width block. No dead negative space.
@@ -2548,7 +2563,7 @@
     }
 
     function money(val){
-      const clean = val.trim();
+      const clean = formatPriceTwoDecimals(val);
       return clean ? `$${escapeHtml(clean)}` : '';
     }
 
@@ -2785,7 +2800,7 @@
     if(priceOn){
       const raw = valueInputs['price'].value.trim();
       if(raw){
-        const display = '$' + raw.replace(/^\$\s*/, '');
+        const display = '$' + formatPriceTwoDecimals(raw);
         pushRow(`<div class="label-price-block">
           <span class="label-price-key">Price / lb</span>
           <span class="label-price-val">${escapeHtml(display)}</span>
@@ -2952,6 +2967,11 @@
     input.addEventListener('change', render);
   });
 
+  valueInputs['price'].addEventListener('blur', () => {
+    valueInputs['price'].value = formatPriceTwoDecimals(valueInputs['price'].value);
+    render();
+  });
+
   KNITS_FIELDS.forEach(key => {
     const input = kValueInputs[key];
     input.addEventListener('input', render);
@@ -3059,7 +3079,7 @@
   function collectSnapshot(){
     const snap = { type: currentType, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
     ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated'].forEach(k => {
-      snap.fields[k] = valueInputs[k].value;
+      snap.fields[k] = k === 'price' ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
     });
     ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated','title'].forEach(k => {
       if(checkboxes[k]) snap.switches[k] = isOn(k);
@@ -3072,7 +3092,7 @@
 
   function applySnapshot(snap){
     Object.keys(snap.fields).forEach(k => {
-      if(valueInputs[k]) valueInputs[k].value = snap.fields[k];
+      if(valueInputs[k]) valueInputs[k].value = k === 'price' ? formatPriceTwoDecimals(snap.fields[k]) : snap.fields[k];
     });
     Object.keys(snap.switches).forEach(k => {
       setOn(k, snap.switches[k]);
@@ -3738,7 +3758,7 @@
           snap.fields.width = match[2] ? `${match[1]}/${match[2]}"` : `${match[1]}"`;
         }
       } else {
-        snap.fields[col.field] = raw;
+        snap.fields[col.field] = col.field === 'price' ? formatPriceTwoDecimals(raw) : raw;
       }
     });
     snap.yarns = ['yarn1','yarn2','yarn3','yarn4','yarn5']
