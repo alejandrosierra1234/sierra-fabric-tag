@@ -1587,18 +1587,29 @@
     html,body{
       background:#ffffff !important;
       margin:0; padding:0;
+      min-height:0 !important;
+      height:auto !important;
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
     .panel, .tab-bar, .preview-meta, .roll-frame::before, .roll-frame::after, .height-warning, .modal-overlay, #database-modal.pinned{
       display:none !important;
     }
-    .app{display:block !important; padding-right:0 !important;}
+    .app{display:block !important; padding-right:0 !important; min-height:0 !important; height:auto !important;}
     .preview-area{
       padding:0; background:#ffffff; display:block;
       position:static; height:auto; overflow:visible;
     }
-    .scale-wrap{ transform:none; margin:0; }
+    .scale-wrap{
+      transform:none;
+      margin:0;
+      break-inside:avoid-page;
+      page-break-inside:avoid;
+    }
+    .scale-wrap:not(:last-child){
+      break-after:page;
+      page-break-after:always;
+    }
     .roll-frame{ box-shadow:none; border-radius:0; }
     .label{
       width:62mm;
@@ -2829,6 +2840,8 @@
   // height constraint: 3.5 inches (88.9mm) max
   // ---------------------------------------------------------------
   const MAX_HEIGHT_MM = 88.9;
+  const PRINT_SAFETY_MM = 1;
+  const MAX_PRINT_CONTENT_MM = MAX_HEIGHT_MM - PRINT_SAFETY_MM;
   // 0.78 was the floor before KNITS added RID/Name/IPSS on top of an
   // already-dense table; a fully-filled KNITS label needs a bit more
   // downscale room to still fit 3.5in instead of blocking print.
@@ -2856,7 +2869,7 @@
     root.style.setProperty('--lscale', 1);
     let naturalHeightMm = pxToMm(firstLabel.offsetHeight);
 
-    if(naturalHeightMm <= MAX_HEIGHT_MM){
+    if(naturalHeightMm <= MAX_PRINT_CONTENT_MM){
       root.style.setProperty('--lscale', 1);
       setHeightExceeded(false);
       return;
@@ -2867,12 +2880,12 @@
       const mid = (lo + hi) / 2;
       root.style.setProperty('--lscale', mid);
       const hMm = pxToMm(firstLabel.offsetHeight);
-      if(hMm <= MAX_HEIGHT_MM){ best = mid; lo = mid; } else { hi = mid; }
+      if(hMm <= MAX_PRINT_CONTENT_MM){ best = mid; lo = mid; } else { hi = mid; }
     }
 
     root.style.setProperty('--lscale', best);
     const finalHeightMm = pxToMm(firstLabel.offsetHeight);
-    setHeightExceeded(finalHeightMm > MAX_HEIGHT_MM);
+    setHeightExceeded(finalHeightMm > MAX_PRINT_CONTENT_MM);
   }
 
   // ---------------------------------------------------------------
@@ -2923,10 +2936,13 @@
       warningEl.classList.remove('visible');
     }
 
-    [printBtn, saveBtn].forEach(btn => {
-      btn.disabled = blocked;
-      btn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
-    });
+    // Keep Print clickable when height is the only problem so the user gets
+    // a clear alert instead of a silent disabled button. Export remains
+    // blocked because it cannot produce a valid one-page label either.
+    printBtn.disabled = missing.length > 0;
+    printBtn.classList.toggle(PRINT_DISABLED_CLASS, missing.length > 0);
+    saveBtn.disabled = blocked;
+    saveBtn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
   }
 
   function render(){
@@ -3003,28 +3019,50 @@
 
   function injectExactPageSize(){
     const labelEl = document.querySelector('#labels-container .label');
-    if(!labelEl) return;
+    if(!labelEl) return null;
 
     const heightMm = pxToMm(labelEl.offsetHeight);
-    // small safety margin so rounding never causes a forced second sheet
-    const safeHeightMm = Math.ceil(heightMm * 10) / 10 + 0.5;
+    // Keep a full millimeter for browser/printer rounding. The auto-fit
+    // routine reserves the same amount inside the 3.5-inch maximum.
+    const safeHeightMm = Math.ceil(heightMm * 10) / 10 + PRINT_SAFETY_MM;
+
+    if(heightExceededState || safeHeightMm > MAX_HEIGHT_MM){
+      return null;
+    }
 
     if(dynamicPageStyleEl) dynamicPageStyleEl.remove();
     dynamicPageStyleEl = document.createElement('style');
     dynamicPageStyleEl.id = 'dynamic-page-size';
     dynamicPageStyleEl.textContent = `@media print { @page { size: 62mm ${safeHeightMm}mm; margin: 0; } }`;
     document.head.appendChild(dynamicPageStyleEl);
+    return safeHeightMm;
+  }
+
+  function prepareSinglePagePrint(){
+    // Recalculate synchronously after Generated or another last-second field
+    // changes, then refuse to open the print dialog if one label could spill.
+    autoFitLabel();
+    const pageHeightMm = injectExactPageSize();
+    if(pageHeightMm === null){
+      alert('La etiqueta no cabe en una sola página. Acorta Finish, Composition, los hilos u otro campo antes de imprimir.');
+      return false;
+    }
+    return true;
   }
 
   document.getElementById('print-btn').addEventListener('click', () => {
-    if(getMissingRequiredFields().length > 0 || heightExceededState){
+    if(getMissingRequiredFields().length > 0){
       refreshActionButtonsState();
+      return;
+    }
+    if(heightExceededState){
+      alert('La etiqueta no cabe en una sola página. Acorta Finish, Composition, los hilos u otro campo antes de imprimir.');
       return;
     }
     setGeneratedTimestamp();
     render();
     requestAnimationFrame(() => {
-      injectExactPageSize();
+      if(!prepareSinglePagePrint()) return;
       setTimeout(() => window.print(), 50);
     });
   });
@@ -4564,7 +4602,10 @@
 
     closeDatabaseModal();
     requestAnimationFrame(() => {
-      injectExactPageSize();
+      if(!prepareSinglePagePrint()){
+        restoreAndCleanup();
+        return;
+      }
       setTimeout(() => window.print(), 50);
     });
   }
@@ -4618,7 +4659,11 @@
     window.addEventListener('afterprint', afterThisPrint);
 
     requestAnimationFrame(() => {
-      injectExactPageSize();
+      if(!prepareSinglePagePrint()){
+        window.removeEventListener('afterprint', afterThisPrint);
+        printNextQueuedRow();
+        return;
+      }
       setTimeout(() => window.print(), 50);
     });
   }
