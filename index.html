@@ -3916,22 +3916,19 @@
   function loadBulkRowsIntoSidebar(toOpen){
     if(toOpen.length === 0) return;
 
-    persistActiveTabSnapshot();
-
-    // On the first upload, replace the empty placeholder. Later uploads
-    // append, so every imported label stays available in the sidebar.
-    if(tabs.length === 1 && !snapshotHasContent(tabs[0].snapshot)){
-      tabs = [];
-    }
-
-    toOpen.forEach(item => {
-      tabs.push(makeTab(item.snapshot));
-    });
-    activeTabId = tabs[tabs.length - 1].id;
+    // The Excel file is the source of truth for the current bulk set.
+    // Re-importing an updated file replaces the previous set instead of
+    // leaving stale duplicates that can look like the update was ignored.
+    tabs = toOpen.map(item => makeTab(item.snapshot));
+    activeTabId = tabs[0].id;
+    tabSearchTerm = '';
+    document.getElementById('tab-search').value = '';
     applySnapshot(getActiveTab().snapshot);
     saveTabsToStorage();
     renderTabBar();
     closeImportModal();
+
+    alert(`Se actualizaron ${toOpen.length} etiquetas desde el Excel.`);
   }
 
   document.getElementById('open-selected-tabs-btn').addEventListener('click', () => {
