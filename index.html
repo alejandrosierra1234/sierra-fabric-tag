@@ -983,7 +983,8 @@
      THE LABEL — editorial composition, no wasted negative space
      ============================================================ */
   .label{
-    width:62mm;
+    width:var(--label-width, 63.5mm);
+    box-sizing:border-box;
     padding:calc(3.4mm * var(--lscale, 1)) calc(5mm * var(--lscale, 1));
     display:flex;
     flex-direction:column;
@@ -991,6 +992,24 @@
     color:#000000;
     background:#ffffff;
     gap:calc(1.6mm * var(--lscale, 1));
+  }
+
+  body[data-print-format="zebra"] .label{
+    min-height:76.2mm;
+    padding:calc(2mm * var(--lscale, 1)) calc(3.6mm * var(--lscale, 1));
+    gap:calc(0.45mm * var(--lscale, 1));
+  }
+  body[data-print-format="zebra"] .label-logo svg{
+    height:calc(5.4mm * var(--lscale, 1));
+  }
+  body[data-print-format="zebra"] .label-title{
+    font-size:calc(4.1mm * var(--lscale, 1));
+  }
+  body[data-print-format="zebra"] .label-block{
+    gap:0;
+  }
+  body[data-print-format="zebra"] .label-row-divider{
+    height:calc(0.18mm * var(--lscale, 1));
   }
 
   .label-header-row{
@@ -1233,7 +1252,7 @@
     font-size:11px;
     color:var(--charcoal);
     line-height:1.5;
-    max-width:62mm;
+    max-width:var(--label-width, 63.5mm);
     display:none;
     flex-shrink:0;
   }
@@ -1583,7 +1602,7 @@
      PRINT
      ============================================================ */
   @media print{
-    @page{ size:62mm auto; margin:0; }
+    @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
     html,body{
       background:#ffffff !important;
       margin:0; padding:0;
@@ -1612,7 +1631,7 @@
     }
     .roll-frame{ box-shadow:none; border-radius:0; }
     .label{
-      width:62mm;
+      width:var(--label-width, 63.5mm);
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
@@ -1864,21 +1883,47 @@
           </div>
 
           <div class="field-row">
-            <button class="switch on" id="chk-cmmts" data-field="cmmts" type="button" role="switch" aria-checked="true"></button>
+            <button class="switch on" id="chk-yardprice" data-field="yardprice" type="button" role="switch" aria-checked="true"></button>
             <div class="field-main">
-              <label class="field-label">Finish</label>
-              <div class="field-input-wrap">
-                <textarea class="field-textarea" id="val-cmmts" data-value="cmmts" placeholder="e.g. Brushed, Peached, Bio Polish"></textarea>
+              <label class="field-label">$ Yarda <span class="char-hint">$ se agrega automático</span></label>
+              <div class="field-input-wrap prefix-wrap">
+                <span class="prefix-symbol">$</span>
+                <input class="field-input prefixed" id="val-yardprice" data-value="yardprice" type="text" inputmode="decimal" placeholder="3.25">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row grouped">
+            <div class="field-main">
+              <div class="grouped-inputs cols-2">
+                <div class="grouped-mini">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-moq" data-field="moq" type="button" role="switch" aria-checked="true"></button>MOQ</span>
+                  <input class="field-input" id="val-moq" data-value="moq" type="text" placeholder="e.g. 1,000 yd">
+                </div>
+                <div class="grouped-mini">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-mcq" data-field="mcq" type="button" role="switch" aria-checked="true"></button>MCQ</span>
+                  <input class="field-input" id="val-mcq" data-value="mcq" type="text" placeholder="e.g. 300 yd">
+                </div>
               </div>
             </div>
           </div>
 
           <div class="field-row">
-            <button class="switch on" id="chk-generated" data-field="generated" type="button" role="switch" aria-checked="true"></button>
+            <button class="switch on" id="chk-categories" data-field="categories" type="button" role="switch" aria-checked="true"></button>
             <div class="field-main">
-              <label class="field-label">Generated <span class="char-hint">automático</span></label>
+              <label class="field-label">Categories</label>
               <div class="field-input-wrap">
-                <input class="field-input" id="val-generated" data-value="generated" type="text" disabled>
+                <input class="field-input" id="val-categories" data-value="categories" type="text" placeholder="e.g. Active, Lounge">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <button class="switch on" id="chk-cmmts" data-field="cmmts" type="button" role="switch" aria-checked="true"></button>
+            <div class="field-main">
+              <label class="field-label">Finish</label>
+              <div class="field-input-wrap">
+                <textarea class="field-textarea" id="val-cmmts" data-value="cmmts" placeholder="e.g. Brushed, Peached, Bio Polish"></textarea>
               </div>
             </div>
           </div>
@@ -2098,6 +2143,15 @@
 
       <!-- ACTIONS -->
       <div class="action-footer">
+        <div class="field-row" style="padding-top:0;">
+          <div class="field-main">
+            <label class="field-label" for="print-format">Formato de impresión</label>
+            <select class="field-input" id="print-format">
+              <option value="zebra">Zebra · 2.5 × 3 in (63.5 × 76.2 mm)</option>
+              <option value="brother">Brother QL-800 · rollo 62 mm</option>
+            </select>
+          </div>
+        </div>
         <div class="copies-row">
           <span class="copies-label">Copies</span>
           <div class="stepper">
@@ -2119,7 +2173,7 @@
           </button>
         </div>
 
-        <p class="print-hint">Configurada para Brother QL-800 · rollo continuo 62mm<br>En el diálogo de impresión, el tamaño de papel debe ser "62mm × Automático"</p>
+        <p class="print-hint" id="print-hint">Zebra · etiqueta 2.5 × 3 pulgadas<br>Imprime al 100%, sin márgenes, en orientación vertical.</p>
       </div>
 
     </div>
@@ -2137,7 +2191,7 @@
 
   <!-- ============ RIGHT PANEL: PREVIEW (sticky) ============ -->
   <div class="preview-area">
-    <div class="preview-meta">Vista previa — 62mm · máx 3.5 in</div>
+    <div class="preview-meta" id="preview-meta">Vista previa — Zebra · 2.5 × 3 in</div>
     <div id="labels-container"></div>
     <div class="height-warning" id="height-warning"></div>
   </div>
@@ -2299,7 +2353,7 @@
   const ALL_TOGGLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles'];
 
   // Fields that have a real switch button in the DOM (id="chk-<key>")
-  const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated'];
+  const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'];
 
   // 'title', 'millarticle', 'composition' are always-required fields with no
   // switch — they're handled specially and always considered "on"
@@ -2370,19 +2424,6 @@
       render();
     });
   });
-
-
-  // Guatemala is always UTC-6, no daylight saving time observed
-  function setGeneratedTimestamp(){
-    const now = new Date();
-    const gtOffsetMs = -6 * 60 * 60 * 1000;
-    const gtTime = new Date(now.getTime() + gtOffsetMs + (now.getTimezoneOffset() * 60000));
-    const pad = (n) => String(n).padStart(2, '0');
-    const stamp = `${gtTime.getFullYear()}-${pad(gtTime.getMonth()+1)}-${pad(gtTime.getDate())}T${pad(gtTime.getHours())}:${pad(gtTime.getMinutes())}:${pad(gtTime.getSeconds())} GT`;
-    valueInputs['generated'].value = stamp;
-  }
-  setGeneratedTimestamp();
-
 
   // ---------------------------------------------------------------
   // YARN dynamic rows
@@ -2677,10 +2718,13 @@
     const yarns = getYarnValues();
 
     const priceOn = isOn('price');
+    const yardPriceOn = isOn('yardprice');
+    const moqOn = isOn('moq');
+    const categoriesOn = isOn('categories');
+    const mcqOn = isOn('mcq');
     const cmmtsOn = isOn('cmmts');
-    const generatedOn = isOn('generated');
 
-    const hasAnyContent = titleOn || millOn || compOn || colorOn || dyedOn || widthOn || gsmOn || diaOn || gaugeOn || needlesOn || yarns.length > 0 || priceOn || cmmtsOn || generatedOn;
+    const hasAnyContent = titleOn || millOn || compOn || colorOn || dyedOn || widthOn || gsmOn || diaOn || gaugeOn || needlesOn || yarns.length > 0 || priceOn || yardPriceOn || moqOn || categoriesOn || mcqOn || cmmtsOn;
 
     if(!hasAnyContent){
       return `<div class="empty-state">Activa al menos un campo para generar la etiqueta.</div>`;
@@ -2705,6 +2749,12 @@
         <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
       </div>`);
 
+    // ---- Event title: fixed across manual and Excel-generated labels ----
+    sections.push(`<div class="label-divider"></div>`);
+    sections.push(`<div class="label-title label-title-standalone">F28 FB Material Trend/Forum</div>`);
+    sections.push(`<div class="label-divider"></div>`);
+    skipNextDivider = true;
+
     // ---- Mill Article / Lot: own full-width row, two columns when both
     // are present, so a long Mill Article never gets cramped or wraps
     // awkwardly the way it did when squeezed beside the logo. ----
@@ -2719,14 +2769,9 @@
       pushRow(`<div class="label-grid-row cols-2">${idRowParts.join('')}</div>`);
     }
 
-    // ---- Title: full-width headline, set apart with its own dividers
-    // and breathing room so it reads as the protagonist of the label ----
+    // ---- Construction type stays editable data beneath the fixed event title ----
     if(titleOn && titleVal){
-      sections.push(`<div class="label-divider"></div>`);
-      sections.push(`<div class="label-title label-title-standalone">${escapeHtml(titleVal)}</div>`);
-      sections.push(`<div class="label-divider"></div>`);
-      contentRowCount++;
-      skipNextDivider = true;
+      pushRow(blockHTML('Construction Type', escapeHtml(titleVal)));
     }
 
     // ---- Composition: full-width block, only if it has content ----
@@ -2819,15 +2864,34 @@
       }
     }
 
+    if(yardPriceOn){
+      const raw = valueInputs['yardprice'].value.trim();
+      if(raw){
+        const display = '$' + formatPriceTwoDecimals(raw);
+        pushRow(`<div class="label-price-block">
+          <span class="label-price-key">$ Yarda</span>
+          <span class="label-price-val">${escapeHtml(display)}</span>
+        </div>`);
+      }
+    }
+
+    const commercialActive = [];
+    if(moqOn && valueInputs['moq'].value.trim()) commercialActive.push({label:'MOQ', val:escapeHtml(valueInputs['moq'].value.trim())});
+    if(mcqOn && valueInputs['mcq'].value.trim()) commercialActive.push({label:'MCQ', val:escapeHtml(valueInputs['mcq'].value.trim())});
+    if(commercialActive.length){
+      const cells = commercialActive.map(f => blockHTML(f.label, f.val)).join('');
+      pushRow(`<div class="label-grid-row cols-2">${cells}${commercialActive.length === 1 ? '<div></div>' : ''}</div>`);
+    }
+
+    if(categoriesOn){
+      const val = escapeHtml(valueInputs['categories'].value.trim());
+      if(val) pushRow(blockHTML('Categories', val));
+    }
+
     // ---- Finish, only if it has content ----
     if(cmmtsOn){
       const val = multilineToHtml(valueInputs['cmmts'].value);
       if(val) pushRow(blockHTML('Finish', val));
-    }
-
-    // ---- Generated (footer, quiet) ----
-    if(generatedOn){
-      sections.push(`<div class="label-footer">Generated ${escapeHtml(valueInputs['generated'].value)}</div>`);
     }
 
     return `
@@ -2837,11 +2901,46 @@
   }
 
   // ---------------------------------------------------------------
-  // height constraint: 3.5 inches (88.9mm) max
+  // Print formats: Zebra die-cut 2.5 × 3 in is the default; the existing
+  // Brother continuous-roll workflow remains available as an option.
   // ---------------------------------------------------------------
-  const MAX_HEIGHT_MM = 88.9;
   const PRINT_SAFETY_MM = 1;
-  const MAX_PRINT_CONTENT_MM = MAX_HEIGHT_MM - PRINT_SAFETY_MM;
+  const PRINT_FORMATS = {
+    zebra: {
+      widthMm: 63.5,
+      heightMm: 76.2,
+      fixedHeight: true,
+      preview: 'Vista previa — Zebra · 2.5 × 3 in',
+      hint: 'Zebra · etiqueta 2.5 × 3 pulgadas<br>Imprime al 100%, sin márgenes, en orientación vertical.'
+    },
+    brother: {
+      widthMm: 62,
+      heightMm: 88.9,
+      fixedHeight: false,
+      preview: 'Vista previa — Brother · 62 mm · máx. 3.5 in',
+      hint: 'Brother QL-800 · rollo continuo 62 mm<br>Usa papel “62 mm × Automático” y escala 100%.'
+    }
+  };
+  let dynamicPageStyleEl = null;
+  let currentPrintFormat = 'zebra';
+  document.body.dataset.printFormat = currentPrintFormat;
+  document.documentElement.style.setProperty('--label-width', `${PRINT_FORMATS.zebra.widthMm}mm`);
+
+  function getPrintConfig(){
+    return PRINT_FORMATS[currentPrintFormat];
+  }
+
+  function setPrintFormat(format){
+    currentPrintFormat = PRINT_FORMATS[format] ? format : 'zebra';
+    const config = getPrintConfig();
+    document.body.dataset.printFormat = currentPrintFormat;
+    document.documentElement.style.setProperty('--label-width', `${config.widthMm}mm`);
+    document.getElementById('preview-meta').textContent = config.preview;
+    document.getElementById('print-hint').innerHTML = config.hint;
+    if(dynamicPageStyleEl) dynamicPageStyleEl.remove();
+    dynamicPageStyleEl = null;
+    render();
+  }
   // 0.78 was the floor before KNITS added RID/Name/IPSS on top of an
   // already-dense table; a fully-filled KNITS label needs a bit more
   // downscale room to still fit 3.5in instead of blocking print.
@@ -2865,11 +2964,12 @@
       return;
     }
     const root = document.documentElement;
+    const maxPrintContentMm = getPrintConfig().heightMm;
 
     root.style.setProperty('--lscale', 1);
     let naturalHeightMm = pxToMm(firstLabel.offsetHeight);
 
-    if(naturalHeightMm <= MAX_PRINT_CONTENT_MM){
+    if(naturalHeightMm <= maxPrintContentMm){
       root.style.setProperty('--lscale', 1);
       setHeightExceeded(false);
       return;
@@ -2880,12 +2980,12 @@
       const mid = (lo + hi) / 2;
       root.style.setProperty('--lscale', mid);
       const hMm = pxToMm(firstLabel.offsetHeight);
-      if(hMm <= MAX_PRINT_CONTENT_MM){ best = mid; lo = mid; } else { hi = mid; }
+      if(hMm <= maxPrintContentMm){ best = mid; lo = mid; } else { hi = mid; }
     }
 
     root.style.setProperty('--lscale', best);
     const finalHeightMm = pxToMm(firstLabel.offsetHeight);
-    setHeightExceeded(finalHeightMm > MAX_PRINT_CONTENT_MM);
+    setHeightExceeded(finalHeightMm > maxPrintContentMm);
   }
 
   // ---------------------------------------------------------------
@@ -2927,7 +3027,8 @@
     const blocked = heightExceededState || missing.length > 0;
 
     if(heightExceededState){
-      warningEl.textContent = 'El contenido es demasiado extenso para 3.5 pulgadas, incluso al tamaño mínimo legible. Quita un campo, un hilo, o acorta los comentarios.';
+      const inches = (getPrintConfig().heightMm / 25.4).toFixed(1).replace('.0', '');
+      warningEl.textContent = `El contenido es demasiado extenso para ${inches} pulgadas, incluso al tamaño mínimo legible. Quita un campo, un hilo, o acorta los comentarios.`;
       warningEl.classList.add('visible');
     } else if(missing.length > 0){
       warningEl.textContent = `Para imprimir o exportar, completa: ${missing.join(', ')}.`;
@@ -2977,7 +3078,7 @@
   // ---------------------------------------------------------------
   // wire text inputs to re-render
   // ---------------------------------------------------------------
-  ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts'].forEach(key => {
+  ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'].forEach(key => {
     const input = valueInputs[key];
     input.addEventListener('input', render);
     input.addEventListener('change', render);
@@ -2985,6 +3086,10 @@
 
   valueInputs['price'].addEventListener('blur', () => {
     valueInputs['price'].value = formatPriceTwoDecimals(valueInputs['price'].value);
+    render();
+  });
+  valueInputs['yardprice'].addEventListener('blur', () => {
+    valueInputs['yardprice'].value = formatPriceTwoDecimals(valueInputs['yardprice'].value);
     render();
   });
 
@@ -2998,6 +3103,8 @@
   // copies stepper
   // ---------------------------------------------------------------
   const copiesInput = document.getElementById('copies-count');
+  const printFormatInput = document.getElementById('print-format');
+  printFormatInput.addEventListener('change', () => setPrintFormat(printFormatInput.value));
   document.getElementById('copies-minus').addEventListener('click', () => {
     copiesInput.value = Math.max(1, parseInt(copiesInput.value,10) - 1);
     render();
@@ -3015,8 +3122,6 @@
   // print across two sheets. To prevent this, we measure the actual
   // rendered height right before printing and inject an exact @page size
   // in mm, instead of relying on `auto` or a remembered paper size.
-  let dynamicPageStyleEl = null;
-
   function injectExactPageSize(){
     const labelEl = document.querySelector('#labels-container .label');
     if(!labelEl) return null;
@@ -3024,23 +3129,26 @@
     const heightMm = pxToMm(labelEl.offsetHeight);
     // Keep a full millimeter for browser/printer rounding. The auto-fit
     // routine reserves the same amount inside the 3.5-inch maximum.
-    const safeHeightMm = Math.ceil(heightMm * 10) / 10 + PRINT_SAFETY_MM;
+    const config = getPrintConfig();
+    const safeHeightMm = config.fixedHeight
+      ? config.heightMm
+      : Math.ceil(heightMm * 10) / 10 + PRINT_SAFETY_MM;
 
-    if(heightExceededState || safeHeightMm > MAX_HEIGHT_MM){
+    if(heightExceededState || heightMm > config.heightMm){
       return null;
     }
 
     if(dynamicPageStyleEl) dynamicPageStyleEl.remove();
     dynamicPageStyleEl = document.createElement('style');
     dynamicPageStyleEl.id = 'dynamic-page-size';
-    dynamicPageStyleEl.textContent = `@media print { @page { size: 62mm ${safeHeightMm}mm; margin: 0; } }`;
+    dynamicPageStyleEl.textContent = `@media print { @page { size: ${config.widthMm}mm ${safeHeightMm}mm; margin: 0; } }`;
     document.head.appendChild(dynamicPageStyleEl);
     return safeHeightMm;
   }
 
   function prepareSinglePagePrint(){
-    // Recalculate synchronously after Generated or another last-second field
-    // changes, then refuse to open the print dialog if one label could spill.
+    // Recalculate synchronously, then refuse to open the print dialog if one
+    // label could spill onto a second physical label.
     autoFitLabel();
     const pageHeightMm = injectExactPageSize();
     if(pageHeightMm === null){
@@ -3059,7 +3167,6 @@
       alert('La etiqueta no cabe en una sola página. Acorta Finish, Composition, los hilos u otro campo antes de imprimir.');
       return;
     }
-    setGeneratedTimestamp();
     render();
     requestAnimationFrame(() => {
       if(!prepareSinglePagePrint()) return;
@@ -3115,11 +3222,11 @@
   let gallerySearchTerm = '';
 
   function collectSnapshot(){
-    const snap = { type: currentType, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
-    ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated'].forEach(k => {
-      snap.fields[k] = k === 'price' ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
+    const snap = { type: currentType, printFormat: currentPrintFormat, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
+    ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'].forEach(k => {
+      snap.fields[k] = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
     });
-    ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','cmmts','generated','title'].forEach(k => {
+    ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts','title'].forEach(k => {
       if(checkboxes[k]) snap.switches[k] = isOn(k);
     });
     KNITS_FIELDS.forEach(k => {
@@ -3129,20 +3236,18 @@
   }
 
   function applySnapshot(snap){
-    Object.keys(snap.fields).forEach(k => {
-      if(valueInputs[k]) valueInputs[k].value = k === 'price' ? formatPriceTwoDecimals(snap.fields[k]) : snap.fields[k];
+    const defaultSnap = emptySnapshot();
+    const snapFields = snap.fields || {};
+    Object.keys(defaultSnap.fields).forEach(k => {
+      const value = snapFields[k] ?? '';
+      if(valueInputs[k]) valueInputs[k].value = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(value) : value;
     });
-    Object.keys(snap.switches).forEach(k => {
-      setOn(k, snap.switches[k]);
+    const snapSwitches = snap.switches || {};
+    Object.keys(defaultSnap.switches).forEach(k => {
+      setOn(k, snapSwitches[k] ?? defaultSnap.switches[k]);
     });
-    // If this snapshot never had a Generated timestamp (e.g. a brand new
-    // tab), fill it in now instead of leaving it blank — it's an automatic
-    // field, the user should never see it empty.
-    if(!valueInputs['generated'].value.trim()){
-      setGeneratedTimestamp();
-    }
     // Parse the combined width value (e.g. 65/67") back into the two visible inputs
-    const widthVal = snap.fields['width'] || '';
+    const widthVal = snapFields.width || '';
     const widthMatch = widthVal.match(/^(\d+)(?:\/(\d+))?"?$/);
     if(widthMatch){
       widthA.value = widthMatch[1] || '';
@@ -3152,9 +3257,17 @@
       widthB.value = '';
     }
     yarnList.innerHTML = '';
-    snap.yarns.forEach(y => addYarnRow(y));
-    if(snap.yarns.length === 0) addYarnRow('');
+    const snapshotYarns = snap.yarns || [];
+    snapshotYarns.forEach(y => addYarnRow(y));
+    if(snapshotYarns.length === 0) addYarnRow('');
     copiesInput.value = snap.copies || '1';
+    currentPrintFormat = PRINT_FORMATS[snap.printFormat] ? snap.printFormat : 'zebra';
+    printFormatInput.value = currentPrintFormat;
+    const printConfig = getPrintConfig();
+    document.body.dataset.printFormat = currentPrintFormat;
+    document.documentElement.style.setProperty('--label-width', `${printConfig.widthMm}mm`);
+    document.getElementById('preview-meta').textContent = printConfig.preview;
+    document.getElementById('print-hint').innerHTML = printConfig.hint;
 
     const kfields = snap.kfields || {};
     KNITS_FIELDS.forEach(k => {
@@ -3333,7 +3446,7 @@
   });
 
   // ---------------------------------------------------------------
-  // BATCH EXPORT — one multi-page PDF, one label per page, 62mm wide
+  // BATCH EXPORT — one multi-page PDF, one label per selected print format
   // ---------------------------------------------------------------
   document.getElementById('export-all-btn').addEventListener('click', async (e) => {
     if(gallery.length === 0) return;
@@ -3359,8 +3472,9 @@
 
         const canvas = await captureLabelCanvas(labelEl, { scale: 4, backgroundColor: '#ffffff' });
         const imgData = canvas.toDataURL('image/png');
-        const widthMm = 62;
-        const heightMm = (canvas.height / canvas.width) * widthMm;
+        const config = getPrintConfig();
+        const widthMm = config.widthMm;
+        const heightMm = config.fixedHeight ? config.heightMm : (canvas.height / canvas.width) * widthMm;
 
         if(!pdf){
           pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [widthMm, heightMm] });
@@ -3415,8 +3529,9 @@
   function emptySnapshot(){
     return {
       type: 'wovens',
-      fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', cmmts:'', generated:'' },
-      switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, cmmts:true, generated:true },
+      printFormat: 'zebra',
+      fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', yardprice:'', moq:'', categories:'', mcq:'', cmmts:'' },
+      switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, yardprice:true, moq:true, categories:true, mcq:true, cmmts:true },
       kfields: emptyKnitsFields(),
       yarns: [],
       copies: '1'
@@ -3509,10 +3624,8 @@
   }
 
   function snapshotHasContent(snapshot){
-    // Generated is filled automatically even on the empty placeholder, so
-    // it must not make that placeholder count as an imported label.
-    const hasFieldContent = Object.entries(snapshot.fields || {})
-      .some(([key, value]) => key !== 'generated' && (value || '').trim().length > 0);
+    const hasFieldContent = Object.values(snapshot.fields || {})
+      .some(value => (value || '').trim().length > 0);
     const hasYarnContent = (snapshot.yarns || []).some(y => (y || '').trim().length > 0);
     return hasFieldContent || hasYarnContent;
   }
@@ -3690,7 +3803,11 @@
     { header: 'Yarn 3', field: 'yarn3' },
     { header: 'Yarn 4', field: 'yarn4' },
     { header: 'Yarn 5', field: 'yarn5' },
-    { header: 'Price', field: 'price' },
+    { header: 'Price / lb ($)', legacyHeaders: ['Price'], field: 'price' },
+    { header: '$ Yarda', legacyHeaders: ['Price / YD', 'Price / YD ($)', 'Yard Price'], field: 'yardprice' },
+    { header: 'MOQ', field: 'moq' },
+    { header: 'Categories', legacyHeaders: ['Category'], field: 'categories' },
+    { header: 'MCQ', field: 'mcq' },
     { header: 'Finish', legacyHeaders: ['Comments'], field: 'cmmts' },
   ];
 
@@ -3700,7 +3817,7 @@
       'Single Jersey', 'NT23-S286-3', 'NT25-SJ369', '95% Modal 5% Spandex', 'Black', 'Piece Dyed',
       '65/67', '200', '32', '27', '',
       '30/1 CPRS 100% Modal', '20D Spandex', '', '', '',
-      '5.69', 'Brushed'
+      '5.69', '3.25', '1,000 yd', 'Active, Lounge', '300 yd', 'Brushed'
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
     ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
@@ -3810,7 +3927,7 @@
           snap.fields.width = match[2] ? `${match[1]}/${match[2]}"` : `${match[1]}"`;
         }
       } else {
-        snap.fields[col.field] = col.field === 'price' ? formatPriceTwoDecimals(raw) : raw;
+        snap.fields[col.field] = (col.field === 'price' || col.field === 'yardprice') ? formatPriceTwoDecimals(raw) : raw;
       }
     });
     snap.yarns = ['yarn1','yarn2','yarn3','yarn4','yarn5']
@@ -4584,7 +4701,6 @@
     const snap = buildSnapshotForDatabaseRow(row);
 
     applySnapshot(snap);
-    setGeneratedTimestamp();
     render();
 
     const missing = getMissingRequiredFields();
@@ -4641,7 +4757,6 @@
     const snap = buildSnapshotForDatabaseRow(row);
 
     applySnapshot(snap);
-    setGeneratedTimestamp();
     render();
 
     const missing = getMissingRequiredFields();
