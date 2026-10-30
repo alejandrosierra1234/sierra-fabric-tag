@@ -2818,7 +2818,6 @@
       return buildKnitsLabelHTML();
     }
     const value = key => valueInputs[key].value.trim();
-    const yarns = getYarnValues();
 
     function dataCell(label, val, valueClass){
       return { label, val, valueClass: valueClass || '' };
@@ -2867,21 +2866,11 @@
     sections.push(gridSection('Material', materialCells, 1));
 
     const technicalCells = [];
-    [['color','Color'],['dyedmethod','Dyed Method'],['width','Width'],['gsm','GSM'],['dia','Dia'],['gauge','Gauge'],['needles','Needles']].forEach(([key,label]) => {
+    [['color','Color'],['dyedmethod','Dyed Method'],['width','Width'],['gsm','GSM'],['needles','Needles']].forEach(([key,label]) => {
       if(isOn(key) && value(key)) technicalCells.push(dataCell(label, escapeHtml(value(key))));
     });
     const technicalCols = technicalCells.length > 6 ? 4 : technicalCells.length > 2 ? 3 : Math.max(1, technicalCells.length);
     sections.push(gridSection('Technical', technicalCells, technicalCols));
-
-    if(yarns.length){
-      sections.push(`<section class="label-ticket-section">
-        <div class="label-ticket-section-title">Yarn</div>
-        ${yarns.map((y, idx) => `<div class="label-ticket-yarn">
-          <span class="label-ticket-key">Yarn ${String(idx + 1).padStart(2, '0')}</span>
-          <span class="label-ticket-val">${escapeHtml(y)}</span>
-        </div>`).join('')}
-      </section>`);
-    }
 
     const commercialCells = [];
     if(isOn('price') && value('price')) commercialCells.push(dataCell('EXW Price / lb', '$' + escapeHtml(formatPriceTwoDecimals(value('price'))), 'ticket-money'));
