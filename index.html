@@ -2062,8 +2062,6 @@
   /* ============================================================
      PRINT
      ============================================================ */
-  /* Keep the staged label laid out before Edge opens its print snapshot.
-     Some Windows builds discard nodes that were display:none at that point. */
   #print-root{
     display:block;
     position:fixed;
@@ -2078,7 +2076,9 @@
       background:#ffffff !important;
       margin:0; padding:0;
       min-height:0 !important;
-      height:auto !important;
+      height:var(--print-total-height, auto) !important;
+      max-height:var(--print-total-height, none) !important;
+      overflow:hidden !important;
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
@@ -2087,14 +2087,19 @@
     }
     .app{display:block !important; padding-right:0 !important; min-height:0 !important; height:auto !important;}
     .preview-area{
-      padding:0; background:#ffffff; display:block;
-      position:static; height:auto; overflow:visible;
+      padding:0 !important;
+      background:#ffffff;
+      display:block !important;
+      position:static !important;
+      top:auto !important;
+      height:auto !important;
+      overflow:visible !important;
     }
     #labels-container{
-      display:block;
-      width:var(--label-width, 63.5mm);
-      margin:0;
-      padding:0;
+      display:block !important;
+      width:var(--label-width, 63.5mm) !important;
+      margin:0 !important;
+      padding:0 !important;
     }
     .scale-wrap{
       transform:none;
@@ -2115,6 +2120,14 @@
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
+    /* Leave 0.2 mm for Chrome's physical-pixel rounding. A box exactly
+       76.2 mm tall can round one pixel beyond a 76.2 mm page and create a
+       second blank sheet. The paper remains 63.5 × 76.2 mm. */
+    body[data-print-format="zebra"] .label{
+      min-height:76mm !important;
+      height:76mm !important;
+      overflow:hidden;
+    }
     .label *{
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
@@ -2125,8 +2138,6 @@
     .label-edit-icon{display:none !important;}
     #labels-container [data-edit-target]{cursor:default; box-shadow:none !important; background:transparent !important;}
 
-    /* Edge is unreliable when printing the complete three-column app. The
-       staged print root is a direct child of body and contains only labels. */
     body.print-isolated > :not(#print-root){display:none !important;}
     body.print-isolated #print-root{
       display:block !important;
@@ -2149,6 +2160,7 @@
     }
     #print-root .print-page:last-child{break-after:auto; page-break-after:auto;}
     #print-root .label{margin:0; box-shadow:none; border-radius:0;}
+
   }
 
   @media (max-width:1180px){
@@ -3812,6 +3824,8 @@
     dynamicPageStyleEl.id = 'dynamic-page-size';
     dynamicPageStyleEl.textContent = `@media print { @page { size: ${config.widthMm}mm ${safeHeightMm}mm; margin: 0; } }`;
     document.head.appendChild(dynamicPageStyleEl);
+    const copies = Math.max(1, parseInt(copiesInput.value, 10) || 1);
+    document.documentElement.style.setProperty('--print-total-height', `${safeHeightMm * copies}mm`);
     return safeHeightMm;
   }
 
@@ -3843,25 +3857,22 @@
     const config = getPrintConfig();
     const root = document.createElement('div');
     root.id = 'print-root';
-    root.innerHTML = Array.from({ length: copies }, () =>
+    root.innerHTML = Array.from({ length:copies }, () =>
       `<div class="print-page" style="width:${config.widthMm}mm;${config.fixedHeight ? `height:${config.heightMm}mm;` : ''}">${buildLabelHTML()}</div>`
     ).join('');
     document.body.appendChild(root);
     document.body.classList.add('print-isolated');
     stagedPrintRoot = root;
-    // Force a screen-layout pass before Edge snapshots the print document.
     void root.offsetHeight;
     window.addEventListener('afterprint', () => cleanupIsolatedPrint(root), { once:true });
     return root;
   }
 
-  function openIsolatedPrintDialog(){
+  function openChromePrintDialog(){
     stageIsolatedPrintRoot();
     setTimeout(() => window.print(), 80);
   }
 
-  // Also protects Ctrl+P and "Print to PDF" when they are invoked directly
-  // from Edge instead of through the app button.
   window.addEventListener('beforeprint', () => {
     autoFitLabel();
     injectExactPageSize();
@@ -3880,7 +3891,7 @@
     render();
     requestAnimationFrame(() => {
       if(!prepareSinglePagePrint()) return;
-      openIsolatedPrintDialog();
+      openChromePrintDialog();
     });
   });
 
@@ -5506,7 +5517,7 @@
         restoreAndCleanup();
         return;
       }
-      openIsolatedPrintDialog();
+      openChromePrintDialog();
     });
   }
 
@@ -5563,7 +5574,7 @@
         printNextQueuedRow();
         return;
       }
-      openIsolatedPrintDialog();
+      openChromePrintDialog();
     });
   }
 
