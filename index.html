@@ -2061,6 +2061,7 @@
   /* ============================================================
      PRINT
      ============================================================ */
+  #print-root{display:none;}
   @media print{
     @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
     html,body{
@@ -2078,6 +2079,12 @@
     .preview-area{
       padding:0; background:#ffffff; display:block;
       position:static; height:auto; overflow:visible;
+    }
+    #labels-container{
+      display:block;
+      width:var(--label-width, 63.5mm);
+      margin:0;
+      padding:0;
     }
     .scale-wrap{
       transform:none;
@@ -2107,6 +2114,28 @@
     }
     .label-edit-icon{display:none !important;}
     #labels-container [data-edit-target]{cursor:default; box-shadow:none !important; background:transparent !important;}
+
+    /* Edge is unreliable when printing the complete three-column app. The
+       staged print root is a direct child of body and contains only labels. */
+    body.print-isolated > :not(#print-root){display:none !important;}
+    body.print-isolated #print-root{
+      display:block !important;
+      width:var(--label-width, 63.5mm);
+      margin:0 !important;
+      padding:0 !important;
+    }
+    #print-root .print-page{
+      width:var(--label-width, 63.5mm);
+      margin:0;
+      padding:0;
+      break-after:page;
+      page-break-after:always;
+      break-inside:avoid;
+      page-break-inside:avoid;
+      overflow:hidden;
+    }
+    #print-root .print-page:last-child{break-after:auto; page-break-after:auto;}
+    #print-root .label{margin:0; box-shadow:none; border-radius:0;}
   }
 
   @media (max-width:1180px){
@@ -3617,6 +3646,10 @@
     container.innerHTML = html;
     requestAnimationFrame(() => {
       autoFitLabel();
+      // Keep an explicit @page rule ready before Edge begins composing its
+      // preview. Injecting it only after clicking Print is too late in some
+      // Edge/Windows combinations and falls back to Letter paper.
+      injectExactPageSize();
       requestAnimationFrame(applyPreviewScale);
     });
 
@@ -3774,6 +3807,46 @@
     return true;
   }
 
+  let stagedPrintRoot = null;
+
+  function cleanupIsolatedPrint(root){
+    if(root?.isConnected) root.remove();
+    if(stagedPrintRoot === root){
+      stagedPrintRoot = null;
+      document.body.classList.remove('print-isolated');
+    }
+  }
+
+  function stageIsolatedPrintRoot(){
+    if(stagedPrintRoot) cleanupIsolatedPrint(stagedPrintRoot);
+    const copies = Math.max(1, parseInt(copiesInput.value, 10) || 1);
+    const config = getPrintConfig();
+    const root = document.createElement('div');
+    root.id = 'print-root';
+    root.setAttribute('aria-hidden', 'true');
+    root.innerHTML = Array.from({ length: copies }, () =>
+      `<div class="print-page" style="width:${config.widthMm}mm;${config.fixedHeight ? `height:${config.heightMm}mm;` : ''}">${buildLabelHTML()}</div>`
+    ).join('');
+    document.body.appendChild(root);
+    document.body.classList.add('print-isolated');
+    stagedPrintRoot = root;
+    window.addEventListener('afterprint', () => cleanupIsolatedPrint(root), { once:true });
+    return root;
+  }
+
+  function openIsolatedPrintDialog(){
+    stageIsolatedPrintRoot();
+    setTimeout(() => window.print(), 80);
+  }
+
+  // Also protects Ctrl+P and "Print to PDF" when they are invoked directly
+  // from Edge instead of through the app button.
+  window.addEventListener('beforeprint', () => {
+    autoFitLabel();
+    injectExactPageSize();
+    if(!stagedPrintRoot) stageIsolatedPrintRoot();
+  });
+
   document.getElementById('print-btn').addEventListener('click', () => {
     if(getMissingRequiredFields().length > 0){
       refreshActionButtonsState();
@@ -3786,7 +3859,7 @@
     render();
     requestAnimationFrame(() => {
       if(!prepareSinglePagePrint()) return;
-      setTimeout(() => window.print(), 50);
+      openIsolatedPrintDialog();
     });
   });
 
@@ -5372,7 +5445,7 @@
         restoreAndCleanup();
         return;
       }
-      setTimeout(() => window.print(), 50);
+      openIsolatedPrintDialog();
     });
   }
 
@@ -5429,7 +5502,7 @@
         printNextQueuedRow();
         return;
       }
-      setTimeout(() => window.print(), 50);
+      openIsolatedPrintDialog();
     });
   }
 
