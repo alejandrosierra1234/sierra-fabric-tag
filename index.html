@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIERRA Fabric Tag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -729,6 +732,7 @@
     margin-top:7px;
   }
   .grouped-inputs.cols-2{grid-template-columns:1fr 1fr;}
+  .grouped-inputs.cols-3{grid-template-columns:1fr 1fr 1fr;}
   .grouped-inputs.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
   .grouped-inputs.cols-5{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
   .grouped-inputs.cols-width-solo{grid-template-columns:1fr 1fr;}
@@ -1137,6 +1141,113 @@
     color:#000000;
     text-align:right;
     white-space:nowrap;
+  }
+
+  /* SIERRA technical ticket — editorial hierarchy for thermal output.
+     Replica carries the event voice; DM Sans reads; DM Mono makes specs,
+     quantities and prices scan as a coherent data system. */
+  .label-wovens-redesign{
+    font-family:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    gap:calc(1.05mm * var(--lscale, 1));
+  }
+  .label-wovens-redesign .label-logo svg{
+    height:calc(5.6mm * var(--lscale, 1));
+  }
+  .label-event-head{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    align-items:end;
+    gap:calc(2mm * var(--lscale, 1));
+    padding:calc(0.8mm * var(--lscale, 1)) 0 calc(1.25mm * var(--lscale, 1));
+    border-bottom:calc(0.65mm * var(--lscale, 1)) solid #000;
+  }
+  .label-event-code{
+    font-family:"DM Mono", ui-monospace, monospace;
+    font-size:calc(2.4mm * var(--lscale, 1));
+    font-weight:500;
+    letter-spacing:0.04em;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .label-event-name{
+    font-family:"Replica", "DM Sans", system-ui, sans-serif;
+    font-size:calc(4.1mm * var(--lscale, 1));
+    font-weight:600;
+    line-height:0.92;
+    text-transform:uppercase;
+    text-align:right;
+  }
+  .label-ticket-section{
+    border:calc(0.25mm * var(--lscale, 1)) solid #000;
+  }
+  .label-ticket-section-title{
+    font-family:"DM Mono", ui-monospace, monospace;
+    font-size:calc(1.75mm * var(--lscale, 1));
+    font-weight:500;
+    line-height:1;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:calc(0.65mm * var(--lscale, 1)) calc(1mm * var(--lscale, 1));
+    border-bottom:calc(0.25mm * var(--lscale, 1)) solid #000;
+  }
+  .label-ticket-grid{
+    display:grid;
+    grid-template-columns:repeat(var(--ticket-cols, 2), minmax(0, 1fr));
+  }
+  .label-ticket-cell{
+    min-width:0;
+    padding:calc(0.75mm * var(--lscale, 1)) calc(1mm * var(--lscale, 1));
+    border-right:calc(0.2mm * var(--lscale, 1)) solid #000;
+    border-bottom:calc(0.2mm * var(--lscale, 1)) solid #000;
+  }
+  .label-ticket-cell.ticket-edge{border-right:none;}
+  .label-ticket-cell.ticket-last-row{border-bottom:none;}
+  .label-ticket-cell.ticket-span-2{grid-column:span 2; border-right:none;}
+  .label-ticket-cell.ticket-span-3{grid-column:span 3; border-right:none;}
+  .label-ticket-key{
+    display:block;
+    font-size:calc(1.75mm * var(--lscale, 1));
+    font-weight:600;
+    line-height:1;
+    letter-spacing:0.035em;
+    text-transform:uppercase;
+  }
+  .label-ticket-val{
+    display:block;
+    margin-top:calc(0.3mm * var(--lscale, 1));
+    font-family:"DM Mono", ui-monospace, monospace;
+    font-size:calc(2.45mm * var(--lscale, 1));
+    font-weight:500;
+    line-height:1.05;
+    overflow-wrap:anywhere;
+  }
+  .label-ticket-val.ticket-prose{
+    font-family:"DM Sans", system-ui, sans-serif;
+    font-weight:600;
+  }
+  .label-ticket-val.ticket-hero{
+    font-family:"Replica", "DM Sans", system-ui, sans-serif;
+    font-size:calc(3.15mm * var(--lscale, 1));
+    line-height:0.98;
+    text-transform:uppercase;
+  }
+  .label-ticket-val.ticket-money{
+    font-size:calc(3mm * var(--lscale, 1));
+  }
+  .label-ticket-yarn{
+    display:grid;
+    grid-template-columns:calc(11mm * var(--lscale, 1)) 1fr;
+    gap:calc(1mm * var(--lscale, 1));
+    padding:calc(0.65mm * var(--lscale, 1)) calc(1mm * var(--lscale, 1));
+    border-bottom:calc(0.2mm * var(--lscale, 1)) solid #000;
+  }
+  .label-ticket-yarn:last-child{border-bottom:none;}
+  .label-ticket-yarn .label-ticket-key{padding-top:calc(0.2mm * var(--lscale, 1));}
+  .label-ticket-yarn .label-ticket-val{margin-top:0;}
+
+  body[data-print-format="zebra"] .label-wovens-redesign{
+    padding:calc(2mm * var(--lscale, 1)) calc(3.2mm * var(--lscale, 1));
+    gap:calc(0.65mm * var(--lscale, 1));
   }
 
   /* KNITS · OLD NAVY FALL 2027 — explicit Arial stack per spec, reuses
@@ -1874,7 +1985,7 @@
           <div class="field-row">
             <button class="switch on" id="chk-price" data-field="price" type="button" role="switch" aria-checked="true"></button>
             <div class="field-main">
-              <label class="field-label">Price / lb <span class="char-hint">$ se agrega automático</span></label>
+              <label class="field-label">Price / lb · EXW <span class="char-hint">$ se agrega automático</span></label>
               <div class="field-input-wrap prefix-wrap">
                 <span class="prefix-symbol">$</span>
                 <input class="field-input prefixed" id="val-price" data-value="price" type="text" inputmode="decimal" placeholder="5.69">
@@ -1885,7 +1996,7 @@
           <div class="field-row">
             <button class="switch on" id="chk-yardprice" data-field="yardprice" type="button" role="switch" aria-checked="true"></button>
             <div class="field-main">
-              <label class="field-label">$ Yarda <span class="char-hint">$ se agrega automático</span></label>
+              <label class="field-label">$ Yarda · EXW <span class="char-hint">$ se agrega automático</span></label>
               <div class="field-input-wrap prefix-wrap">
                 <span class="prefix-symbol">$</span>
                 <input class="field-input prefixed" id="val-yardprice" data-value="yardprice" type="text" inputmode="decimal" placeholder="3.25">
@@ -1895,7 +2006,7 @@
 
           <div class="field-row grouped">
             <div class="field-main">
-              <div class="grouped-inputs cols-2">
+              <div class="grouped-inputs cols-3">
                 <div class="grouped-mini">
                   <span class="grouped-mini-label"><button class="switch on" id="chk-moq" data-field="moq" type="button" role="switch" aria-checked="true"></button>MOQ</span>
                   <input class="field-input" id="val-moq" data-value="moq" type="text" placeholder="e.g. 1,000 yd">
@@ -1903,6 +2014,10 @@
                 <div class="grouped-mini">
                   <span class="grouped-mini-label"><button class="switch on" id="chk-mcq" data-field="mcq" type="button" role="switch" aria-checked="true"></button>MCQ</span>
                   <input class="field-input" id="val-mcq" data-value="mcq" type="text" placeholder="e.g. 300 yd">
+                </div>
+                <div class="grouped-mini">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-lt" data-field="lt" type="button" role="switch" aria-checked="true"></button>LT</span>
+                  <input class="field-input" id="val-lt" data-value="lt" type="text" placeholder="e.g. 6 weeks">
                 </div>
               </div>
             </div>
@@ -2353,7 +2468,7 @@
   const ALL_TOGGLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles'];
 
   // Fields that have a real switch button in the DOM (id="chk-<key>")
-  const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'];
+  const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'];
 
   // 'title', 'millarticle', 'composition' are always-required fields with no
   // switch — they're handled specially and always considered "on"
@@ -2702,202 +2817,86 @@
     if(currentType === 'knits-gis-fw2026'){
       return buildKnitsLabelHTML();
     }
-    const titleOn = isOn('title');
-    const titleVal = valueInputs['title'].value.trim();
-
-    const millOn = isOn('millarticle');
-    const compOn = isOn('composition');
-    const colorOn = isOn('color');
-    const dyedOn = isOn('dyedmethod');
-    const widthOn = isOn('width');
-    const gsmOn = isOn('gsm');
-    const diaOn = isOn('dia');
-    const gaugeOn = isOn('gauge');
-    const needlesOn = isOn('needles');
-
+    const value = key => valueInputs[key].value.trim();
     const yarns = getYarnValues();
 
-    const priceOn = isOn('price');
-    const yardPriceOn = isOn('yardprice');
-    const moqOn = isOn('moq');
-    const categoriesOn = isOn('categories');
-    const mcqOn = isOn('mcq');
-    const cmmtsOn = isOn('cmmts');
-
-    const hasAnyContent = titleOn || millOn || compOn || colorOn || dyedOn || widthOn || gsmOn || diaOn || gaugeOn || needlesOn || yarns.length > 0 || priceOn || yardPriceOn || moqOn || categoriesOn || mcqOn || cmmtsOn;
-
-    if(!hasAnyContent){
-      return `<div class="empty-state">Activa al menos un campo para generar la etiqueta.</div>`;
+    function dataCell(label, val, valueClass){
+      return { label, val, valueClass: valueClass || '' };
     }
 
-    let sections = [];
-    let contentRowCount = 0; // tracks rows that should get a thin divider before them (excludes header/title)
-    let skipNextDivider = false; // set true right after a row that already drew its own bottom divider
-
-    function pushRow(html){
-      if(contentRowCount > 0 && !skipNextDivider){
-        sections.push(`<div class="label-row-divider"></div>`);
-      }
-      skipNextDivider = false;
-      sections.push(html);
-      contentRowCount++;
+    function gridSection(title, inputCells, cols){
+      if(!inputCells.length) return '';
+      const cells = inputCells.slice();
+      const remainder = cells.length % cols || cols;
+      const lastRowStart = cells.length - remainder;
+      const html = cells.map((cell, idx) => {
+        const classes = ['label-ticket-cell'];
+        const isLastCell = idx === cells.length - 1;
+        const grow = isLastCell && remainder < cols ? cols - remainder + 1 : 1;
+        if((idx + 1) % cols === 0 || isLastCell) classes.push('ticket-edge');
+        if(idx >= lastRowStart) classes.push('ticket-last-row');
+        return `<div class="${classes.join(' ')}"${grow > 1 ? ` style="grid-column:span ${grow}"` : ''}>
+          <span class="label-ticket-key">${cell.label}</span>
+          <span class="label-ticket-val ${cell.valueClass}">${cell.val}</span>
+        </div>`;
+      }).join('');
+      return `<section class="label-ticket-section">
+        <div class="label-ticket-section-title">${title}</div>
+        <div class="label-ticket-grid" style="--ticket-cols:${cols}">${html}</div>
+      </section>`;
     }
 
-    // ---- Header: logo + "Manufactured in Honduras" note ----
+    const sections = [];
     sections.push(`<div class="label-header-row">
-        <div class="label-logo">${SIERRA_LOGO_SVG}</div>
-        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
-      </div>`);
+      <div class="label-logo">${SIERRA_LOGO_SVG}</div>
+      <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
+    </div>`);
+    sections.push(`<div class="label-event-head">
+      <span class="label-event-code">F28 · FB</span>
+      <span class="label-event-name">Material Trend / Forum</span>
+    </div>`);
 
-    // ---- Event title: fixed across manual and Excel-generated labels ----
-    sections.push(`<div class="label-divider"></div>`);
-    sections.push(`<div class="label-title label-title-standalone">F28 FB Material Trend/Forum</div>`);
-    sections.push(`<div class="label-divider"></div>`);
-    skipNextDivider = true;
+    const articleCells = [];
+    if(value('millarticle')) articleCells.push(dataCell('Mill Article', multilineToHtml(value('millarticle')), 'ticket-hero'));
+    if(isOn('lot') && value('lot')) articleCells.push(dataCell('Lot', escapeHtml(value('lot'))));
+    sections.push(gridSection('Article', articleCells, 2));
 
-    // ---- Mill Article / Lot: own full-width row, two columns when both
-    // are present, so a long Mill Article never gets cramped or wraps
-    // awkwardly the way it did when squeezed beside the logo. ----
-    const millHeaderVal = millOn ? multilineToHtml(valueInputs['millarticle'].value) : '';
-    const lotHeaderVal = isOn('lot') ? escapeHtml(valueInputs['lot'].value.trim()) : '';
-    const idRowParts = [];
-    if(millHeaderVal) idRowParts.push(blockHTML('Mill Article', millHeaderVal));
-    if(lotHeaderVal) idRowParts.push(blockHTML('Lot', lotHeaderVal));
-    if(idRowParts.length === 1){
-      pushRow(`<div class="label-grid-row cols-2">${idRowParts[0]}<div></div></div>`);
-    } else if(idRowParts.length === 2){
-      pushRow(`<div class="label-grid-row cols-2">${idRowParts.join('')}</div>`);
-    }
+    const materialCells = [];
+    if(value('title')) materialCells.push(dataCell('Construction Type', escapeHtml(value('title')), 'ticket-hero'));
+    if(value('composition')) materialCells.push(dataCell('Composition', multilineToHtml(value('composition')), 'ticket-prose'));
+    sections.push(gridSection('Material', materialCells, 1));
 
-    // ---- Construction type stays editable data beneath the fixed event title ----
-    if(titleOn && titleVal){
-      pushRow(blockHTML('Construction Type', escapeHtml(titleVal)));
-    }
+    const technicalCells = [];
+    [['color','Color'],['dyedmethod','Dyed Method'],['width','Width'],['gsm','GSM'],['dia','Dia'],['gauge','Gauge'],['needles','Needles']].forEach(([key,label]) => {
+      if(isOn(key) && value(key)) technicalCells.push(dataCell(label, escapeHtml(value(key))));
+    });
+    const technicalCols = technicalCells.length > 6 ? 4 : technicalCells.length > 2 ? 3 : Math.max(1, technicalCells.length);
+    sections.push(gridSection('Technical', technicalCells, technicalCols));
 
-    // ---- Composition: full-width block, only if it has content ----
-    if(compOn){
-      const val = multilineToHtml(valueInputs['composition'].value);
-      if(val) pushRow(blockHTML('Composition', val));
-    }
-
-    // ---- Color / Dyed Method: only the cells that actually have content ----
-    const pairActive = [];
-    if(colorOn){
-      const val = escapeHtml(valueInputs['color'].value.trim());
-      if(val) pairActive.push({label:'Color', val});
-    }
-    if(dyedOn){
-      const val = escapeHtml(valueInputs['dyedmethod'].value.trim());
-      if(val) pairActive.push({label:'Dyed Method', val});
-    }
-    if(pairActive.length > 0){
-      const cells = pairActive.map(f => blockHTML(f.label, f.val)).join('');
-      if(pairActive.length === 1){
-        pushRow(`<div class="label-grid-row cols-2">${cells}<div></div></div>`);
-      } else {
-        pushRow(`<div class="label-grid-row cols-2">${cells}</div>`);
-      }
+    if(yarns.length){
+      sections.push(`<section class="label-ticket-section">
+        <div class="label-ticket-section-title">Yarn</div>
+        ${yarns.map((y, idx) => `<div class="label-ticket-yarn">
+          <span class="label-ticket-key">Yarn ${String(idx + 1).padStart(2, '0')}</span>
+          <span class="label-ticket-val">${escapeHtml(y)}</span>
+        </div>`).join('')}
+      </section>`);
     }
 
-    // ---- Width / GSM / Dia / Gauge / Needles: only fields with actual content join the grid ----
-    const quadActive = [];
-    if(widthOn){
-      const val = escapeHtml(valueInputs['width'].value.trim());
-      if(val) quadActive.push({label:'Width', val});
-    }
-    if(gsmOn){
-      const val = escapeHtml(valueInputs['gsm'].value.trim());
-      if(val) quadActive.push({label:'GSM', val});
-    }
-    if(diaOn){
-      const val = escapeHtml(valueInputs['dia'].value.trim());
-      if(val) quadActive.push({label:'Dia', val});
-    }
-    if(gaugeOn){
-      const val = escapeHtml(valueInputs['gauge'].value.trim());
-      if(val) quadActive.push({label:'Gauge', val});
-    }
-    if(needlesOn){
-      const val = escapeHtml(valueInputs['needles'].value.trim());
-      if(val) quadActive.push({label:'Needles', val});
-    }
+    const commercialCells = [];
+    if(isOn('price') && value('price')) commercialCells.push(dataCell('EXW Price / lb', '$' + escapeHtml(formatPriceTwoDecimals(value('price'))), 'ticket-money'));
+    if(isOn('yardprice') && value('yardprice')) commercialCells.push(dataCell('EXW $ Yarda', '$' + escapeHtml(formatPriceTwoDecimals(value('yardprice'))), 'ticket-money'));
+    if(isOn('moq') && value('moq')) commercialCells.push(dataCell('MOQ', escapeHtml(value('moq'))));
+    if(isOn('mcq') && value('mcq')) commercialCells.push(dataCell('MCQ', escapeHtml(value('mcq'))));
+    if(isOn('lt') && value('lt')) commercialCells.push(dataCell('LT', escapeHtml(value('lt'))));
+    sections.push(gridSection('Commercial', commercialCells, 3));
 
-    if(quadActive.length > 0){
-      const n = quadActive.length;
-      let rowSizes;
-      if(n <= 4) rowSizes = [n];
-      else if(n === 5) rowSizes = [3, 2];
-      else if(n === 6) rowSizes = [3, 3];
-      else if(n === 7) rowSizes = [4, 3];
-      else rowSizes = [4, 4];
+    const noteCells = [];
+    if(isOn('categories') && value('categories')) noteCells.push(dataCell('Categories', escapeHtml(value('categories')), 'ticket-prose'));
+    if(isOn('cmmts') && value('cmmts')) noteCells.push(dataCell('Finish', multilineToHtml(value('cmmts')), 'ticket-prose'));
+    sections.push(gridSection('Application', noteCells, 1));
 
-      let cursor = 0;
-      rowSizes.forEach(size => {
-        const chunk = quadActive.slice(cursor, cursor + size);
-        cursor += size;
-        const colClass = chunk.length === 1 ? 'cols-2' : chunk.length === 2 ? 'cols-2' : chunk.length === 3 ? 'cols-3' : 'cols-4';
-        const cells = chunk.map(f => blockHTML(f.label, f.val)).join('');
-        const filler = chunk.length === 1 ? '<div></div>' : '';
-        pushRow(`<div class="label-grid-row ${colClass}">${cells}${filler}</div>`);
-      });
-    }
-
-    // ---- Yarn: each yarn is just another row, same hierarchy as everything else ----
-    if(yarns.length > 0){
-      yarns.forEach((y, idx) => {
-        pushRow(`<div class="label-yarn-row">
-          <span class="label-yarn-tag">Yarn ${String(idx+1).padStart(2,'0')}</span>
-          <span class="label-yarn-val">${escapeHtml(y)}</span>
-        </div>`);
-      });
-    }
-
-    // ---- Price (editorial emphasis), only if it has content ----
-    if(priceOn){
-      const raw = valueInputs['price'].value.trim();
-      if(raw){
-        const display = '$' + formatPriceTwoDecimals(raw);
-        pushRow(`<div class="label-price-block">
-          <span class="label-price-key">Price / lb</span>
-          <span class="label-price-val">${escapeHtml(display)}</span>
-        </div>`);
-      }
-    }
-
-    if(yardPriceOn){
-      const raw = valueInputs['yardprice'].value.trim();
-      if(raw){
-        const display = '$' + formatPriceTwoDecimals(raw);
-        pushRow(`<div class="label-price-block">
-          <span class="label-price-key">$ Yarda</span>
-          <span class="label-price-val">${escapeHtml(display)}</span>
-        </div>`);
-      }
-    }
-
-    const commercialActive = [];
-    if(moqOn && valueInputs['moq'].value.trim()) commercialActive.push({label:'MOQ', val:escapeHtml(valueInputs['moq'].value.trim())});
-    if(mcqOn && valueInputs['mcq'].value.trim()) commercialActive.push({label:'MCQ', val:escapeHtml(valueInputs['mcq'].value.trim())});
-    if(commercialActive.length){
-      const cells = commercialActive.map(f => blockHTML(f.label, f.val)).join('');
-      pushRow(`<div class="label-grid-row cols-2">${cells}${commercialActive.length === 1 ? '<div></div>' : ''}</div>`);
-    }
-
-    if(categoriesOn){
-      const val = escapeHtml(valueInputs['categories'].value.trim());
-      if(val) pushRow(blockHTML('Categories', val));
-    }
-
-    // ---- Finish, only if it has content ----
-    if(cmmtsOn){
-      const val = multilineToHtml(valueInputs['cmmts'].value);
-      if(val) pushRow(blockHTML('Finish', val));
-    }
-
-    return `
-      <div class="label">
-        ${sections.join('\n')}
-      </div>`;
+    return `<div class="label label-wovens-redesign">${sections.filter(Boolean).join('\n')}</div>`;
   }
 
   // ---------------------------------------------------------------
@@ -3078,7 +3077,7 @@
   // ---------------------------------------------------------------
   // wire text inputs to re-render
   // ---------------------------------------------------------------
-  ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'].forEach(key => {
+  ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(key => {
     const input = valueInputs[key];
     input.addEventListener('input', render);
     input.addEventListener('change', render);
@@ -3223,10 +3222,10 @@
 
   function collectSnapshot(){
     const snap = { type: currentType, printFormat: currentPrintFormat, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
-    ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts'].forEach(k => {
+    ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(k => {
       snap.fields[k] = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
     });
-    ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','categories','mcq','cmmts','title'].forEach(k => {
+    ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts','title'].forEach(k => {
       if(checkboxes[k]) snap.switches[k] = isOn(k);
     });
     KNITS_FIELDS.forEach(k => {
@@ -3530,8 +3529,8 @@
     return {
       type: 'wovens',
       printFormat: 'zebra',
-      fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', yardprice:'', moq:'', categories:'', mcq:'', cmmts:'' },
-      switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, yardprice:true, moq:true, categories:true, mcq:true, cmmts:true },
+      fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', yardprice:'', moq:'', mcq:'', lt:'', categories:'', cmmts:'' },
+      switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, yardprice:true, moq:true, mcq:true, lt:true, categories:true, cmmts:true },
       kfields: emptyKnitsFields(),
       yarns: [],
       copies: '1'
@@ -3803,11 +3802,12 @@
     { header: 'Yarn 3', field: 'yarn3' },
     { header: 'Yarn 4', field: 'yarn4' },
     { header: 'Yarn 5', field: 'yarn5' },
-    { header: 'Price / lb ($)', legacyHeaders: ['Price'], field: 'price' },
-    { header: '$ Yarda', legacyHeaders: ['Price / YD', 'Price / YD ($)', 'Yard Price'], field: 'yardprice' },
+    { header: 'EXW Price / lb ($)', legacyHeaders: ['Price / lb ($)', 'Price'], field: 'price' },
+    { header: 'EXW $ Yarda', legacyHeaders: ['$ Yarda', 'Price / YD', 'Price / YD ($)', 'Yard Price'], field: 'yardprice' },
     { header: 'MOQ', field: 'moq' },
-    { header: 'Categories', legacyHeaders: ['Category'], field: 'categories' },
     { header: 'MCQ', field: 'mcq' },
+    { header: 'LT', legacyHeaders: ['Lead Time'], field: 'lt' },
+    { header: 'Categories', legacyHeaders: ['Category'], field: 'categories' },
     { header: 'Finish', legacyHeaders: ['Comments'], field: 'cmmts' },
   ];
 
@@ -3817,7 +3817,7 @@
       'Single Jersey', 'NT23-S286-3', 'NT25-SJ369', '95% Modal 5% Spandex', 'Black', 'Piece Dyed',
       '65/67', '200', '32', '27', '',
       '30/1 CPRS 100% Modal', '20D Spandex', '', '', '',
-      '5.69', '3.25', '1,000 yd', 'Active, Lounge', '300 yd', 'Brushed'
+      '5.69', '3.25', '1,000 yd', '300 yd', '6 weeks', 'Active, Lounge', 'Brushed'
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
     ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
