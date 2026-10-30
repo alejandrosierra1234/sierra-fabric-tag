@@ -987,7 +987,7 @@
      THE LABEL — editorial composition, no wasted negative space
      ============================================================ */
   .label{
-    width:var(--label-width, 85.6mm);
+    width:var(--label-width, 63.5mm);
     box-sizing:border-box;
     padding:calc(3.4mm * var(--lscale, 1)) calc(5mm * var(--lscale, 1));
     display:flex;
@@ -998,25 +998,24 @@
     gap:calc(1.6mm * var(--lscale, 1));
   }
 
-  /* Zebra ZC300 uses ISO CR80 cards in landscape: 85.60 × 53.98 mm.
-     The minimum height preserves the physical card while still allowing
-     autoFitLabel() to detect real overflow before a job is sent. */
+  /* Fixed Zebra label: 2.5 × 3 in, portrait. The minimum height keeps
+     the physical label size while autoFitLabel() still detects overflow. */
   body[data-print-format="zebra"] .label{
-    min-height:53.98mm;
-    padding:calc(1.45mm * var(--lscale, 1)) calc(2.2mm * var(--lscale, 1));
-    gap:calc(0.5mm * var(--lscale, 1));
+    min-height:76.2mm;
+    padding:calc(2mm * var(--lscale, 1)) calc(3.6mm * var(--lscale, 1));
+    gap:calc(0.45mm * var(--lscale, 1));
   }
   body[data-print-format="zebra"] .label-logo svg{
-    height:calc(4.4mm * var(--lscale, 1));
+    height:calc(5.4mm * var(--lscale, 1));
   }
   body[data-print-format="zebra"] .label-title{
-    font-size:calc(3.4mm * var(--lscale, 1));
+    font-size:calc(4.1mm * var(--lscale, 1));
   }
   body[data-print-format="zebra"] .label-block{
     gap:0;
   }
   body[data-print-format="zebra"] .label-row-divider{
-    height:calc(0.15mm * var(--lscale, 1));
+    height:calc(0.18mm * var(--lscale, 1));
   }
 
   .label-header-row{
@@ -1249,67 +1248,8 @@
   .label-ticket-yarn .label-ticket-val{margin-top:0;}
 
   body[data-print-format="zebra"] .label-wovens-redesign{
-    display:grid;
-    grid-template-columns:minmax(0, 0.94fr) minmax(0, 1.06fr);
-    grid-auto-flow:row;
-    align-content:start;
-    padding:calc(1.45mm * var(--lscale, 1)) calc(2.2mm * var(--lscale, 1));
-    gap:calc(0.55mm * var(--lscale, 1)) calc(0.7mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign > .label-header-row,
-  body[data-print-format="zebra"] .label-wovens-redesign > .label-event-head,
-  body[data-print-format="zebra"] .label-wovens-redesign > [data-section="Application"]{
-    grid-column:1 / -1;
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-header-row{
-    min-height:calc(4.6mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-origin-note{
-    font-size:calc(1.25mm * var(--lscale, 1));
-    line-height:1.15;
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-event-head{
-    align-items:center;
-    padding:calc(0.35mm * var(--lscale, 1)) 0 calc(0.55mm * var(--lscale, 1));
-    border-bottom-width:calc(0.45mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-event-code{
-    font-size:calc(1.9mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-event-name{
-    font-size:calc(3.05mm * var(--lscale, 1));
-    line-height:0.95;
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-section{
-    border-width:calc(0.2mm * var(--lscale, 1));
-    min-width:0;
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-section-title{
-    font-size:calc(1.35mm * var(--lscale, 1));
-    padding:calc(0.4mm * var(--lscale, 1)) calc(0.65mm * var(--lscale, 1));
-    border-bottom-width:calc(0.2mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-cell{
-    padding:calc(0.45mm * var(--lscale, 1)) calc(0.65mm * var(--lscale, 1));
-    border-right-width:calc(0.16mm * var(--lscale, 1));
-    border-bottom-width:calc(0.16mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-key{
-    font-size:calc(1.35mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-val{
-    margin-top:calc(0.2mm * var(--lscale, 1));
-    font-size:calc(1.85mm * var(--lscale, 1));
-    line-height:1;
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-val.ticket-hero{
-    font-size:calc(2.35mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign .label-ticket-val.ticket-money{
-    font-size:calc(2.25mm * var(--lscale, 1));
-  }
-  body[data-print-format="zebra"] .label-wovens-redesign > [data-section="Application"][data-cell-count="2"] .label-ticket-grid{
-    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    padding:calc(2mm * var(--lscale, 1)) calc(3.2mm * var(--lscale, 1));
+    gap:calc(0.65mm * var(--lscale, 1));
   }
 
   /* KNITS · OLD NAVY FALL 2027 — explicit Arial stack per spec, reuses
@@ -1425,7 +1365,7 @@
     font-size:11px;
     color:var(--charcoal);
     line-height:1.5;
-    max-width:var(--label-width, 85.6mm);
+    max-width:var(--label-width, 63.5mm);
     display:none;
     flex-shrink:0;
   }
@@ -1775,7 +1715,7 @@
      PRINT
      ============================================================ */
   @media print{
-    @page{ size:var(--label-width, 85.6mm) auto; margin:0; }
+    @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
     html,body{
       background:#ffffff !important;
       margin:0; padding:0;
@@ -1804,7 +1744,7 @@
     }
     .roll-frame{ box-shadow:none; border-radius:0; }
     .label{
-      width:var(--label-width, 85.6mm);
+      width:var(--label-width, 63.5mm);
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
@@ -2324,7 +2264,7 @@
           <div class="field-main">
             <label class="field-label" for="print-format">Formato de impresión</label>
             <select class="field-input" id="print-format">
-              <option value="zebra">Zebra ZC300 · CR80 horizontal (85.60 × 53.98 mm)</option>
+              <option value="zebra">Zebra · 2.5 × 3 in (63.5 × 76.2 mm)</option>
               <option value="brother">Brother QL-800 · rollo 62 mm</option>
             </select>
           </div>
@@ -2346,11 +2286,11 @@
         <div class="action-buttons" style="margin-top:10px;">
           <button class="btn btn-primary" id="print-btn" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            <span class="btn-label">Imprimir ZC300</span>
+            <span class="btn-label">Imprimir Zebra</span>
           </button>
         </div>
 
-        <p class="print-hint" id="print-hint">Zebra ZC300 · tarjeta CR80 horizontal<br>Impresión directa cuando Chrome tiene habilitada la impresión silenciosa.</p>
+        <p class="print-hint" id="print-hint">Zebra · etiqueta 2.5 × 3 pulgadas, orientación vertical<br>Impresión directa cuando Chrome tiene habilitada la impresión silenciosa.</p>
       </div>
 
     </div>
@@ -2368,7 +2308,7 @@
 
   <!-- ============ RIGHT PANEL: PREVIEW (sticky) ============ -->
   <div class="preview-area">
-    <div class="preview-meta" id="preview-meta">Vista previa — Zebra ZC300 · CR80 horizontal</div>
+    <div class="preview-meta" id="preview-meta">Vista previa — Zebra · 2.5 × 3 in</div>
     <div id="labels-container"></div>
     <div class="height-warning" id="height-warning"></div>
   </div>
@@ -2945,23 +2885,23 @@
     const noteCells = [];
     if(isOn('categories') && value('categories')) noteCells.push(dataCell('Categories', escapeHtml(value('categories')), 'ticket-prose'));
     if(isOn('cmmts') && value('cmmts')) noteCells.push(dataCell('Finish', multilineToHtml(value('cmmts')), 'ticket-prose'));
-    sections.push(gridSection('Application', noteCells, noteCells.length > 1 ? 2 : 1));
+    sections.push(gridSection('Application', noteCells, 1));
 
     return `<div class="label label-wovens-redesign">${sections.filter(Boolean).join('\n')}</div>`;
   }
 
   // ---------------------------------------------------------------
-  // Print formats: Zebra ZC300 CR80 landscape is the default; the existing
+  // Print formats: Zebra 2.5 × 3 in portrait is the default; the existing
   // Brother continuous-roll workflow remains available as an option.
   // ---------------------------------------------------------------
   const PRINT_SAFETY_MM = 1;
   const PRINT_FORMATS = {
     zebra: {
-      widthMm: 85.6,
-      heightMm: 53.98,
+      widthMm: 63.5,
+      heightMm: 76.2,
       fixedHeight: true,
-      preview: 'Vista previa — Zebra ZC300 · CR80 horizontal',
-      hint: 'Zebra ZC300 · tarjeta CR80 horizontal (85.60 × 53.98 mm)<br>Impresión directa cuando Chrome tiene habilitada la impresión silenciosa.'
+      preview: 'Vista previa — Zebra · 2.5 × 3 in',
+      hint: 'Zebra · etiqueta 2.5 × 3 pulgadas, orientación vertical<br>Impresión directa cuando Chrome tiene habilitada la impresión silenciosa.'
     },
     brother: {
       widthMm: 62,
