@@ -2061,7 +2061,16 @@
   /* ============================================================
      PRINT
      ============================================================ */
-  #print-root{display:none;}
+  /* Keep the staged label laid out before Edge opens its print snapshot.
+     Some Windows builds discard nodes that were display:none at that point. */
+  #print-root{
+    display:block;
+    position:fixed;
+    left:-100000px;
+    top:0;
+    width:var(--label-width, 63.5mm);
+    pointer-events:none;
+  }
   @media print{
     @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
     html,body{
@@ -2120,6 +2129,9 @@
     body.print-isolated > :not(#print-root){display:none !important;}
     body.print-isolated #print-root{
       display:block !important;
+      position:static !important;
+      left:auto !important;
+      top:auto !important;
       width:var(--label-width, 63.5mm);
       margin:0 !important;
       padding:0 !important;
@@ -2732,6 +2744,10 @@
           <button class="btn btn-primary" id="print-btn" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span class="btn-label">Imprimir Zebra</span>
+          </button>
+          <button class="btn btn-secondary" id="download-pdf-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12v6M9 15l3 3 3-3"/></svg>
+            <span class="btn-label">Descargar PDF para imprimir</span>
           </button>
         </div>
 
@@ -3494,6 +3510,7 @@
   function refreshActionButtonsState(){
     const warningEl = document.getElementById('height-warning');
     const printBtn = document.getElementById('print-btn');
+    const pdfBtn = document.getElementById('download-pdf-btn');
     const saveBtn = document.getElementById('save-gallery-btn');
 
     const missing = getMissingRequiredFields();
@@ -3515,6 +3532,8 @@
     // blocked because it cannot produce a valid one-page label either.
     printBtn.disabled = missing.length > 0;
     printBtn.classList.toggle(PRINT_DISABLED_CLASS, missing.length > 0);
+    pdfBtn.disabled = blocked;
+    pdfBtn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
     saveBtn.disabled = blocked;
     saveBtn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
   }
@@ -3823,13 +3842,14 @@
     const config = getPrintConfig();
     const root = document.createElement('div');
     root.id = 'print-root';
-    root.setAttribute('aria-hidden', 'true');
     root.innerHTML = Array.from({ length: copies }, () =>
       `<div class="print-page" style="width:${config.widthMm}mm;${config.fixedHeight ? `height:${config.heightMm}mm;` : ''}">${buildLabelHTML()}</div>`
     ).join('');
     document.body.appendChild(root);
     document.body.classList.add('print-isolated');
     stagedPrintRoot = root;
+    // Force a screen-layout pass before Edge snapshots the print document.
+    void root.offsetHeight;
     window.addEventListener('afterprint', () => cleanupIsolatedPrint(root), { once:true });
     return root;
   }
@@ -3861,6 +3881,46 @@
       if(!prepareSinglePagePrint()) return;
       openIsolatedPrintDialog();
     });
+  });
+
+  document.getElementById('download-pdf-btn').addEventListener('click', async event => {
+    if(getMissingRequiredFields().length > 0 || heightExceededState){
+      refreshActionButtonsState();
+      return;
+    }
+    const button = event.currentTarget;
+    const originalHTML = button.innerHTML;
+    button.disabled = true;
+    button.textContent = 'Generando PDF...';
+    try{
+      render();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      const labelEl = document.querySelector('#labels-container .label');
+      if(!labelEl) throw new Error('No label available');
+      const canvas = await captureLabelCanvas(labelEl, { scale:4, backgroundColor:'#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const config = getPrintConfig();
+      const widthMm = config.widthMm;
+      const heightMm = config.fixedHeight ? config.heightMm : (canvas.height / canvas.width) * widthMm;
+      const orientation = widthMm > heightMm ? 'landscape' : 'portrait';
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation, unit:'mm', format:[widthMm, heightMm] });
+      const copies = Math.max(1, parseInt(copiesInput.value, 10) || 1);
+      for(let index = 0; index < copies; index++){
+        if(index > 0) pdf.addPage([widthMm, heightMm], orientation);
+        pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+      }
+      const article = (currentType === 'wovens' ? valueInputs.millarticle.value : kValueInputs.millarticle.value).split('\n')[0].trim();
+      pdf.save(`sierra-fabric-tag-${article || 'etiqueta'}.pdf`);
+    } catch(error){
+      console.error(error);
+      alert('No se pudo generar el PDF. Recarga la página e intenta de nuevo.');
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalHTML;
+      refreshActionButtonsState();
+    }
   });
 
   // ---------------------------------------------------------------
