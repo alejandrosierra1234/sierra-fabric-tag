@@ -1168,6 +1168,9 @@
      THE LABEL — editorial composition, no wasted negative space
      ============================================================ */
   .label{
+    --label-type-title:4.1mm;
+    --label-type-body:3.1mm;
+    --label-type-meta:2.1mm;
     width:var(--label-width, 63.5mm);
     box-sizing:border-box;
     padding:calc(3.4mm * var(--lscale, 1)) calc(5mm * var(--lscale, 1));
@@ -1214,7 +1217,7 @@
   }
 
   .label-title{
-    font-size:calc(4.6mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-title) * var(--lscale, 1));
     font-weight:700;
     text-transform:uppercase;
     color:#000000;
@@ -1233,14 +1236,14 @@
   }
 
   .label-block-key{
-    font-size:calc(2.5mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     text-transform:uppercase;
     color:#000000;
   }
 
   .label-block-val{
-    font-size:calc(3.1mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     font-weight:600;
     color:#000000;
     line-height:1.0;
@@ -1276,7 +1279,7 @@
     gap:calc(3mm * var(--lscale, 1));
   }
   .label-yarn-tag{
-    font-size:calc(2.5mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     text-transform:uppercase;
     color:#000000;
@@ -1285,7 +1288,7 @@
     padding-top:calc(0.3mm * var(--lscale,1));
   }
   .label-yarn-val{
-    font-size:calc(3.1mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     font-weight:600;
     color:#000000;
     line-height:1.0;
@@ -1298,25 +1301,25 @@
     justify-content:space-between;
   }
   .label-price-key{
-    font-size:calc(2.5mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     text-transform:uppercase;
     color:#000000;
   }
   .label-price-val{
-    font-size:calc(3.6mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     font-weight:700;
     color:#000000;
   }
 
   .label-footer{
-    font-size:calc(2.2mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     color:#000000;
   }
 
   .label-origin-note{
     flex-shrink:0;
-    font-size:calc(1.55mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:0.02em;
@@ -1345,7 +1348,7 @@
   }
   .label-event-code{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
-    font-size:calc(2.4mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:500;
     letter-spacing:0.04em;
     line-height:1;
@@ -1353,7 +1356,7 @@
   }
   .label-event-name{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
-    font-size:calc(4.1mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-title) * var(--lscale, 1));
     font-weight:600;
     line-height:0.92;
     text-transform:uppercase;
@@ -1364,7 +1367,7 @@
   }
   .label-ticket-section-title{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
-    font-size:calc(1.75mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:500;
     line-height:1;
     letter-spacing:0.12em;
@@ -1389,7 +1392,7 @@
   .label-ticket-cell.ticket-span-3{grid-column:span 3; border-right:none;}
   .label-ticket-key{
     display:block;
-    font-size:calc(1.75mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:600;
     line-height:1;
     letter-spacing:0.035em;
@@ -1399,7 +1402,7 @@
     display:block;
     margin-top:calc(0.3mm * var(--lscale, 1));
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
-    font-size:calc(2.45mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     font-weight:500;
     line-height:1.05;
     overflow-wrap:anywhere;
@@ -1410,12 +1413,12 @@
   }
   .label-ticket-val.ticket-hero{
     font-family:Arial, "Helvetica Neue", Helvetica, sans-serif;
-    font-size:calc(3.15mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     line-height:0.98;
     text-transform:uppercase;
   }
   .label-ticket-val.ticket-money{
-    font-size:calc(3mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
   }
   .label-ticket-yarn{
     display:grid;
@@ -1482,7 +1485,7 @@
     gap:calc(0.6mm * var(--lscale, 1));
   }
   .label-mill-block .label-title{
-    font-size:calc(4mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-title) * var(--lscale, 1));
   }
   .label-knits .label-title-standalone{
     padding:calc(0.5mm * var(--lscale, 1)) 0;
@@ -1491,7 +1494,7 @@
     display:flex;
     align-items:center;
     gap:calc(1mm * var(--lscale, 1));
-    font-size:calc(2.1mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     letter-spacing:0.06em;
     text-transform:uppercase;
@@ -1504,24 +1507,23 @@
     fill:#000000;
   }
 
-  /* Field-level keys read quieter than section titles — lighter weight,
-     tighter tracking, smaller — so the two tiers never blur together. */
+  /* All supporting labels share one compact size; all printable values
+     share one body size, keeping the hierarchy predictable in print. */
   .label-knits .label-block-key{
-    font-size:calc(2.1mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:600;
     letter-spacing:0.02em;
   }
   .label-knits .label-block-val{
-    font-size:calc(2.85mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
     line-height:1.05;
   }
-  /* RID/Name keep a bigger value than ordinary fields even inside the
-     ruled table, so they still read as the label's top hierarchy. */
+  /* Emphasis comes from weight and placement, never an extra type size. */
   .label-knits .label-block-val-hero{
-    font-size:calc(3.6mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-body) * var(--lscale, 1));
   }
   .label-knits .label-block-key-hero{
-    font-size:calc(2.5mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
   }
 
   /* A real bordered ticket table — one continuous ruled box holding every
@@ -1535,7 +1537,7 @@
   }
   .label-knits-table-title{
     text-align:center;
-    font-size:calc(2.35mm * var(--lscale, 1));
+    font-size:calc(var(--label-type-meta) * var(--lscale, 1));
     font-weight:700;
     letter-spacing:0.08em;
     text-transform:uppercase;
