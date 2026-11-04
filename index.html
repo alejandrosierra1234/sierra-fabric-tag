@@ -4583,14 +4583,14 @@
   // Column order matches what gets written into the downloadable template,
   // so reading and writing always stay in sync.
   const EXCEL_COLUMNS = [
-    { header: 'Construction Type', field: 'title', required: true },
-    { header: 'Mill Article', field: 'millarticle', required: true },
+    { header: 'Construction Type', legacyHeaders: ['FABRIC COMPOSITION', 'FABRIC TYPE'], field: 'title', required: true },
+    { header: 'Mill Article', legacyHeaders: ['NT', 'Mill Article #'], field: 'millarticle', required: true },
     { header: 'Lot', field: 'lot' },
-    { header: 'Composition', field: 'composition', required: true },
+    { header: 'Composition', legacyHeaders: ['COMPOCICON', 'COMPOSICION', 'COMPOSICIÓN', 'Content'], field: 'composition', required: true },
     { header: 'Color', field: 'color' },
     { header: 'Dyed Method', field: 'dyedmethod' },
-    { header: 'Width', field: 'width' }, // accepts "65/67" or just "65"
-    { header: 'GSM', field: 'gsm' },
+    { header: 'Width', legacyHeaders: ['STD WIDTH'], field: 'width' }, // accepts "65/67" or just "65"
+    { header: 'GSM', legacyHeaders: ['STD GSM', 'Weight (GSM)'], field: 'gsm' },
     { header: 'Dia', field: 'dia' },
     { header: 'Gauge', field: 'gauge' },
     { header: 'Needles', field: 'needles' },
@@ -4605,7 +4605,8 @@
     { header: 'MCQ', field: 'mcq' },
     { header: 'LT', legacyHeaders: ['Lead Time'], field: 'lt' },
     { header: 'Categories', legacyHeaders: ['Category'], field: 'categories' },
-    { header: 'Finish', legacyHeaders: ['Comments'], field: 'cmmts' },
+    { header: 'Finish', legacyHeaders: ['Comments', 'COMENTARIOS'], field: 'cmmts' },
+    { header: 'Cantidad', legacyHeaders: ['Quantity', 'Copies'], field: 'copies' },
   ];
 
   function downloadExcelTemplate(){
@@ -4614,7 +4615,7 @@
       'Single Jersey', 'NT23-S286-3', 'NT25-SJ369', '95% Modal 5% Spandex', 'Black', 'Piece Dyed',
       '65/67', '200', '32', '27', '',
       '30/1 CPRS 100% Modal', '20D Spandex', '', '', '',
-      '5.69', '3.25', '1,000 yd', '300 yd', '6 weeks', 'Active, Lounge', 'Brushed'
+      '5.69', '3.25', '1,000 yd', '300 yd', '6 weeks', 'Active, Lounge', 'Brushed', '1'
     ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
     ws['!cols'] = headers.map(h => ({ wch: Math.max(14, h.length + 2) }));
@@ -4716,6 +4717,11 @@
     EXCEL_COLUMNS.forEach(col => {
       const raw = excelCell(row, col);
       if(col.field.startsWith('yarn')) return; // handled separately below
+      if(col.field === 'copies'){
+        const copies = parseInt(raw, 10);
+        snap.copies = String(Number.isFinite(copies) ? Math.min(50, Math.max(1, copies)) : 1);
+        return;
+      }
       if(col.field === 'width'){
         // Accept "65/67", "65 / 67", or a bare "65" and normalize to the
         // form's expected "65/67"" pattern.
@@ -4742,6 +4748,32 @@
     return missing;
   }
 
+  function findExcelHeaderRow(sheet){
+    const previewRows = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: '',
+      blankrows: true,
+      raw: false,
+    });
+    const candidateHeaders = EXCEL_COLUMNS.map(col =>
+      [col.header].concat(col.legacyHeaders || []).map(normalizeExcelHeader)
+    );
+    let bestIndex = 0;
+    let bestScore = -1;
+    previewRows.slice(0, 25).forEach((row, index) => {
+      const normalizedCells = new Set(row.map(normalizeExcelHeader).filter(Boolean));
+      const score = candidateHeaders.reduce(
+        (total, aliases) => total + (aliases.some(alias => normalizedCells.has(alias)) ? 1 : 0),
+        0
+      );
+      if(score > bestScore){
+        bestScore = score;
+        bestIndex = index;
+      }
+    });
+    return bestScore >= 2 ? bestIndex : 0;
+  }
+
   let pendingImportRows = []; // [{ rowIndex, snapshot, missing, selected }]
   let pendingImportMode = 'wovens'; // set right before opening the file picker
 
@@ -4754,7 +4786,8 @@
         const data = new Uint8Array(e.target.result);
         const wb = XLSX.read(data, { type: 'array' });
         const sheet = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        const headerRowIndex = findExcelHeaderRow(sheet);
+        const rows = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex, defval: '' });
 
         if(rows.length === 0){
           alert('El archivo no tiene filas de datos. Verifica que uses la plantilla y que la primera fila tenga los encabezados.');
@@ -4765,7 +4798,7 @@
           const missing = validateExcelRow(row);
           const snapshot = snapshotFromExcelRow(row);
           return {
-            rowIndex: idx + 2, // +2 accounts for the header row and 1-indexing, matches what the user sees in Excel
+            rowIndex: headerRowIndex + idx + 2, // header + data offset, using the row number visible in Excel
             snapshot,
             missing,
             selected: missing.length === 0,
