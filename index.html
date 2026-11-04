@@ -3356,11 +3356,6 @@
       <div class="label-logo">${SIERRA_LOGO_SVG}</div>
       <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
     </div>`);
-    sections.push(`<div class="label-event-head">
-      <span class="label-event-code">F28 · FB</span>
-      <span class="label-event-name">Material Trend / Forum</span>
-    </div>`);
-
     const articleCells = [];
     if(value('millarticle')) articleCells.push(dataCell('Mill Article', multilineToHtml(value('millarticle')), 'ticket-hero', 'val-millarticle'));
     if(isOn('lot') && value('lot')) articleCells.push(dataCell('Lot', escapeHtml(value('lot')), '', 'val-lot'));
