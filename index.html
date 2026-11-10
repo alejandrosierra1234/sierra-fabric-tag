@@ -148,7 +148,8 @@
     background:var(--sys-bg);
     border-right:1px solid var(--hairline);
     padding:0;
-    overflow-y:auto;
+    height:100vh;
+    overflow:hidden;
     display:flex;
     flex-direction:column;
   }
@@ -156,8 +157,8 @@
   .panel-header{
     padding:28px 32px 22px;
     border-bottom:1px solid var(--hairline);
-    position:sticky;
-    top:0;
+    position:relative;
+    flex:none;
     background:rgba(245,245,245,0.92);
     backdrop-filter:saturate(180%) blur(14px);
     z-index:5;
@@ -410,6 +411,8 @@
   .panel-body{
     padding:20px 32px 48px;
     flex:1;
+    min-height:0;
+    overflow-y:auto;
   }
 
   .editor-flow{
@@ -1139,8 +1142,8 @@
   }
 
   .quick-print-bar{
-    position:sticky;
-    bottom:0;
+    position:relative;
+    flex:none;
     z-index:9;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto auto;
@@ -2353,7 +2356,7 @@
     .app.mobile-view-editor > .panel{display:flex;}
     .app.mobile-view-tabs > .tab-bar{display:flex;}
     .app.mobile-view-preview > .preview-area{display:flex;}
-    .panel{border-right:none; min-height:calc(100svh - 64px);}
+    .panel{border-right:none; height:calc(100svh - 64px); min-height:calc(100svh - 64px);}
     .tab-bar{
       position:relative;
       height:calc(100svh - 64px);
@@ -4859,7 +4862,7 @@
   const databaseMenu = wireDropdownMenu('database-menu-btn', 'database-menu-dropdown');
   // Close any open dropdown if the panel scrolls (since fixed positioning
   // would otherwise leave it floating in the wrong spot) or the window resizes.
-  document.querySelector('.panel').addEventListener('scroll', () => {
+  document.querySelector('.panel-body').addEventListener('scroll', () => {
     [createMenu, databaseMenu].forEach(({ dropdown }) => dropdown.classList.remove('open'));
   });
   window.addEventListener('resize', () => {
