@@ -1535,7 +1535,10 @@
   [data-edit-target]:focus-visible > .label-edit-icon{opacity:1; transform:scale(1);}
 
   body[data-print-format="zebra"] .label-wovens-redesign{
-    padding:calc(2mm * var(--lscale, 1)) calc(3.2mm * var(--lscale, 1));
+    /* Keep a fixed physical safe area so auto-fit cannot squeeze content
+       toward the cut edge. This modest inset tolerates small Zebra feed
+       variations without sacrificing meaningful printable space. */
+    padding:3mm 4mm;
     gap:calc(0.65mm * var(--lscale, 1));
   }
 
