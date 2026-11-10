@@ -377,6 +377,36 @@
     box-shadow:0 1px 2px rgba(0,0,0,0.08);
   }
 
+  .visibility-toolbar{
+    margin-top:12px;
+    padding:12px;
+    border:1px solid var(--hairline);
+    border-radius:10px;
+    background:var(--paper);
+  }
+  .visibility-toolbar-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .visibility-toolbar-title{font-size:11px; font-weight:700; color:var(--graphite); text-transform:uppercase; letter-spacing:.05em;}
+  .visibility-toolbar-scope{font:500 9.5px/1.2 "DM Mono",ui-monospace,monospace; color:var(--stone);}
+  .visibility-toolbar-actions{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .visibility-action{
+    min-height:44px;
+    padding:0 10px;
+    border:1px solid var(--hairline);
+    border-radius:8px;
+    background:var(--paper);
+    color:var(--charcoal);
+    font:600 11px/1.2 "DM Sans",system-ui,sans-serif;
+    cursor:pointer;
+  }
+  .visibility-action:hover{background:var(--fog);}
+  .visibility-action.bulk{grid-column:1/-1; border-color:var(--charcoal); background:var(--charcoal); color:var(--paper);}
+
   .panel-body{
     padding:20px 32px 48px;
     flex:1;
@@ -634,6 +664,37 @@
     color:var(--stone);
     font:500 10px/1.4 "DM Mono", ui-monospace, monospace;
   }
+  .tab-filter{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    padding:3px;
+    border-radius:9px;
+    background:var(--sys-bg);
+  }
+  .tab-filter-btn{
+    min-height:44px;
+    border:0;
+    border-radius:7px;
+    background:transparent;
+    color:var(--graphite);
+    font:600 10.5px/1 "DM Sans",system-ui,sans-serif;
+    cursor:pointer;
+  }
+  .tab-filter-btn.active{background:var(--charcoal); color:var(--paper);}
+  .tab-bulk-actions{display:grid; grid-template-columns:1fr auto; gap:6px;}
+  .tab-bulk-action{
+    min-height:44px;
+    padding:0 10px;
+    border:1px solid var(--hairline);
+    border-radius:8px;
+    background:var(--paper);
+    color:var(--charcoal);
+    font:600 10.5px/1.2 "DM Sans",system-ui,sans-serif;
+    cursor:pointer;
+  }
+  .tab-bulk-action:hover{background:var(--fog);}
+  .tab-bulk-action.danger{color:#b40b0b;}
+  .tab-bulk-action:disabled{opacity:.4; cursor:not-allowed;}
   .tab-empty{
     padding:16px 10px;
     color:var(--stone);
@@ -696,7 +757,6 @@
   }
   .tab-select:focus-visible,
   .tab-print-toggle:focus-visible,
-  .tab-close:focus-visible,
   .tab-search-clear:focus-visible{
     outline:2px solid var(--teal-deep);
     outline-offset:2px;
@@ -769,21 +829,6 @@
   .tab-print-toggle[aria-pressed="true"]{background:var(--logo-teal); border-color:var(--logo-teal); color:var(--charcoal);}
   .tab-print-toggle svg{width:17px; height:17px;}
 
-  .tab-close{
-    width:44px;
-    height:44px;
-    border-radius:8px;
-    border:none;
-    background:transparent;
-    color:var(--stone);
-    display:grid;
-    place-items:center;
-    cursor:pointer;
-    flex-shrink:0;
-  }
-  .tab-close:hover{background:var(--mist); color:var(--charcoal);}
-  .tab-close svg{width:16px; height:16px;}
-
   .tab-add-btn{
     display:none;
     flex-shrink:0;
@@ -824,15 +869,17 @@
   }
 
   .toggle-all{
+    min-height:44px;
     font-size:12px;
     font-weight:500;
     color:var(--teal-deep);
     cursor:pointer;
     background:none;
     border:none;
-    padding:0;
+    padding:0 8px;
+    border-radius:8px;
   }
-  .toggle-all:hover{opacity:0.7;}
+  .toggle-all:hover{background:var(--mist);}
 
   .card{
     background:var(--paper);
@@ -1090,6 +1137,39 @@
     padding-top:24px;
     border-top:1px solid var(--hairline);
   }
+
+  .quick-print-bar{
+    position:sticky;
+    bottom:0;
+    z-index:9;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    align-items:center;
+    gap:8px;
+    padding:12px 16px;
+    border-top:1px solid var(--hairline);
+    background:rgba(255,255,255,.96);
+    box-shadow:0 -8px 24px rgba(43,43,43,.06);
+  }
+  .quick-print-copy{min-width:0;}
+  .quick-print-title{display:block; color:var(--ink); font-size:12px; font-weight:700;}
+  .quick-print-meta{display:block; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--stone); font:500 9.5px/1.2 "DM Mono",ui-monospace,monospace;}
+  .quick-print-btn{
+    min-height:44px;
+    padding:0 14px;
+    border:1px solid var(--charcoal);
+    border-radius:8px;
+    background:var(--charcoal);
+    color:var(--paper);
+    font:600 11.5px/1 "DM Sans",system-ui,sans-serif;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+  }
+  .quick-print-btn.secondary{width:44px; padding:0; justify-content:center; border-color:var(--hairline); background:var(--paper); color:var(--charcoal);}
+  .quick-print-btn:disabled{opacity:.4; cursor:not-allowed;}
+  .quick-print-btn svg{width:16px; height:16px;}
 
   .copies-row{
     display:flex;
@@ -2388,6 +2468,17 @@
         <button type="button" class="tagtype-btn active" data-type="wovens">WOVENS</button>
         <button type="button" class="tagtype-btn" data-type="knits-gis-fw2026">KNITS · OLD NAVY FALL 2027</button>
       </div>
+      <div class="visibility-toolbar" id="visibility-toolbar">
+        <div class="visibility-toolbar-head">
+          <span class="visibility-toolbar-title">Visibilidad</span>
+          <span class="visibility-toolbar-scope">Etiqueta actual</span>
+        </div>
+        <div class="visibility-toolbar-actions">
+          <button class="visibility-action" id="visibility-essential-btn" type="button">Solo esenciales</button>
+          <button class="visibility-action" id="visibility-all-btn" type="button">Mostrar todo</button>
+          <button class="visibility-action bulk" id="visibility-apply-bulk-btn" type="button">Aplicar esta visibilidad a todas</button>
+        </div>
+      </div>
     </div>
 
     <div class="panel-body">
@@ -2415,7 +2506,7 @@
       <div class="group">
         <div class="group-header">
           <span class="group-title">Fabric Identity</span>
-          <button class="toggle-all" id="toggle-technical">Select all</button>
+          <button class="toggle-all" id="toggle-technical" type="button">Ocultar opcionales</button>
         </div>
         <div class="card">
 
@@ -2512,6 +2603,7 @@
       <div class="group">
         <div class="group-header">
           <span class="group-title">Yarn</span>
+          <button class="toggle-all" id="toggle-yarn" type="button">Ocultar sección</button>
         </div>
         <div class="card">
           <div class="yarn-list" id="yarn-list"></div>
@@ -2526,6 +2618,7 @@
       <div class="group">
         <div class="group-header">
           <span class="group-title">Commercial Notes</span>
+          <button class="toggle-all" id="toggle-commercial" type="button">Ocultar sección</button>
         </div>
         <div class="card">
 
@@ -2843,6 +2936,19 @@
       </div>
 
     </div>
+    <div class="quick-print-bar" aria-label="Acciones rápidas de impresión">
+      <div class="quick-print-copy">
+        <span class="quick-print-title">Lista para imprimir</span>
+        <span class="quick-print-meta" id="quick-print-meta">1 copia · Zebra 2.5 × 3 in</span>
+      </div>
+      <button class="quick-print-btn secondary" id="quick-pdf-btn" type="button" aria-label="Descargar PDF" title="Descargar PDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 12v6M9 15l3 3 3-3"/></svg>
+      </button>
+      <button class="quick-print-btn" id="quick-print-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir
+      </button>
+    </div>
   </div>
 
   <aside class="tab-bar" id="tab-bar" aria-label="Etiquetas cargadas en bulk">
@@ -2861,6 +2967,15 @@
       </button>
     </div>
     <div class="tab-status-summary" id="tab-status-summary" aria-live="polite"></div>
+    <div class="tab-filter" role="group" aria-label="Filtrar etiquetas por estado">
+      <button class="tab-filter-btn active" type="button" data-tab-filter="all">Todas</button>
+      <button class="tab-filter-btn" type="button" data-tab-filter="pending">Pendientes</button>
+      <button class="tab-filter-btn" type="button" data-tab-filter="printed">Impresas</button>
+    </div>
+    <div class="tab-bulk-actions">
+      <button class="tab-bulk-action" id="mark-visible-printed-btn" type="button">Marcar visibles como impresas</button>
+      <button class="tab-bulk-action danger" id="remove-active-tab-btn" type="button">Quitar actual</button>
+    </div>
     <div class="tab-list" id="tab-list" role="list" aria-label="Lista de etiquetas"></div>
     <button class="tab-add-btn" id="tab-add-btn" type="button" aria-hidden="true" tabindex="-1"></button>
   </aside>
@@ -3045,6 +3160,7 @@
   // Field registry
   // ---------------------------------------------------------------
   const ALL_TOGGLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles'];
+  const COMMERCIAL_TOGGLE_FIELDS = ['price','yardprice','moq','mcq','lt','categories','cmmts'];
 
   // Fields that have a real switch button in the DOM (id="chk-<key>")
   const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'];
@@ -3083,6 +3199,7 @@
     document.querySelectorAll('.tagtype-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
     document.getElementById('group-wovens').style.display = type === 'wovens' ? '' : 'none';
     document.getElementById('group-knits').style.display = type === 'knits-gis-fw2026' ? '' : 'none';
+    document.getElementById('visibility-toolbar').style.display = type === 'wovens' ? '' : 'none';
   }
 
   function setTagType(type){
@@ -3108,6 +3225,10 @@
     el.classList.toggle('on', on);
     el.setAttribute('aria-checked', on ? 'true' : 'false');
     if(valueInputs[key]) valueInputs[key].disabled = !on;
+    if(key === 'width'){
+      const widthParts = [document.getElementById('val-width-a'), document.getElementById('val-width-b')];
+      widthParts.forEach(input => { if(input) input.disabled = !on; });
+    }
   }
 
   // Switch click wiring (acts as the old checkbox)
@@ -3115,6 +3236,7 @@
     sw.addEventListener('click', () => {
       const key = sw.dataset.field;
       setOn(key, !isOn(key));
+      syncVisibilityControls();
       render();
     });
   });
@@ -3123,6 +3245,7 @@
   // YARN dynamic rows
   // ---------------------------------------------------------------
   let yarnCounter = 0;
+  let yarnVisible = true;
   const yarnList = document.getElementById('yarn-list');
 
   function addYarnRow(initialValue){
@@ -3205,13 +3328,60 @@
   // ---------------------------------------------------------------
   // Toggle all (fabric identity group)
   // ---------------------------------------------------------------
-  let allTechnicalOn = true;
+  function setFieldGroupVisibility(fields, visible){
+    fields.forEach(key => setOn(key, visible));
+    syncVisibilityControls();
+    render();
+  }
+
+  function syncVisibilityControls(){
+    const syncButton = (id, fields, hideLabel) => {
+      const button = document.getElementById(id);
+      if(!button) return;
+      const anyVisible = fields.some(isOn);
+      button.textContent = anyVisible ? hideLabel : 'Mostrar sección';
+      button.setAttribute('aria-pressed', anyVisible ? 'false' : 'true');
+    };
+    syncButton('toggle-technical', ALL_TOGGLE_FIELDS, 'Ocultar opcionales');
+    syncButton('toggle-commercial', COMMERCIAL_TOGGLE_FIELDS, 'Ocultar sección');
+    const yarnButton = document.getElementById('toggle-yarn');
+    if(yarnButton){
+      yarnButton.textContent = yarnVisible ? 'Ocultar sección' : 'Mostrar sección';
+      yarnButton.setAttribute('aria-pressed', yarnVisible ? 'false' : 'true');
+    }
+  }
+
   document.getElementById('toggle-technical').addEventListener('click', () => {
-    allTechnicalOn = !allTechnicalOn;
-    ALL_TOGGLE_FIELDS.forEach(k => setOn(k, allTechnicalOn));
-    document.getElementById('toggle-technical').textContent = allTechnicalOn ? 'Deselect all' : 'Select all';
+    setFieldGroupVisibility(ALL_TOGGLE_FIELDS, !ALL_TOGGLE_FIELDS.some(isOn));
+  });
+  document.getElementById('toggle-commercial').addEventListener('click', () => {
+    setFieldGroupVisibility(COMMERCIAL_TOGGLE_FIELDS, !COMMERCIAL_TOGGLE_FIELDS.some(isOn));
+  });
+  document.getElementById('toggle-yarn').addEventListener('click', () => {
+    yarnVisible = !yarnVisible;
+    syncVisibilityControls();
     render();
   });
+  document.getElementById('visibility-essential-btn').addEventListener('click', () => {
+    yarnVisible = false;
+    setFieldGroupVisibility(SWITCHABLE_FIELDS, false);
+  });
+  document.getElementById('visibility-all-btn').addEventListener('click', () => {
+    yarnVisible = true;
+    setFieldGroupVisibility(SWITCHABLE_FIELDS, true);
+  });
+  document.getElementById('visibility-apply-bulk-btn').addEventListener('click', () => {
+    persistActiveTabSnapshot();
+    const visibility = Object.fromEntries(SWITCHABLE_FIELDS.map(key => [key, isOn(key)]));
+    tabs.forEach(tab => {
+      tab.snapshot.switches = { ...(tab.snapshot.switches || {}), ...visibility };
+      tab.snapshot.yarnVisible = yarnVisible;
+    });
+    saveTabsToStorage();
+    renderTabBar();
+    alert(`La visibilidad se aplicó a ${tabs.filter(tab => snapshotHasContent(tab.snapshot)).length} etiquetas.`);
+  });
+  syncVisibilityControls();
 
   // ---------------------------------------------------------------
   // helpers
@@ -3462,7 +3632,7 @@
     const yarnCells = Array.from(yarnList.querySelectorAll('.yarn-item input'))
       .map((input, index) => ({ value:input.value.trim(), targetId:input.id, index }))
       .filter(item => item.value);
-    if(yarnCells.length){
+    if(yarnVisible && yarnCells.length){
       sections.push(`<section class="label-ticket-section" data-section="Yarn">
         <div class="label-ticket-section-title">Yarn</div>
         <div>${yarnCells.map(item => `<div class="label-ticket-yarn"${editableAttrs(item.targetId, `Yarn ${item.index + 1}`)}><span class="label-ticket-key">Yarn ${String(item.index + 1).padStart(2,'0')}</span><span class="label-ticket-val">${escapeHtml(item.value)}</span>${LABEL_EDIT_ICON}</div>`).join('')}</div>
@@ -3608,6 +3778,9 @@
     const printBtn = document.getElementById('print-btn');
     const pdfBtn = document.getElementById('download-pdf-btn');
     const saveBtn = document.getElementById('save-gallery-btn');
+    const quickPrintBtn = document.getElementById('quick-print-btn');
+    const quickPdfBtn = document.getElementById('quick-pdf-btn');
+    const quickPrintTitle = document.querySelector('.quick-print-title');
 
     const missing = getMissingRequiredFields();
     const blocked = heightExceededState || missing.length > 0;
@@ -3632,6 +3805,11 @@
     pdfBtn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
     saveBtn.disabled = blocked;
     saveBtn.classList.toggle(PRINT_DISABLED_CLASS, blocked);
+    quickPrintBtn.disabled = missing.length > 0;
+    quickPdfBtn.disabled = blocked;
+    quickPrintTitle.textContent = heightExceededState
+      ? 'La etiqueta excede el alto'
+      : missing.length > 0 ? 'Completa los datos requeridos' : 'Lista para imprimir';
   }
 
   // ---------------------------------------------------------------
@@ -3868,15 +4046,28 @@
   // ---------------------------------------------------------------
   const copiesInput = document.getElementById('copies-count');
   const printFormatInput = document.getElementById('print-format');
-  printFormatInput.addEventListener('change', () => setPrintFormat(printFormatInput.value));
+  function updateQuickPrintBar(){
+    const copies = Math.max(1, parseInt(copiesInput.value,10) || 1);
+    const formatLabel = currentPrintFormat === 'zebra' ? 'Zebra 2.5 × 3 in' : 'Brother 62 mm';
+    document.getElementById('quick-print-meta').textContent = `${copies} ${copies === 1 ? 'copia' : 'copias'} · ${formatLabel}`;
+  }
+  printFormatInput.addEventListener('change', () => {
+    setPrintFormat(printFormatInput.value);
+    updateQuickPrintBar();
+  });
   document.getElementById('copies-minus').addEventListener('click', () => {
     copiesInput.value = Math.max(1, parseInt(copiesInput.value,10) - 1);
+    updateQuickPrintBar();
     render();
   });
   document.getElementById('copies-plus').addEventListener('click', () => {
     copiesInput.value = Math.min(50, parseInt(copiesInput.value,10) + 1);
+    updateQuickPrintBar();
     render();
   });
+  document.getElementById('quick-print-btn').addEventListener('click', () => document.getElementById('print-btn').click());
+  document.getElementById('quick-pdf-btn').addEventListener('click', () => document.getElementById('download-pdf-btn').click());
+  updateQuickPrintBar();
 
   // ---------------------------------------------------------------
   // PRINT
@@ -4066,7 +4257,7 @@
   let gallerySearchTerm = '';
 
   function collectSnapshot(){
-    const snap = { type: currentType, printFormat: currentPrintFormat, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), copies: copiesInput.value };
+    const snap = { type: currentType, printFormat: currentPrintFormat, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), yarnVisible, copies: copiesInput.value };
     ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(k => {
       snap.fields[k] = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
     });
@@ -4087,9 +4278,11 @@
       if(valueInputs[k]) valueInputs[k].value = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(value) : value;
     });
     const snapSwitches = snap.switches || {};
+    yarnVisible = snap.yarnVisible !== false;
     Object.keys(defaultSnap.switches).forEach(k => {
       setOn(k, snapSwitches[k] ?? defaultSnap.switches[k]);
     });
+    syncVisibilityControls();
     // Parse the combined width value (e.g. 65/67") back into the two visible inputs
     const widthVal = snapFields.width || '';
     const widthMatch = widthVal.match(/^(\d+)(?:\/(\d+))?"?$/);
@@ -4107,6 +4300,7 @@
     copiesInput.value = snap.copies || '1';
     currentPrintFormat = PRINT_FORMATS[snap.printFormat] ? snap.printFormat : 'zebra';
     printFormatInput.value = currentPrintFormat;
+    updateQuickPrintBar();
     const printConfig = getPrintConfig();
     document.body.dataset.printFormat = currentPrintFormat;
     document.documentElement.style.setProperty('--label-width', `${printConfig.widthMm}mm`);
@@ -4362,6 +4556,8 @@
   const TABS_STORAGE_KEY = 'sierra-fabric-tag-bulk-tabs-v2';
   const MAX_TABS = Number.POSITIVE_INFINITY;
   let tabSearchTerm = '';
+  let tabFilter = 'all';
+  let currentVisibleTabIds = [];
 
   function emptyKnitsFields(){
     const kf = {};
@@ -4379,6 +4575,7 @@
       switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, yardprice:true, moq:true, mcq:true, lt:true, categories:true, cmmts:true },
       kfields: emptyKnitsFields(),
       yarns: [],
+      yarnVisible: true,
       copies: '1'
     };
   }
@@ -4531,15 +4728,18 @@
     const clearSearchBtn = document.getElementById('tab-search-clear');
     const normalizedSearch = tabSearchTerm.trim().toLowerCase();
     const importedTabs = tabs.filter(tab => snapshotHasContent(tab.snapshot));
-    const visibleTabs = normalizedSearch
+    const searchedTabs = normalizedSearch
       ? importedTabs.filter(tab => `${tabDisplayName(tab)} ${tabSubLabel(tab)} ${tab.printedAt ? 'impresa' : 'pendiente'}`.toLowerCase().includes(normalizedSearch))
       : importedTabs;
+    const visibleTabs = searchedTabs.filter(tab => tabFilter === 'all' || (tabFilter === 'printed' ? Boolean(tab.printedAt) : !tab.printedAt));
+    currentVisibleTabIds = visibleTabs.map(tab => tab.id);
+    document.getElementById('mark-visible-printed-btn').disabled = visibleTabs.length === 0;
 
     const printedCount = importedTabs.filter(tab => tab.printedAt).length;
     countEl.textContent = importedTabs.length;
     countEl.title = printedCount ? `${printedCount} impresas de ${importedTabs.length}` : `${importedTabs.length} etiquetas`;
     clearSearchBtn.hidden = !normalizedSearch;
-    statusEl.textContent = normalizedSearch
+    statusEl.textContent = normalizedSearch || tabFilter !== 'all'
       ? `${visibleTabs.length} de ${importedTabs.length} · ${printedCount} impresas`
       : `${printedCount} impresas · ${Math.max(0, importedTabs.length - printedCount)} pendientes`;
 
@@ -4568,7 +4768,6 @@
           <button class="tab-print-toggle" type="button" data-printed-tab-id="${tab.id}" aria-pressed="${tab.printedAt ? 'true' : 'false'}" aria-label="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}" title="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.6 2.6L16.5 9"/></svg>
           </button>
-          ${tabs.length > 1 ? `<button class="tab-close" type="button" data-close-tab-id="${tab.id}" aria-label="Eliminar etiqueta" title="Eliminar etiqueta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button>` : ''}
         </div>`;
     }).join('');
 
@@ -4583,13 +4782,6 @@
         toggleTabPrinted(toggle.dataset.printedTabId);
       });
     });
-    tabList.querySelectorAll('.tab-close').forEach(closeEl => {
-      closeEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeTab(closeEl.dataset.closeTabId);
-      });
-    });
-
     addBtn.disabled = true;
   }
 
@@ -4605,6 +4797,21 @@
     renderTabBar();
     searchInput.focus();
   });
+  document.querySelectorAll('[data-tab-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+      tabFilter = button.dataset.tabFilter;
+      document.querySelectorAll('[data-tab-filter]').forEach(item => item.classList.toggle('active', item === button));
+      renderTabBar();
+    });
+  });
+  document.getElementById('mark-visible-printed-btn').addEventListener('click', () => {
+    persistActiveTabSnapshot();
+    const now = Date.now();
+    tabs.forEach(tab => { if(currentVisibleTabIds.includes(tab.id)) tab.printedAt = now; });
+    saveTabsToStorage();
+    renderTabBar();
+  });
+  document.getElementById('remove-active-tab-btn').addEventListener('click', () => closeTab(activeTabId));
 
   // The sidebar is its own app column. Keep this function for compatibility
   // with older saved sessions/call sites, but do not offset it by the form.
@@ -4996,7 +5203,9 @@
     tabs = toOpen.map(item => makeTab(item.snapshot));
     activeTabId = tabs[0].id;
     tabSearchTerm = '';
+    tabFilter = 'all';
     document.getElementById('tab-search').value = '';
+    document.querySelectorAll('[data-tab-filter]').forEach(button => button.classList.toggle('active', button.dataset.tabFilter === 'all'));
     applySnapshot(getActiveTab().snapshot);
     saveTabsToStorage();
     renderTabBar();
