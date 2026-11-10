@@ -1533,6 +1533,9 @@
     display:grid;
     grid-template-columns:repeat(var(--ticket-cols, 2), minmax(0, 1fr));
   }
+  .label-ticket-grid + .label-ticket-grid{
+    border-top:calc(0.2mm * var(--lscale, 1)) solid #000;
+  }
   .label-ticket-cell{
     position:relative;
     min-width:0;
@@ -2379,6 +2382,8 @@
   @media (max-width:560px){
     .panel-header{padding:20px 20px 18px;}
     .panel-body{padding:16px 20px 40px;}
+    .technical-working-inputs{grid-template-columns:1fr 1fr;}
+    .technical-working-inputs .grouped-mini:first-child{grid-column:1 / -1;}
     .preview-toolbar{padding-left:12px; gap:8px;}
     .preview-tools{gap:0;}
     .preview-tool{min-width:44px; width:44px; height:44px; padding:0;}
@@ -2541,26 +2546,26 @@
             </div>
           </div>
 
-          <!-- Color + Dyed Method, grouped pair -->
+          <!-- Standard technical values stay separate from the working values. -->
           <div class="field-row grouped">
             <div class="field-main">
               <div class="grouped-inputs cols-2">
                 <div class="grouped-mini">
-                  <span class="grouped-mini-label"><button class="switch on" id="chk-color" data-field="color" type="button" role="switch" aria-checked="true"></button>Color</span>
-                  <input class="field-input" id="val-color" data-value="color" type="text" placeholder="e.g. Black">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-stdwidth" data-field="stdwidth" type="button" role="switch" aria-checked="true"></button>STD Width</span>
+                  <input class="field-input" id="val-stdwidth" data-value="stdwidth" type="text" placeholder="e.g. 65/67&quot;">
                 </div>
                 <div class="grouped-mini">
-                  <span class="grouped-mini-label"><button class="switch on" id="chk-dyedmethod" data-field="dyedmethod" type="button" role="switch" aria-checked="true"></button>Dyed Method</span>
-                  <input class="field-input" id="val-dyedmethod" data-value="dyedmethod" type="text" placeholder="e.g. Piece Dyed">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-stdgsm" data-field="stdgsm" type="button" role="switch" aria-checked="true"></button>STD GSM</span>
+                  <input class="field-input" id="val-stdgsm" data-value="stdgsm" type="text" inputmode="decimal" placeholder="200">
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Width on its own row: needs more room for the fraction inputs -->
+          <!-- Working Width, GSM, and Color share the next row. -->
           <div class="field-row grouped">
             <div class="field-main">
-              <div class="grouped-inputs cols-width-solo">
+              <div class="grouped-inputs cols-3 technical-working-inputs">
                 <div class="grouped-mini">
                   <span class="grouped-mini-label"><button class="switch on" id="chk-width" data-field="width" type="button" role="switch" aria-checked="true"></button>Width</span>
                   <div class="width-fraction-wrap">
@@ -2571,18 +2576,22 @@
                   </div>
                   <input type="hidden" id="val-width">
                 </div>
+                <div class="grouped-mini">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-gsm" data-field="gsm" type="button" role="switch" aria-checked="true"></button>GSM</span>
+                  <input class="field-input" id="val-gsm" data-value="gsm" type="text" inputmode="decimal" placeholder="200">
+                </div>
+                <div class="grouped-mini">
+                  <span class="grouped-mini-label"><button class="switch on" id="chk-color" data-field="color" type="button" role="switch" aria-checked="true"></button>Color</span>
+                  <input class="field-input" id="val-color" data-value="color" type="text" placeholder="e.g. Black">
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- GSM / Dia / Gauge / Needles, grouped quad -->
+          <!-- Remaining machine details. -->
           <div class="field-row grouped">
             <div class="field-main">
-              <div class="grouped-inputs cols-4">
-                <div class="grouped-mini">
-                  <span class="grouped-mini-label"><button class="switch on" id="chk-gsm" data-field="gsm" type="button" role="switch" aria-checked="true"></button>GSM</span>
-                  <input class="field-input" id="val-gsm" data-value="gsm" type="text" placeholder="200">
-                </div>
+              <div class="grouped-inputs cols-3">
                 <div class="grouped-mini">
                   <span class="grouped-mini-label"><button class="switch on" id="chk-dia" data-field="dia" type="button" role="switch" aria-checked="true"></button>Dia</span>
                   <input class="field-input" id="val-dia" data-value="dia" type="text" placeholder="32">
@@ -2595,6 +2604,17 @@
                   <span class="grouped-mini-label"><button class="switch" id="chk-needles" data-field="needles" type="button" role="switch" aria-checked="false"></button>Needles</span>
                   <input class="field-input" id="val-needles" data-value="needles" type="text" placeholder="96" disabled>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dyed Method intentionally closes the technical sequence. -->
+          <div class="field-row">
+            <button class="switch on" id="chk-dyedmethod" data-field="dyedmethod" type="button" role="switch" aria-checked="true"></button>
+            <div class="field-main">
+              <label class="field-label" for="val-dyedmethod">Dyed Method</label>
+              <div class="field-input-wrap">
+                <input class="field-input" id="val-dyedmethod" data-value="dyedmethod" type="text" placeholder="e.g. Piece Dyed">
               </div>
             </div>
           </div>
@@ -3162,11 +3182,11 @@
   // ---------------------------------------------------------------
   // Field registry
   // ---------------------------------------------------------------
-  const ALL_TOGGLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles'];
+  const ALL_TOGGLE_FIELDS = ['lot','stdwidth','stdgsm','width','gsm','color','dia','gauge','needles','dyedmethod'];
   const COMMERCIAL_TOGGLE_FIELDS = ['price','yardprice','moq','mcq','lt','categories','cmmts'];
 
   // Fields that have a real switch button in the DOM (id="chk-<key>")
-  const SWITCHABLE_FIELDS = ['lot','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'];
+  const SWITCHABLE_FIELDS = ['lot','stdwidth','stdgsm','width','gsm','color','dia','gauge','needles','dyedmethod','price','yardprice','moq','mcq','lt','categories','cmmts'];
 
   // 'title', 'millarticle', 'composition' are always-required fields with no
   // switch — they're handled specially and always considered "on"
@@ -3584,8 +3604,7 @@
       return { label, val, valueClass: valueClass || '', targetId };
     }
 
-    function gridSection(title, inputCells, cols){
-      if(!inputCells.length) return '';
+    function ticketGrid(inputCells, cols){
       const cells = inputCells.slice();
       const remainder = cells.length % cols || cols;
       const lastRowStart = cells.length - remainder;
@@ -3601,9 +3620,15 @@
           ${cell.targetId ? LABEL_EDIT_ICON : ''}
         </div>`;
       }).join('');
+      return `<div class="label-ticket-grid" style="--ticket-cols:${cols}">${html}</div>`;
+    }
+
+    function gridSection(title, inputCells, cols){
+      if(!inputCells.length) return '';
+      const cells = inputCells.slice();
       return `<section class="label-ticket-section" data-section="${escapeAttr(title)}" data-cell-count="${cells.length}">
         <div class="label-ticket-section-title">${title}</div>
-        <div class="label-ticket-grid" style="--ticket-cols:${cols}">${html}</div>
+        ${ticketGrid(cells, cols)}
       </section>`;
     }
 
@@ -3622,15 +3647,25 @@
     if(value('composition')) materialCells.push(dataCell('Composition', multilineToHtml(value('composition')), 'ticket-prose', 'val-composition'));
     sections.push(gridSection('Material', materialCells, 1));
 
+    const standardCells = [];
+    [['stdwidth','STD Width'],['stdgsm','STD GSM']].forEach(([key,label]) => {
+      if(isOn(key) && value(key)) standardCells.push(dataCell(label, escapeHtml(value(key)), '', `val-${key}`));
+    });
     const technicalCells = [];
-    // Keep Width, GSM, and Color together on the first row. Dyed Method
-    // stays last so that, when all technical fields are present, it sits
-    // alone on the final row.
+    // Working Width, GSM, and Color stay together after the standard pair.
+    // Dyed Method remains the final cell and expands across its last row.
     [['width','Width'],['gsm','GSM'],['color','Color'],['dia','Dia'],['gauge','Gauge'],['needles','Needles'],['dyedmethod','Dyed Method']].forEach(([key,label]) => {
       if(isOn(key) && value(key)) technicalCells.push(dataCell(label, escapeHtml(value(key)), '', key === 'width' ? 'val-width-a' : `val-${key}`));
     });
-    const technicalCols = technicalCells.length > 2 ? 3 : Math.max(1, technicalCells.length);
-    sections.push(gridSection('Technical', technicalCells, technicalCols));
+    if(standardCells.length || technicalCells.length){
+      const technicalGrids = [];
+      if(standardCells.length) technicalGrids.push(ticketGrid(standardCells, 2));
+      if(technicalCells.length) technicalGrids.push(ticketGrid(technicalCells, technicalCells.length > 2 ? 3 : Math.max(1, technicalCells.length)));
+      sections.push(`<section class="label-ticket-section" data-section="Technical" data-cell-count="${standardCells.length + technicalCells.length}">
+        <div class="label-ticket-section-title">Technical</div>
+        ${technicalGrids.join('')}
+      </section>`);
+    }
 
     const yarnCells = Array.from(yarnList.querySelectorAll('.yarn-item input'))
       .map((input, index) => ({ value:input.value.trim(), targetId:input.id, index }))
@@ -4023,7 +4058,7 @@
   // ---------------------------------------------------------------
   // wire text inputs to re-render
   // ---------------------------------------------------------------
-  ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(key => {
+  ['title','millarticle','lot','composition','stdwidth','stdgsm','width','gsm','color','dia','gauge','needles','dyedmethod','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(key => {
     const input = valueInputs[key];
     input.addEventListener('input', render);
     input.addEventListener('change', render);
@@ -4261,10 +4296,10 @@
 
   function collectSnapshot(){
     const snap = { type: currentType, printFormat: currentPrintFormat, fields: {}, switches: {}, kfields: {}, yarns: getYarnValues(), yarnVisible, copies: copiesInput.value };
-    ['title','millarticle','lot','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(k => {
+    ['title','millarticle','lot','composition','stdwidth','stdgsm','width','gsm','color','dia','gauge','needles','dyedmethod','price','yardprice','moq','mcq','lt','categories','cmmts'].forEach(k => {
       snap.fields[k] = (k === 'price' || k === 'yardprice') ? formatPriceTwoDecimals(valueInputs[k].value) : valueInputs[k].value;
     });
-    ['millarticle','composition','color','dyedmethod','width','gsm','dia','gauge','needles','price','yardprice','moq','mcq','lt','categories','cmmts','title'].forEach(k => {
+    ['millarticle','composition','stdwidth','stdgsm','width','gsm','color','dia','gauge','needles','dyedmethod','price','yardprice','moq','mcq','lt','categories','cmmts','title'].forEach(k => {
       if(checkboxes[k]) snap.switches[k] = isOn(k);
     });
     KNITS_FIELDS.forEach(k => {
@@ -4574,8 +4609,8 @@
     return {
       type: 'wovens',
       printFormat: 'zebra',
-      fields: { title:'', millarticle:'', lot:'', composition:'', color:'', dyedmethod:'', width:'', gsm:'', dia:'', gauge:'', needles:'', price:'', yardprice:'', moq:'', mcq:'', lt:'', categories:'', cmmts:'' },
-      switches: { lot:true, color:true, dyedmethod:true, width:true, gsm:true, dia:true, gauge:true, needles:false, price:true, yardprice:true, moq:true, mcq:true, lt:true, categories:true, cmmts:true },
+      fields: { title:'', millarticle:'', lot:'', composition:'', stdwidth:'', stdgsm:'', width:'', gsm:'', color:'', dia:'', gauge:'', needles:'', dyedmethod:'', price:'', yardprice:'', moq:'', mcq:'', lt:'', categories:'', cmmts:'' },
+      switches: { lot:true, stdwidth:true, stdgsm:true, width:true, gsm:true, color:true, dia:true, gauge:true, needles:false, dyedmethod:true, price:true, yardprice:true, moq:true, mcq:true, lt:true, categories:true, cmmts:true },
       kfields: emptyKnitsFields(),
       yarns: [],
       yarnVisible: true,
@@ -4888,8 +4923,10 @@
     { header: 'Composition', legacyHeaders: ['COMPOCICON', 'COMPOSICION', 'COMPOSICIÓN', 'Content'], field: 'composition', required: true },
     { header: 'Color', field: 'color' },
     { header: 'Dyed Method', field: 'dyedmethod' },
-    { header: 'Width', legacyHeaders: ['STD WIDTH'], field: 'width' }, // accepts "65/67" or just "65"
-    { header: 'GSM', legacyHeaders: ['STD GSM', 'Weight (GSM)'], field: 'gsm' },
+    { header: 'STD Width', field: 'stdwidth' },
+    { header: 'STD GSM', field: 'stdgsm' },
+    { header: 'Width', field: 'width' }, // accepts "65/67" or just "65"
+    { header: 'GSM', legacyHeaders: ['Weight (GSM)'], field: 'gsm' },
     { header: 'Dia', field: 'dia' },
     { header: 'Gauge', field: 'gauge' },
     { header: 'Needles', field: 'needles' },
@@ -4912,7 +4949,7 @@
     const headers = EXCEL_COLUMNS.map(c => c.header);
     const sampleRow = [
       'Single Jersey', 'NT23-S286-3', 'NT25-SJ369', '95% Modal 5% Spandex', 'Black', 'Piece Dyed',
-      '65/67', '200', '32', '27', '',
+      '64/66', '195', '65/67', '200', '32', '27', '',
       '30/1 CPRS 100% Modal', '20D Spandex', '', '', '',
       '5.69', '3.25', '1,000 yd', '300 yd', '6 weeks', 'Active, Lounge', 'Brushed', '1'
     ];
@@ -5021,12 +5058,12 @@
         snap.copies = String(Number.isFinite(copies) ? Math.min(50, Math.max(1, copies)) : 1);
         return;
       }
-      if(col.field === 'width'){
+      if(col.field === 'width' || col.field === 'stdwidth'){
         // Accept "65/67", "65 / 67", or a bare "65" and normalize to the
         // form's expected "65/67"" pattern.
         const match = raw.match(/(\d+)\s*\/?\s*(\d+)?/);
         if(match){
-          snap.fields.width = match[2] ? `${match[1]}/${match[2]}"` : `${match[1]}"`;
+          snap.fields[col.field] = match[2] ? `${match[1]}/${match[2]}"` : `${match[1]}"`;
         }
       } else {
         snap.fields[col.field] = (col.field === 'price' || col.field === 'yardprice') ? formatPriceTwoDecimals(raw) : raw;
@@ -5687,6 +5724,8 @@
     snap.fields.dia = cleanCell(row[DB_COLUMN_MAP.dia]);
     snap.fields.gauge = cleanCell(row[DB_COLUMN_MAP.gauge]);
     snap.fields.needles = cleanCell(row[DB_COLUMN_MAP.needles]);
+    snap.fields.stdwidth = formatWidthValue(row['STD WIDTH']);
+    snap.fields.stdgsm = formatGsmValue(row['STD GSM']);
     snap.fields.width = widthValue;
     snap.fields.gsm = gsmValue;
     snap.yarns = DB_YARN_COLUMNS.map(col => cleanCell(row[col])).filter(v => v.length > 0);
