@@ -534,8 +534,8 @@
     display:flex;
     flex-direction:column;
     align-items:stretch;
-    gap:10px;
-    padding:20px 14px;
+    gap:12px;
+    padding:24px 16px 16px;
     background:var(--paper);
     border-right:1px solid var(--hairline);
     position:sticky;
@@ -551,40 +551,89 @@
     justify-content:space-between;
     gap:10px;
   }
+  .tab-sidebar-copy{min-width:0;}
   .tab-sidebar-title{
     margin:0;
     color:var(--ink);
-    font-size:12px;
-    font-weight:800;
-    letter-spacing:.08em;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:.06em;
     text-transform:uppercase;
   }
+  .tab-sidebar-subtitle{
+    margin:4px 0 0;
+    color:var(--stone);
+    font-size:10.5px;
+    line-height:1.35;
+  }
   .tab-sidebar-count{
-    min-width:24px;
-    height:22px;
-    padding:0 7px;
+    min-width:36px;
+    height:32px;
+    padding:0 10px;
     border-radius:999px;
     background:var(--sys-bg);
     color:var(--graphite);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:11px;
+    font:600 12px/1 "DM Mono", ui-monospace, monospace;
     font-weight:700;
   }
-  .tab-search{
+  .tab-search-shell{
+    position:relative;
+    display:flex;
+    align-items:center;
     width:100%;
-    height:34px;
+    height:44px;
     border:1px solid var(--hairline);
-    border-radius:8px;
+    border-radius:10px;
     background:var(--sys-bg);
+    color:var(--stone);
+    transition:border-color 160ms cubic-bezier(.2,0,0,1), background-color 160ms cubic-bezier(.2,0,0,1), box-shadow 160ms cubic-bezier(.2,0,0,1);
+  }
+  .tab-search-shell:focus-within{
+    border-color:var(--logo-teal);
+    background:var(--paper);
+    box-shadow:0 0 0 3px rgba(22,205,190,.14);
+  }
+  .tab-search-icon{
+    width:16px;
+    height:16px;
+    margin-left:12px;
+    flex:none;
+  }
+  .tab-search{
+    min-width:0;
+    height:100%;
+    flex:1;
+    border:0;
+    background:transparent;
     color:var(--ink);
     font:inherit;
     font-size:12px;
-    padding:0 10px;
+    padding:0 8px;
     outline:none;
   }
-  .tab-search:focus{border-color:var(--stone); background:var(--paper);}
+  .tab-search::-webkit-search-cancel-button{display:none;}
+  .tab-search-clear{
+    width:44px;
+    height:44px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:var(--stone);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+  }
+  .tab-search-clear:hover{background:var(--mist); color:var(--charcoal);}
+  .tab-search-clear[hidden]{display:none;}
+  .tab-search-clear svg{width:15px; height:15px;}
+  .tab-status-summary{
+    min-height:16px;
+    color:var(--stone);
+    font:500 10px/1.4 "DM Mono", ui-monospace, monospace;
+  }
   .tab-empty{
     padding:16px 10px;
     color:var(--stone);
@@ -596,12 +645,13 @@
     display:flex;
     flex-direction:column;
     align-items:stretch;
-    gap:4px;
+    gap:2px;
     flex:1;
     min-width:0;
     min-height:0;
     overflow-y:auto;
-    padding-right:2px;
+    padding:2px 4px 12px 0;
+    scrollbar-gutter:stable;
   }
   .tab-list::-webkit-scrollbar{width:5px;}
   .tab-list::-webkit-scrollbar-thumb{background:var(--mist); border-radius:999px;}
@@ -609,30 +659,48 @@
   .tab-item{
     display:flex;
     align-items:center;
-    gap:6px;
-    padding:7px 8px 7px 12px;
-    border-radius:8px;
+    gap:2px;
+    border:1px solid transparent;
+    border-radius:10px;
     background:transparent;
     color:var(--graphite);
-    font-size:12px;
-    font-weight:500;
-    cursor:pointer;
     width:100%;
-    min-height:44px;
-    text-align:left;
-    transition:background-color .15s ease;
-    border:none;
+    min-height:64px;
+    transition:background-color 160ms cubic-bezier(.2,0,0,1), border-color 160ms cubic-bezier(.2,0,0,1);
   }
-  .tab-item:hover{background:rgba(0,0,0,0.04);}
+  .tab-item:hover{background:var(--sys-bg);}
   .tab-item.active{
-    background:var(--paper);
+    background:var(--surface-context);
+    border-color:var(--border-context);
     color:var(--ink);
-    font-weight:700;
-    box-shadow:0 1px 1px rgba(0,0,0,0.06);
   }
-  .tab-item.active .tab-dot{background:var(--lime-accent);}
-  .tab-item.printed{background:rgba(22,205,190,.055);}
+  .tab-item.active .tab-dot{background:var(--logo-teal);}
+  .tab-item.printed:not(.active){background:rgba(22,205,190,.045);}
   .tab-item.printed .tab-name{color:var(--graphite);}
+
+  .tab-select{
+    min-width:0;
+    min-height:62px;
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 6px 9px 12px;
+    border:0;
+    border-radius:9px;
+    background:transparent;
+    color:inherit;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+  .tab-select:focus-visible,
+  .tab-print-toggle:focus-visible,
+  .tab-close:focus-visible,
+  .tab-search-clear:focus-visible{
+    outline:2px solid var(--teal-deep);
+    outline-offset:2px;
+  }
 
   .tab-dot{
     width:5px;
@@ -648,7 +716,12 @@
     white-space:nowrap;
     flex:1;
     min-width:0;
+    color:var(--graphite);
+    font-size:12px;
+    font-weight:600;
+    line-height:1.25;
   }
+  .tab-item.active .tab-name{color:var(--ink); font-weight:700;}
   .tab-copy{
     display:flex;
     flex-direction:column;
@@ -661,7 +734,7 @@
     text-overflow:ellipsis;
     white-space:nowrap;
     color:var(--stone);
-    font-size:10.5px;
+    font:500 10.5px/1.3 "DM Mono", ui-monospace, monospace;
     font-weight:500;
   }
   .tab-subrow{
@@ -674,7 +747,7 @@
   .tab-printed-label{
     flex:none;
     color:var(--teal-deep);
-    font-size:9px;
+    font-size:8.5px;
     font-weight:700;
     letter-spacing:.04em;
     text-transform:uppercase;
@@ -682,36 +755,34 @@
   .tab-print-toggle{
     display:grid;
     place-items:center;
-    width:26px;
-    height:26px;
+    width:44px;
+    height:44px;
     flex:none;
     border:1px solid var(--hairline);
-    border-radius:50%;
-    background:var(--paper);
+    border-radius:8px;
+    background:transparent;
     color:var(--stone);
     cursor:pointer;
     transition:background-color 140ms cubic-bezier(.2,0,0,1), border-color 140ms cubic-bezier(.2,0,0,1), color 140ms cubic-bezier(.2,0,0,1);
   }
-  .tab-print-toggle:hover{border-color:var(--logo-teal); color:var(--teal-deep);}
-  .tab-print-toggle[aria-checked="true"]{background:var(--logo-teal); border-color:var(--logo-teal); color:var(--charcoal);}
-  .tab-print-toggle svg{width:14px; height:14px;}
+  .tab-print-toggle:hover{background:var(--paper); border-color:var(--logo-teal); color:var(--teal-deep);}
+  .tab-print-toggle[aria-pressed="true"]{background:var(--logo-teal); border-color:var(--logo-teal); color:var(--charcoal);}
+  .tab-print-toggle svg{width:17px; height:17px;}
 
   .tab-close{
-    width:16px;
-    height:16px;
-    border-radius:50%;
+    width:44px;
+    height:44px;
+    border-radius:8px;
     border:none;
     background:transparent;
     color:var(--stone);
-    font-size:12px;
-    line-height:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display:grid;
+    place-items:center;
     cursor:pointer;
     flex-shrink:0;
   }
   .tab-close:hover{background:var(--mist); color:var(--charcoal);}
+  .tab-close svg{width:16px; height:16px;}
 
   .tab-add-btn{
     display:none;
@@ -1698,7 +1769,7 @@
   }
 
   .app{
-    grid-template-columns:minmax(360px,400px) minmax(240px,280px) minmax(0,1fr);
+    grid-template-columns:minmax(360px,400px) minmax(280px,300px) minmax(0,1fr);
     transition:grid-template-columns 240ms cubic-bezier(.2,0,0,1);
   }
   .app.focus-preview{grid-template-columns:minmax(0,1fr);}
@@ -1707,8 +1778,7 @@
 
   .tab-item.active{
     background:var(--surface-context);
-    outline:1px solid var(--border-context);
-    outline-offset:-1px;
+    border-color:var(--border-context);
   }
   .tab-item.active .tab-dot{background:var(--logo-teal);}
   .switch.on{background:var(--logo-teal); border-color:var(--logo-teal);}
@@ -2774,11 +2844,21 @@
 
   <aside class="tab-bar" id="tab-bar" aria-label="Etiquetas cargadas en bulk">
     <div class="tab-sidebar-head">
-      <p class="tab-sidebar-title">Etiquetas bulk</p>
+      <div class="tab-sidebar-copy">
+        <p class="tab-sidebar-title">Etiquetas bulk</p>
+        <p class="tab-sidebar-subtitle">Selecciona, revisa y marca las impresas.</p>
+      </div>
       <span class="tab-sidebar-count" id="tab-count">0</span>
     </div>
-    <input class="tab-search" id="tab-search" type="search" placeholder="Buscar etiqueta" autocomplete="off">
-    <div class="tab-list" id="tab-list"></div>
+    <div class="tab-search-shell" role="search">
+      <svg class="tab-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input class="tab-search" id="tab-search" type="search" placeholder="Buscar por artículo o código" autocomplete="off" aria-label="Buscar etiqueta">
+      <button class="tab-search-clear" id="tab-search-clear" type="button" aria-label="Limpiar búsqueda" title="Limpiar búsqueda" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      </button>
+    </div>
+    <div class="tab-status-summary" id="tab-status-summary" aria-live="polite"></div>
+    <div class="tab-list" id="tab-list" role="list" aria-label="Lista de etiquetas"></div>
     <button class="tab-add-btn" id="tab-add-btn" type="button" aria-hidden="true" tabindex="-1"></button>
   </aside>
 
@@ -4444,6 +4524,8 @@
     const tabList = document.getElementById('tab-list');
     const addBtn = document.getElementById('tab-add-btn');
     const countEl = document.getElementById('tab-count');
+    const statusEl = document.getElementById('tab-status-summary');
+    const clearSearchBtn = document.getElementById('tab-search-clear');
     const normalizedSearch = tabSearchTerm.trim().toLowerCase();
     const importedTabs = tabs.filter(tab => snapshotHasContent(tab.snapshot));
     const visibleTabs = normalizedSearch
@@ -4451,8 +4533,12 @@
       : importedTabs;
 
     const printedCount = importedTabs.filter(tab => tab.printedAt).length;
-    countEl.textContent = printedCount ? `${printedCount}/${importedTabs.length}` : importedTabs.length;
+    countEl.textContent = importedTabs.length;
     countEl.title = printedCount ? `${printedCount} impresas de ${importedTabs.length}` : `${importedTabs.length} etiquetas`;
+    clearSearchBtn.hidden = !normalizedSearch;
+    statusEl.textContent = normalizedSearch
+      ? `${visibleTabs.length} de ${importedTabs.length} · ${printedCount} impresas`
+      : `${printedCount} impresas · ${Math.max(0, importedTabs.length - printedCount)} pendientes`;
 
     if(visibleTabs.length === 0){
       tabList.innerHTML = `<div class="tab-empty">${normalizedSearch ? 'No hay etiquetas que coincidan con la búsqueda.' : 'Carga un Excel en bulk para ver aquí todas las etiquetas.'}</div>`;
@@ -4465,36 +4551,31 @@
       const sub = tab.id === activeTabId ? tabSubLabel({ snapshot: collectSnapshot() }) : tabSubLabel(tab);
       const titleAttr = sub ? `${name} — ${sub}` : name;
       return `
-        <button class="tab-item ${isActive ? 'active' : ''} ${tab.printedAt ? 'printed' : ''}" data-tab-id="${tab.id}" title="${escapeAttr(titleAttr)}">
-          <span class="tab-dot"></span>
-          <span class="tab-copy">
-            <span class="tab-name">${escapeHtml(name)}</span>
-            <span class="tab-subrow">
-              ${sub ? `<span class="tab-sub">${escapeHtml(sub)}</span>` : '<span class="tab-sub"></span>'}
-              ${tab.printedAt ? '<span class="tab-printed-label">Impresa</span>' : ''}
+        <div class="tab-item ${isActive ? 'active' : ''} ${tab.printedAt ? 'printed' : ''}" role="listitem">
+          <button class="tab-select" type="button" data-tab-id="${tab.id}" aria-current="${isActive ? 'true' : 'false'}" title="${escapeAttr(titleAttr)}">
+            <span class="tab-dot" aria-hidden="true"></span>
+            <span class="tab-copy">
+              <span class="tab-name">${escapeHtml(name)}</span>
+              <span class="tab-subrow">
+                ${sub ? `<span class="tab-sub">${escapeHtml(sub)}</span>` : '<span class="tab-sub"></span>'}
+                ${tab.printedAt ? '<span class="tab-printed-label">Impresa</span>' : ''}
+              </span>
             </span>
-          </span>
-          <span class="tab-print-toggle" data-printed-tab-id="${tab.id}" role="checkbox" aria-checked="${tab.printedAt ? 'true' : 'false'}" aria-label="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}" title="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}">
+          </button>
+          <button class="tab-print-toggle" type="button" data-printed-tab-id="${tab.id}" aria-pressed="${tab.printedAt ? 'true' : 'false'}" aria-label="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}" title="${tab.printedAt ? 'Marcar como pendiente' : 'Marcar como impresa'}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.6 2.6L16.5 9"/></svg>
-          </span>
-          ${tabs.length > 1 ? `<span class="tab-close" data-close-tab-id="${tab.id}" role="button" aria-label="Cerrar pestaña">×</span>` : ''}
-        </button>`;
+          </button>
+          ${tabs.length > 1 ? `<button class="tab-close" type="button" data-close-tab-id="${tab.id}" aria-label="Eliminar etiqueta" title="Eliminar etiqueta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button>` : ''}
+        </div>`;
     }).join('');
 
-    tabList.querySelectorAll('.tab-item').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        if(e.target.closest('.tab-close, .tab-print-toggle')) return;
+    tabList.querySelectorAll('.tab-select').forEach(btn => {
+      btn.addEventListener('click', () => {
         switchToTab(btn.dataset.tabId);
       });
     });
     tabList.querySelectorAll('.tab-print-toggle').forEach(toggle => {
       toggle.addEventListener('click', event => {
-        event.stopPropagation();
-        toggleTabPrinted(toggle.dataset.printedTabId);
-      });
-      toggle.addEventListener('keydown', event => {
-        if(event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
         event.stopPropagation();
         toggleTabPrinted(toggle.dataset.printedTabId);
       });
@@ -4513,6 +4594,13 @@
   document.getElementById('tab-search').addEventListener('input', (e) => {
     tabSearchTerm = e.target.value;
     renderTabBar();
+  });
+  document.getElementById('tab-search-clear').addEventListener('click', () => {
+    const searchInput = document.getElementById('tab-search');
+    tabSearchTerm = '';
+    searchInput.value = '';
+    renderTabBar();
+    searchInput.focus();
   });
 
   // The sidebar is its own app column. Keep this function for compatibility
