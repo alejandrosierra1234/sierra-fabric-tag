@@ -2289,7 +2289,8 @@
     color:#000000;
     overflow:hidden;
   }
-  .northern-repeat-strip{
+  .northern-repeat-strip,
+  .northern-spacer-strip{
     position:relative;
     display:flex;
     flex:0 0 10mm;
@@ -2298,6 +2299,9 @@
     align-items:center;
     justify-content:center;
     padding:0 3mm;
+    border-bottom:0.1mm dashed #a4a4a4; /* subtle functional cut guide */
+  }
+  .northern-repeat-strip{
     font-family:"Replica", "DM Sans", system-ui, sans-serif;
     font-size:4.25mm;
     font-weight:700;
@@ -2305,7 +2309,6 @@
     letter-spacing:-0.12mm;
     text-align:center;
     white-space:nowrap;
-    border-bottom:0.1mm dashed #a4a4a4; /* subtle functional cut guide */
   }
   @media print{
     @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
@@ -4301,7 +4304,11 @@
     const root = document.createElement('div');
     root.id = 'print-root';
     root.style.width = '62mm';
-    root.innerHTML = `<div class="print-page northern-repeat-page" style="width:62mm;height:90mm;">${Array.from({ length:9 }, () => '<div class="northern-repeat-strip">NORTHERN TEXTILES</div>').join('')}</div>`;
+    const strips = Array.from({ length:9 }, (_, index) => index % 2 === 0
+      ? '<div class="northern-repeat-strip">NORTHERN TEXTILES</div>'
+      : '<div class="northern-spacer-strip" aria-hidden="true"></div>'
+    ).join('');
+    root.innerHTML = `<div class="print-page northern-repeat-page" style="width:62mm;height:90mm;">${strips}</div>`;
     document.body.appendChild(root);
     document.body.classList.add('print-isolated');
     stagedPrintRoot = root;
