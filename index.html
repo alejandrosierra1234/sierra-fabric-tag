@@ -1387,11 +1387,9 @@
   }
 
   .label-brand{
-    min-width:0;
     display:flex;
-    flex:1 1 auto;
+    width:100%;
     flex-direction:column;
-    align-items:flex-start;
     gap:calc(0.5mm * var(--lscale, 1));
   }
 
@@ -1405,14 +1403,18 @@
   .label-mill-name{
     display:flex;
     align-items:center;
+    justify-content:center;
     height:10mm;
+    width:100%;
     flex:none;
     max-width:100%;
     font-family:"Replica", "DM Sans", system-ui, sans-serif;
-    font-size:5mm;
+    font-size:4.25mm;
     font-weight:700;
     line-height:1;
     letter-spacing:-0.16mm;
+    text-align:center;
+    text-transform:uppercase;
     white-space:nowrap;
     color:#000000;
   }
@@ -3644,12 +3646,12 @@
     flushTable();
 
     // ---- Logo + mill name + "Manufactured in Honduras" note ----
-    sections.unshift(`<div class="label-header-row">
-        <div class="label-brand">
+    sections.unshift(`<div class="label-brand">
+        <div class="label-header-row">
           <div class="label-logo">${SIERRA_LOGO_SVG}</div>
-          <strong class="label-mill-name">Northern Textiles</strong>
+          <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
         </div>
-        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
+        <strong class="label-mill-name">NORTHERN TEXTILES</strong>
       </div>`);
 
     return `
@@ -3697,12 +3699,12 @@
     }
 
     const sections = [];
-    sections.push(`<div class="label-header-row">
-      <div class="label-brand">
+    sections.push(`<div class="label-brand">
+      <div class="label-header-row">
         <div class="label-logo">${SIERRA_LOGO_SVG}</div>
-        <strong class="label-mill-name">Northern Textiles</strong>
+        <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
       </div>
-      <span class="label-origin-note">MANUFACTURED<br>IN HONDURAS</span>
+      <strong class="label-mill-name">NORTHERN TEXTILES</strong>
     </div>`);
     const articleCells = [];
     if(value('millarticle')) articleCells.push(dataCell('Mill Article', multilineToHtml(value('millarticle')), 'ticket-hero', 'val-millarticle'));
