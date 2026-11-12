@@ -3050,6 +3050,10 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span class="btn-label">Imprimir tiras Northern Textiles</span>
           </button>
+          <button class="btn btn-secondary" id="print-blank-strips-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span class="btn-label">Imprimir tiras en blanco</span>
+          </button>
         </div>
 
         <p class="print-hint" id="print-hint">Zebra · etiqueta 2.5 × 3 pulgadas, orientación vertical<br>Impresión directa cuando Chrome tiene habilitada la impresión silenciosa.</p>
@@ -4292,7 +4296,7 @@
     setTimeout(() => window.print(), 80);
   }
 
-  function stageNorthernTextilesPrintRoot(){
+  function stageBrotherStripPrintRoot(kind){
     if(stagedPrintRoot) cleanupIsolatedPrint(stagedPrintRoot);
     if(dynamicPageStyleEl) dynamicPageStyleEl.remove();
     dynamicPageStyleEl = document.createElement('style');
@@ -4304,29 +4308,34 @@
     const root = document.createElement('div');
     root.id = 'print-root';
     root.style.width = '62mm';
-    const strips = Array.from({ length:9 }, (_, index) => index % 2 === 0
-      ? '<div class="northern-repeat-strip">NORTHERN TEXTILES</div>'
-      : '<div class="northern-spacer-strip" aria-hidden="true"></div>'
-    ).join('');
+    const stripHTML = kind === 'blank'
+      ? '<div class="northern-spacer-strip" aria-hidden="true"></div>'
+      : '<div class="northern-repeat-strip">NORTHERN TEXTILES</div>';
+    const strips = Array.from({ length:9 }, () => stripHTML).join('');
     root.innerHTML = `<div class="print-page northern-repeat-page" style="width:62mm;height:90mm;">${strips}</div>`;
     document.body.appendChild(root);
     document.body.classList.add('print-isolated');
     stagedPrintRoot = root;
-    activePrintMode = 'northern';
+    activePrintMode = kind === 'blank' ? 'blank-strips' : 'northern-strips';
     void root.offsetHeight;
     window.addEventListener('afterprint', () => cleanupIsolatedPrint(root), { once:true });
     return root;
   }
 
   window.addEventListener('beforeprint', () => {
-    if(activePrintMode === 'northern') return;
+    if(activePrintMode !== 'label') return;
     autoFitLabel();
     injectExactPageSize();
     if(!stagedPrintRoot) stageIsolatedPrintRoot();
   });
 
   document.getElementById('print-northern-btn').addEventListener('click', () => {
-    stageNorthernTextilesPrintRoot();
+    stageBrotherStripPrintRoot('text');
+    setTimeout(() => window.print(), 80);
+  });
+
+  document.getElementById('print-blank-strips-btn').addEventListener('click', () => {
+    stageBrotherStripPrintRoot('blank');
     setTimeout(() => window.print(), 80);
   });
 
