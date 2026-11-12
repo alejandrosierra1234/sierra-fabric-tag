@@ -2280,6 +2280,33 @@
     width:var(--label-width, 63.5mm);
     pointer-events:none;
   }
+  .northern-repeat-page{
+    width:62mm;
+    height:90mm;
+    display:flex;
+    flex-direction:column;
+    background:#ffffff;
+    color:#000000;
+    overflow:hidden;
+  }
+  .northern-repeat-strip{
+    position:relative;
+    display:flex;
+    flex:0 0 10mm;
+    width:62mm;
+    height:10mm;
+    align-items:center;
+    justify-content:center;
+    padding:0 3mm;
+    font-family:"Replica", "DM Sans", system-ui, sans-serif;
+    font-size:4.25mm;
+    font-weight:700;
+    line-height:1;
+    letter-spacing:-0.12mm;
+    text-align:center;
+    white-space:nowrap;
+    border-bottom:0.2mm dashed #000000; /* functional cut guide */
+  }
   @media print{
     @page{ size:var(--label-width, 63.5mm) auto; margin:0; }
     html,body{
@@ -3015,6 +3042,10 @@
           <button class="btn btn-secondary" id="download-pdf-btn" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12v6M9 15l3 3 3-3"/></svg>
             <span class="btn-label">Descargar PDF para imprimir</span>
+          </button>
+          <button class="btn btn-secondary" id="print-northern-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span class="btn-label">Imprimir tiras Northern Textiles</span>
           </button>
         </div>
 
@@ -4225,12 +4256,14 @@
   }
 
   let stagedPrintRoot = null;
+  let activePrintMode = 'label';
 
   function cleanupIsolatedPrint(root){
     if(root?.isConnected) root.remove();
     if(stagedPrintRoot === root){
       stagedPrintRoot = null;
       document.body.classList.remove('print-isolated');
+      activePrintMode = 'label';
     }
   }
 
@@ -4256,10 +4289,38 @@
     setTimeout(() => window.print(), 80);
   }
 
+  function stageNorthernTextilesPrintRoot(){
+    if(stagedPrintRoot) cleanupIsolatedPrint(stagedPrintRoot);
+    if(dynamicPageStyleEl) dynamicPageStyleEl.remove();
+    dynamicPageStyleEl = document.createElement('style');
+    dynamicPageStyleEl.id = 'dynamic-page-size';
+    dynamicPageStyleEl.textContent = '@media print { @page { size: 62mm 90mm; margin: 0; } }';
+    document.head.appendChild(dynamicPageStyleEl);
+    document.documentElement.style.setProperty('--print-total-height', '90mm');
+
+    const root = document.createElement('div');
+    root.id = 'print-root';
+    root.style.width = '62mm';
+    root.innerHTML = `<div class="print-page northern-repeat-page" style="width:62mm;height:90mm;">${Array.from({ length:9 }, () => '<div class="northern-repeat-strip">NORTHERN TEXTILES</div>').join('')}</div>`;
+    document.body.appendChild(root);
+    document.body.classList.add('print-isolated');
+    stagedPrintRoot = root;
+    activePrintMode = 'northern';
+    void root.offsetHeight;
+    window.addEventListener('afterprint', () => cleanupIsolatedPrint(root), { once:true });
+    return root;
+  }
+
   window.addEventListener('beforeprint', () => {
+    if(activePrintMode === 'northern') return;
     autoFitLabel();
     injectExactPageSize();
     if(!stagedPrintRoot) stageIsolatedPrintRoot();
+  });
+
+  document.getElementById('print-northern-btn').addEventListener('click', () => {
+    stageNorthernTextilesPrintRoot();
+    setTimeout(() => window.print(), 80);
   });
 
   document.getElementById('print-btn').addEventListener('click', () => {
